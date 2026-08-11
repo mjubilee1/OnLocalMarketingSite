@@ -46,7 +46,7 @@ const features = [
 const steps = [
   {
     title: "Download the app",
-    body: "Get the app running on Windows in under a minute. Mac version coming soon."
+    body: "Enter your access code, then get the app running on Windows in under a minute. Mac version coming soon."
   },
   {
     title: "Create your workspace",
@@ -88,6 +88,11 @@ const faqs = [
     question: "Windows SmartScreen blocked the installer. What should I do?",
     answer:
       "Since this is an early release, Windows may warn you. Click 'More info', then 'Run anyway'."
+  },
+  {
+    question: "How do I get an access code?",
+    answer:
+      "Early access is invite-only. Email montrell@onlocalai.com or Subash@onlocalai.com and we’ll send you a code to unlock the download."
   }
 ];
 
@@ -123,7 +128,7 @@ export default function MarketingHome() {
               onboarding, and timesheets. Nothing leaves your machine.
             </p>
 
-            <div id="download" className="mt-9 flex flex-wrap items-center gap-3">
+            <div id="download" className="mt-9 flex flex-col gap-3">
               <WindowsDownloadButton href={windowsDownloadUrl || "#"} />
 
               <span className="inline-flex items-center gap-2 text-sm text-slate-500">
