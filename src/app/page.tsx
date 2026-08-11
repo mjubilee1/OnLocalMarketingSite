@@ -3,7 +3,7 @@ import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
 
 const windowsDownloadUrl =
   process.env.NEXT_PUBLIC_DESKTOP_WINDOWS_URL?.trim() ||
-  "https://github.com/mjubilee1/Local-LLM/releases/latest/download/Business-AI-windows-setup.exe";
+  "https://github.com/mjubilee1/Local-LLM-releases/releases/latest/download/Business-AI-windows-setup.exe";
 
 const contactEmails = ["montrell@onlocalai.com", "Subash@onlocalai.com"];
 const contactHref = `mailto:${contactEmails.join(",")}?subject=${encodeURIComponent(
