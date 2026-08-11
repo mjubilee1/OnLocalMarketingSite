@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { GA_MEASUREMENT_ID } from "@/lib/gtag";
 import "./globals.css";
-
-const GA_MEASUREMENT_ID = "G-5R4PQNJ3FC";
 
 export const metadata: Metadata = {
   title: "OnLocalAI",
