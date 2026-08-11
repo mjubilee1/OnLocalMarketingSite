@@ -5,7 +5,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "OnLocalAI",
-  description: "Your company's knowledge, captured and put to work.",
+  description:
+    "Private AI for knowledge, training, helpdesk, onboarding, and timesheets — running on your own computer.",
 };
 
 export default function RootLayout({

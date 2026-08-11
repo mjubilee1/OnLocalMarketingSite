@@ -12,39 +12,49 @@ const contactHref = `mailto:${contactEmails.join(",")}?subject=${encodeURICompon
 
 const features = [
   {
-    icon: BookIcon,
-    title: "Learns your company's voice",
-    body: "Analyzes your documents to instantly match your organization's writing style and knowledge. No manual setup needed."
+    icon: SearchIcon,
+    title: "Company knowledge, on demand",
+    body: "Ask questions grounded in your policies, SOPs, and wiki — with citations. Draft reports and memos from uploads in a private workspace."
   },
   {
-    icon: PenIcon,
-    title: "Drafts in your tone",
-    body: "Generates reports, memos, and replies that sound exactly like your team wrote them."
+    icon: GraduationIcon,
+    title: "Hands-on training that sticks",
+    body: "Turn docs into checklists, quizzes, flashcards, and task-based learning paths. Track progress and certify skill levels."
+  },
+  {
+    icon: TicketIcon,
+    title: "AI helpdesk built in",
+    body: "Employees open tickets; AI triages priority and tags, drafts knowledge-grounded replies, and tracks SLAs for your team."
   },
   {
     icon: UsersIcon,
-    title: "Keeps expertise in-house",
-    body: "Turns senior experts' knowledge into onboarding material, so their judgment stays when they leave."
+    title: "Onboarding from day one",
+    body: "30-60-90 milestones, role-play practice, and a daily briefing so new hires know what to do next — without chasing experts."
   },
   {
-    icon: SearchIcon,
-    title: "Answers from your files",
-    body: "Get clear answers instantly pulled from your documents, no matter how large your library is."
+    icon: ClockIcon,
+    title: "Timesheets with AI assist",
+    body: "Log time in plain English, submit weekly sheets, and let managers approve — with utilization insights when you need them."
+  },
+  {
+    icon: ShieldIcon,
+    title: "100% on your machine",
+    body: "Models, files, tickets, and training data stay local. Works offline. Nothing is sent to the cloud."
   }
 ];
 
 const steps = [
   {
     title: "Download the app",
-    body: "Get the app running on Mac or Windows in under a minute."
+    body: "Get the app running on Windows in under a minute. Mac version coming soon."
   },
   {
-    title: "Sign up for OnLocalAI",
-    body: "Create an account and get a team license to grant access to your entire team."
+    title: "Create your workspace",
+    body: "Set up your team, add teammates, and grant admin access where you need it."
   },
   {
-    title: "Point it at your documents",
-    body: "Add your files to safely ask questions and draft memos. Everything stays on your computer."
+    title: "Add knowledge and go",
+    body: "Upload policies and training docs, then use chat, training, tickets, and timesheets — all on your computer."
   }
 ];
 
@@ -52,27 +62,27 @@ const faqs = [
   {
     question: "What does OnLocalAI do?",
     answer:
-      "It learns from your documents to answer questions, draft reports, and create onboarding materials."
+      "It's a private AI workspace for your team: company knowledge Q&A and report drafting, hands-on training and quizzes, an AI helpdesk, onboarding milestones, and timesheets — all running on your machine."
   },
   {
     question: "Do our files leave our computer?",
     answer:
-      "No. OnLocalAI runs locally. Your documents never leave your machine."
+      "No. OnLocalAI runs locally. Your documents, tickets, training progress, and timesheets never leave your machine."
   },
   {
-    question: "What kind of documents can we use?",
+    question: "What can the knowledge base handle?",
     answer:
-      "Use reports, memos, notes, policies, contracts, or any files your team relies on."
+      "Policies, SOPs, wikis, contracts, training PDFs, and more. Chat answers with citations; Advanced Chat lets you upload files for a private session and generate grounded reports."
   },
   {
-    question: "Can it write in our company's style?",
+    question: "How does training work?",
     answer:
-      "Yes. It learns your organization's tone to draft material that matches your style."
+      "Upload training materials and the AI turns them into interactive checklists, quizzes, flashcards, and prerequisite learning paths. Progress and certifications stay with each employee."
   },
   {
-    question: "How does this help with onboarding?",
+    question: "Is there a helpdesk / ticketing system?",
     answer:
-      "It converts your documents' expertise into training material, bringing new hires up to speed faster."
+      "Yes. Employees file tickets; AI suggests category, priority, and tags, then drafts replies grounded in your knowledge base. Agents manage SLA, assignment, and resolution."
   },
   {
     question: "Windows SmartScreen blocked the installer. What should I do?",
@@ -105,12 +115,12 @@ export default function MarketingHome() {
         <section className="grid items-center gap-12 pb-8 pt-10 lg:grid-cols-[1.05fr_0.95fr] lg:pt-16">
           <div className="animate-fade-up">
             <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Your company&apos;s knowledge, captured and put to work.
+              Private AI for knowledge, training, and support.
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-              Learn from your documents to draft reports in your voice, answer questions, and
-              preserve expert judgment. 100% local, nothing sent to the cloud.
+              OnLocalAI runs on your computer — company Q&amp;A, hands-on training, helpdesk,
+              onboarding, and timesheets. Nothing leaves your machine.
             </p>
 
             <div id="download" className="mt-9 flex flex-wrap items-center gap-3">
@@ -123,9 +133,9 @@ export default function MarketingHome() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500">
-              <TrustItem>Data Privacy</TrustItem>
-              <TrustItem>Custom Model</TrustItem>
+              <TrustItem>Runs Locally</TrustItem>
               <TrustItem>Works Offline</TrustItem>
+              <TrustItem>Team Workspace</TrustItem>
             </div>
           </div>
 
@@ -134,19 +144,28 @@ export default function MarketingHome() {
           </div>
         </section>
 
-        <section className="grid gap-4 border-t border-slate-200 py-14 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map(({ icon: Icon, title, body }) => (
-            <div
-              key={title}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-500/40 hover:shadow-md"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 ring-1 ring-inset ring-emerald-600/15">
-                <Icon className="h-5 w-5" />
-              </span>
-              <h3 className="mt-4 text-sm font-semibold text-slate-900">{title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{body}</p>
-            </div>
-          ))}
+        <section className="border-t border-slate-200 py-14">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+            Everything your team needs — still fully local
+          </h2>
+          <p className="mt-1.5 max-w-2xl text-sm text-slate-600">
+            Beyond documents: training, tickets, onboarding, and time tracking in one private workspace.
+          </p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map(({ icon: Icon, title, body }) => (
+              <div
+                key={title}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-500/40 hover:shadow-md"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 ring-1 ring-inset ring-emerald-600/15">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-4 text-sm font-semibold text-slate-900">{title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{body}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="border-t border-slate-200 py-14">
@@ -173,8 +192,8 @@ export default function MarketingHome() {
                 Interested? Let&apos;s talk.
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Capture your institutional knowledge while keeping it private. Reach out to get
-                started.
+                Bring knowledge, training, and support in-house — without sending data to the cloud.
+                Reach out to get started.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -228,7 +247,7 @@ export default function MarketingHome() {
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-xs text-slate-500 sm:flex-row">
           <span className="flex items-center gap-2">
             <ShieldIcon className="h-4 w-4 text-emerald-600/80" />
-            OnLocalAI — your private assistant that runs on your own computer.
+            OnLocalAI — private AI for knowledge, training, and support.
           </span>
           <span className="flex items-center gap-4">
             <a href={contactHref} className="transition hover:text-emerald-700">
@@ -275,29 +294,48 @@ function AppPreview() {
         </span>
       </div>
 
+      <div className="flex gap-1.5 border-b border-slate-100 px-3 py-2">
+        {["Chat", "Training", "Tickets", "Timesheet"].map((tab, i) => (
+          <span
+            key={tab}
+            className={`rounded-md px-2 py-1 text-[10px] font-medium ${
+              i === 0 ? "bg-emerald-100 text-emerald-700" : "text-slate-400"
+            }`}
+          >
+            {tab}
+          </span>
+        ))}
+      </div>
+
       <div className="space-y-3 p-4">
         <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-emerald-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white">
-          Draft the Q3 vendor review memo in our house style.
+          How do I request VPN access, and who owns the onboarding checklist?
         </div>
 
         <div className="max-w-[90%] rounded-2xl rounded-bl-sm border border-slate-200 bg-slate-50 px-3.5 py-2.5">
           <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium text-emerald-600">
-            <PenIcon className="h-3 w-3" />
-            Drafted in your company&apos;s voice
+            <SearchIcon className="h-3 w-3" />
+            Answered from your knowledge base
           </div>
           <div className="space-y-1.5">
             <span className="block h-2 w-full rounded-full bg-slate-300" />
             <span className="block h-2 w-11/12 rounded-full bg-slate-300" />
             <span className="block h-2 w-4/5 rounded-full bg-slate-300" />
           </div>
-          <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400">
-            <FolderIcon className="h-3 w-3" />
-            Based on 240 of your documents
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
+            <span className="inline-flex items-center gap-1">
+              <FolderIcon className="h-3 w-3" />
+              vpn-and-ssh.md
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <GraduationIcon className="h-3 w-3" />
+              Day-30 milestone
+            </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-          <span className="text-[12px] text-slate-400">Ask, draft, or search your documents…</span>
+          <span className="text-[12px] text-slate-400">Ask, train, or open a ticket…</span>
           <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-600 text-white">
             <ArrowUpIcon className="h-3.5 w-3.5" />
           </span>
@@ -324,19 +362,30 @@ function FolderIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-function BookIcon(props: SVGProps<SVGSVGElement>) {
+function GraduationIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M4 5.5A1.5 1.5 0 015.5 4H11v15H5.5A1.5 1.5 0 014 17.5v-12z" />
-      <path d="M20 5.5A1.5 1.5 0 0018.5 4H13v15h5.5a1.5 1.5 0 001.5-1.5v-12z" />
+      <path d="M22 10L12 5 2 10l10 5 10-5z" />
+      <path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5" />
+      <path d="M22 10v6" />
     </svg>
   );
 }
 
-function PenIcon(props: SVGProps<SVGSVGElement>) {
+function TicketIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M14.5 5.5l4 4M4 20l1-4L16 5a2.1 2.1 0 013 3L8 19l-4 1z" />
+      <path d="M3 9a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 00-2 2 2 2 0 002 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 002-2 2 2 0 00-2-2V9z" />
+      <path d="M9 7v10" />
+    </svg>
+  );
+}
+
+function ClockIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </svg>
   );
 }
