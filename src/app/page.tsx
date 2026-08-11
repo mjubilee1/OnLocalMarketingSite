@@ -5,6 +5,10 @@ const windowsDownloadUrl =
   process.env.NEXT_PUBLIC_DESKTOP_WINDOWS_URL?.trim() ||
   "https://github.com/mjubilee1/Local-LLM-releases/releases/latest/download/Business-AI-windows-setup.exe";
 
+const macDownloadUrl =
+  process.env.NEXT_PUBLIC_DESKTOP_MAC_URL?.trim() ||
+  "https://github.com/mjubilee1/Local-LLM-releases/releases/latest/download/Business-AI-mac.zip";
+
 const contactEmails = ["montrell@onlocalai.com", "Subash@onlocalai.com"];
 const contactHref = `mailto:${contactEmails.join(",")}?subject=${encodeURIComponent(
   "Interested in OnLocalAI"
@@ -46,10 +50,10 @@ const features = [
 const steps = [
   {
     title: "Download the app",
-    body: "Enter your access code, then get the app running on Windows in under a minute. Mac version coming soon."
+    body: "Enter your access code, then download for Windows or Mac and get running in under a minute."
   },
   {
-    title: "Create your workspace",
+    title: "Create your company",
     body: "Set up your team, add teammates, and grant admin access where you need it."
   },
   {
@@ -129,12 +133,10 @@ export default function MarketingHome() {
             </p>
 
             <div id="download" className="mt-9 flex flex-col gap-3">
-              <WindowsDownloadButton href={windowsDownloadUrl || "#"} />
-
-              <span className="inline-flex items-center gap-2 text-sm text-slate-500">
-                <AppleIcon className="h-4 w-4 text-slate-400" />
-                Mac version coming soon
-              </span>
+              <WindowsDownloadButton
+                href={windowsDownloadUrl || "#"}
+                macHref={macDownloadUrl || undefined}
+              />
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500">
@@ -434,14 +436,6 @@ function ArrowUpIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M12 19V5M6 11l6-6 6 6" />
-    </svg>
-  );
-}
-
-function AppleIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M16.36 12.85c-.02-2.03 1.66-3 1.74-3.05-.95-1.39-2.42-1.58-2.95-1.6-1.26-.13-2.45.74-3.09.74-.63 0-1.61-.72-2.65-.7-1.37.02-2.63.79-3.33 2.01-1.42 2.46-.36 6.11 1.02 8.11.67.98 1.48 2.08 2.54 2.04 1.02-.04 1.4-.66 2.64-.66 1.23 0 1.58.66 2.65.64 1.09-.02 1.79-1 2.46-1.98.77-1.13 1.09-2.22 1.1-2.28-.02-.01-2.12-.81-2.14-3.21zM14.6 6.86c.56-.68.94-1.62.84-2.56-.81.03-1.79.54-2.37 1.22-.52.6-.97 1.55-.85 2.47.9.07 1.82-.46 2.38-1.13z" />
     </svg>
   );
 }
