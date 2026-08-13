@@ -14,5 +14,9 @@ export function trackEvent(action: string, params?: GtagEventParams) {
     return;
   }
 
-  window.gtag("event", action, params);
+  // Beacon so mailto / outbound clicks still send before the page loses focus.
+  window.gtag("event", action, {
+    ...params,
+    transport_type: "beacon",
+  });
 }
