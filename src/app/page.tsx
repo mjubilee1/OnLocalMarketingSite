@@ -1,4 +1,5 @@
 import type { ReactNode, SVGProps } from "react";
+import { ContactLink } from "@/components/ContactLink";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
 
 const windowsDownloadUrl =
@@ -204,22 +205,24 @@ export default function MarketingHome() {
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <a
+                <ContactLink
                   href={contactHref}
+                  source="contact_section_cta"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
                 >
                   <MailIcon className="h-4 w-4" />
                   Contact us
-                </a>
+                </ContactLink>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
                   {contactEmails.map((email) => (
-                    <a
+                    <ContactLink
                       key={email}
                       href={`mailto:${email}`}
+                      source="contact_section_email"
                       className="transition hover:text-emerald-700"
                     >
                       {email}
-                    </a>
+                    </ContactLink>
                   ))}
                 </div>
               </div>
@@ -257,9 +260,13 @@ export default function MarketingHome() {
             OnLocalAI — private AI for knowledge, training, and support.
           </span>
           <span className="flex items-center gap-4">
-            <a href={contactHref} className="transition hover:text-emerald-700">
+            <ContactLink
+              href={contactHref}
+              source="footer_contact"
+              className="transition hover:text-emerald-700"
+            >
               Contact
-            </a>
+            </ContactLink>
             <span>Early access version · free to try.</span>
           </span>
         </div>

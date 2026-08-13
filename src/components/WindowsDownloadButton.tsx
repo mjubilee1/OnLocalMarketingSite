@@ -83,6 +83,11 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
               "Request OnLocalAI access code"
             )}`}
             className="font-medium text-emerald-700 underline-offset-2 hover:underline"
+            onClick={() =>
+              trackEvent("request_access", {
+                source: "download_request_code",
+              })
+            }
           >
             Request a code
           </a>
