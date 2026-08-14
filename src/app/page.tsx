@@ -88,9 +88,9 @@ const steps = [
 ];
 
 const stack = [
-  { icon: ChipIcon, title: "Local models via Ollama", body: "Qwen 2.5 for chat and nomic-embed-text for embeddings run on-device — swap in any Ollama model you like." },
-  { icon: DatabaseIcon, title: "On-disk vector store", body: "ChromaDB keeps every embedding in a persistent local index. Your documents are never uploaded to index them." },
-  { icon: ServerIcon, title: "Self-contained backend", body: "A bundled FastAPI server ships inside the desktop app. No external API keys, no accounts, no telemetry." },
+  { icon: ChipIcon, title: "Customized open-source models", body: "Tuned open-source language and embedding models run entirely on-device — no proprietary APIs, no per-token bills, no vendor lock-in." },
+  { icon: DatabaseIcon, title: "On-disk vector store", body: "A persistent local index keeps every embedding on your machine. Your documents are never uploaded to be indexed or searched." },
+  { icon: ServerIcon, title: "Self-contained backend", body: "The whole engine is bundled inside the desktop app. No external API keys, no accounts, and no telemetry of any kind." },
 ];
 
 const faqs = [
@@ -127,7 +127,7 @@ const faqs = [
   {
     question: "What does it run on under the hood?",
     answer:
-      "Local models served by Ollama (Qwen 2.5 for chat, nomic-embed-text for embeddings), a persistent ChromaDB vector store, and a bundled FastAPI backend — all inside a native desktop app for Windows and macOS.",
+      "Customized open-source language and embedding models running on-device, a persistent local vector store, and a self-contained backend — all bundled inside a native desktop app for Windows and macOS. No proprietary AI services are involved.",
   },
   {
     question: "Windows SmartScreen blocked the installer. What should I do?",

@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     "employee onboarding AI",
     "AI helpdesk",
     "knowledge base AI",
-    "Ollama",
-    "ChromaDB",
+    "open-source AI models",
+    "self-hosted AI",
   ],
   applicationName: "OnLocalAI",
   icons: {
