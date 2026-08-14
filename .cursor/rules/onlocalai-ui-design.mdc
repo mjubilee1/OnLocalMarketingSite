@@ -1,0 +1,50 @@
+---
+description: OnLocalAI shared UI brand system — keep onlocal-public and Local-LLM visually consistent
+globs: "**/*.{tsx,jsx,css,html,svg}"
+alwaysApply: false
+---
+
+# OnLocalAI UI Design
+
+Shared visual language for **onlocal-public** (marketing) and **Local-LLM** (product app). Match existing brand tokens; do not invent a new palette or look.
+
+## Brand core
+
+- Product name lockup: `onlocal` + `AI` (AI in a lighter brand tint). Mark inherits `currentColor`.
+- Primary navy (logo): `#01185E` → Tailwind `brand-900` / CSS `--accent`
+- Light UI default. Dark theme only in the product app via existing `data-theme="dark"` tokens — never invent new dark colors.
+- Avoid: purple/indigo themes, cream+terracotta, glow stacks, emoji decoration, generic Inter-as-hero marketing fonts when Geist/brand stack is already in use on the marketing site.
+
+## Color tokens (keep in sync)
+
+| Role | Marketing (Tailwind) | Product (CSS vars, light) |
+|------|----------------------|---------------------------|
+| Accent / navy | `brand-900` `#01185E` | `--accent` `#01185E` |
+| Stronger navy | `brand-950` `#030f3a` | `--accent-strong` `#001046` |
+| Soft fill | `brand-50` / `brand-100` | `--accent-soft` |
+| Text | `slate-900` / `slate-700` | `--text` / `--text-2` |
+| Muted | `slate-500` / `slate-600` | `--muted` |
+| Surface | white / `slate-50` | `--surface` / `--bg` `#f4f5fb` |
+| Border | `slate-200` | `--border` `#e3e6f3` |
+| Sidebar | n/a (marketing) | navy gradient `#01185e` → `#000d38` |
+
+Semantic: ok `#0ea672`, warn `#d98700`, err `#e0384e` (product). Prefer brand navy over sky/blue-500 for CTAs.
+
+## Layout & components
+
+- **Marketing**: white page, soft brand/sky ambient blurs, sticky glass header, `max-w-6xl`, `rounded-2xl` cards, primary CTA `bg-brand-900` → hover `brand-800`.
+- **Product app**: reuse `:root` / `html[data-theme="dark"]` variables in `app/static/index.html` — radii `--radius` / `--radius-lg`, existing shadows, sidebar gradient. Do not restyle chrome with one-off hex.
+- Radius: prefer `rounded-xl` / `rounded-2xl` (marketing) or `var(--radius*)` (app). Avoid `rounded-full` pills except small status dots.
+- Motion: subtle only (`fade-up`, soft float, pulse-dot). Respect `prefers-reduced-motion`.
+
+## Do / Don't
+
+```tsx
+// ✅ Primary CTA
+className="rounded-xl bg-brand-900 text-white hover:bg-brand-800"
+
+// ❌ Off-brand
+className="rounded-full bg-violet-600 shadow-[0_0_40px_rgba(139,92,246,.5)]"
+```
+
+When changing colors or logo treatment in one repo, mirror the same tokens/wordmark in the other.

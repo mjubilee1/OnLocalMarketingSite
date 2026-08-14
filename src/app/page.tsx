@@ -15,8 +15,12 @@ const contactEmails = ["montrell@onlocalai.com", "Subash@onlocalai.com"];
 const contactHref = `mailto:${contactEmails.join(",")}?subject=${encodeURIComponent(
   "Interested in OnLocalAI"
 )}`;
+const bookDemoHref = `mailto:${contactEmails.join(",")}?subject=${encodeURIComponent(
+  "Book a demo — OnLocalAI"
+)}`;
 
 const navLinks = [
+  { label: "The problem", href: "#problem" },
   { label: "Features", href: "#features" },
   { label: "Privacy", href: "#privacy" },
   { label: "How it works", href: "#how" },
@@ -30,16 +34,34 @@ const stats = [
   { value: "Win · Mac", label: "Native desktop app" },
 ];
 
+const problems = [
+  {
+    icon: UsersIcon,
+    title: "Every hire gets a different first 90 days",
+    body: "Onboarding depends on who had time that week. One person gets a walkthrough. The next gets a folder of PDFs. Quality becomes luck, not a process.",
+  },
+  {
+    icon: SearchIcon,
+    title: "The real answers live in people, not the handbook",
+    body: "SOPs go stale the day they're written. New hires ping Slack. Managers answer the same questions again. Tribal knowledge never makes it into the system.",
+  },
+  {
+    icon: GraduationIcon,
+    title: "Training, tickets, and docs don't add up to a path",
+    body: "Knowledge is in Drive. Training is a deck. Support is a shared inbox. Nobody can see what a new hire has actually learned — or what's still blocking them.",
+  },
+];
+
 const features = [
+  {
+    icon: UsersIcon,
+    title: "Onboarding from day one",
+    body: "A personalized home dashboard with 30-60-90 milestones, this-week hours, open tickets, recent quiz scores, and an AI daily briefing — so every new hire knows what's next, not just the ones with a patient manager.",
+  },
   {
     icon: SearchIcon,
     title: "Grounded company Q&A",
     body: "Ask across your policies, SOPs, and wikis and get answers with citations. Retrieval is scoped to each employee's department, so people only ever see what they should.",
-  },
-  {
-    icon: DocumentIcon,
-    title: "Advanced Chat & AI reports",
-    body: "Open a private, per-session workspace: upload PDF, Word, CSV, or Markdown, ask questions with source citations, then generate a grounded report with an executive summary — download or print it.",
   },
   {
     icon: GraduationIcon,
@@ -52,14 +74,14 @@ const features = [
     body: "A full ticketing desk with SLA timers, status workflow, and assignment. AI triages priority, category, tags, and sentiment, then drafts knowledge-grounded replies for an agent to review and send.",
   },
   {
+    icon: DocumentIcon,
+    title: "Advanced Chat & AI reports",
+    body: "Open a private, per-session workspace: upload PDF, Word, CSV, or Markdown, ask questions with source citations, then generate a grounded report with an executive summary — download or print it.",
+  },
+  {
     icon: ClockIcon,
     title: "Timesheets with AI assist",
     body: "Log time in plain English, submit weekly sheets, and let managers approve or reject. Utilization and billable-hour insights are generated for you against a standard week.",
-  },
-  {
-    icon: UsersIcon,
-    title: "Onboarding from day one",
-    body: "A personalized home dashboard with 30-60-90 milestones, this-week hours, open tickets, recent quiz scores, and an AI daily briefing — so new hires always know what's next.",
   },
 ];
 
@@ -97,7 +119,7 @@ const faqs = [
   {
     question: "What does OnLocalAI do?",
     answer:
-      "It's a private AI workspace for your whole team: grounded company Q&A with citations, a document workspace with report generation, hands-on training and quizzes, an AI helpdesk with SLAs, onboarding milestones, and timesheets — all running on your own machine.",
+      "It replaces messy, inconsistent onboarding with one private workspace: grounded company Q&A with citations, hands-on training and quizzes, an AI helpdesk with SLAs, 30-60-90 onboarding milestones, and timesheets — all running on your own machine.",
   },
   {
     question: "Do our files ever leave our computer?",
@@ -165,13 +187,23 @@ export default function MarketingHome() {
             ))}
           </nav>
 
-          <a
-            href="#download"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800"
-          >
-            Get the app
-            <ArrowRightIcon className="h-3.5 w-3.5" />
-          </a>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ContactLink
+              href={bookDemoHref}
+              source="header_book_demo"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-900 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 sm:px-4"
+            >
+              <CalendarIcon className="h-3.5 w-3.5" />
+              Book demo
+            </ContactLink>
+            <a
+              href="#download"
+              className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-brand-300 hover:text-brand-900 sm:inline-flex"
+            >
+              Get the app
+              <ArrowRightIcon className="h-3.5 w-3.5" />
+            </a>
+          </div>
         </div>
       </header>
 
@@ -184,18 +216,22 @@ export default function MarketingHome() {
                 <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-brand-600" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-700" />
               </span>
-              New · Advanced Chat, AI reports & task-based learning paths
+              For fast-growing teams
             </span>
 
             <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.35rem]">
-              Private AI for your team&apos;s{" "}
-              <span className="text-brand-900">knowledge, training &amp; support</span>.
+              Fast-growing companies have{" "}
+              <span className="text-brand-900">messy, inconsistent onboarding</span>.
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-              OnLocalAI runs entirely on your own computer — company Q&amp;A with citations,
-              hands-on training, an AI helpdesk, onboarding, and timesheets in one app.
-              No cloud, no accounts, nothing leaves your machine.
+              Handbooks go stale. Training is a PDF. The real answers live in Slack.
+              Every new hire gets a different version of &ldquo;how we do things here&rdquo; —
+              and it only gets worse as you scale.
+            </p>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600">
+              OnLocalAI puts knowledge, training, and support in one private app on your
+              machine, so every hire follows the same grounded path. Nothing leaves the building.
             </p>
 
             <div id="download" className="mt-9 scroll-mt-24">
@@ -218,6 +254,36 @@ export default function MarketingHome() {
           </div>
         </section>
 
+        {/* ---------------- The problem ---------------- */}
+        <section id="problem" className="scroll-mt-24 py-16 lg:py-20">
+          <SectionHeading
+            eyebrow="The problem"
+            title="Growth breaks onboarding before it breaks the product"
+            subtitle="When headcount outruns process, new hires don't fail because they're unprepared — they fail because the company never gave them the same playbook twice."
+          />
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            {problems.map(({ icon: Icon, title, body }) => (
+              <article
+                key={title}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-600/15">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
+              </article>
+            ))}
+          </div>
+
+          <p className="mt-8 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+            That&apos;s the cost: managers repeat themselves, ramp time stretches, and
+            &ldquo;how we work&rdquo; becomes whoever happened to sit next to you.
+            OnLocalAI is built to make that path consistent — without sending a byte to the cloud.
+          </p>
+        </section>
+
         {/* ---------------- Stats strip ---------------- */}
         <section className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 shadow-sm sm:grid-cols-4">
           {stats.map((stat) => (
@@ -233,9 +299,9 @@ export default function MarketingHome() {
         {/* ---------------- Features ---------------- */}
         <section id="features" className="scroll-mt-24 py-16 lg:py-20">
           <SectionHeading
-            eyebrow="One workspace"
-            title="Everything your team needs — still fully local"
-            subtitle="Beyond a chatbot: knowledge, training, tickets, onboarding, and time tracking in one private app your data never leaves."
+            eyebrow="The fix"
+            title="One private workspace so every hire gets the same path"
+            subtitle="Knowledge, training, tickets, and 30–60–90 onboarding in one app — grounded in your docs, scoped by department, running on your hardware."
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -361,8 +427,9 @@ export default function MarketingHome() {
                 Interested? Let&apos;s talk.
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Bring knowledge, training, and support in-house — without sending a single
-                byte to the cloud. Reach out and we&apos;ll get you an access code.
+                If onboarding is already slipping as you hire, we can show you a private
+                workspace that makes the path consistent — without sending a single byte
+                to the cloud. Reach out and we&apos;ll get you a demo and an access code.
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-4">
@@ -526,7 +593,7 @@ function AppPreview() {
 
         <div className="space-y-3 p-4">
           <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-brand-900 px-3.5 py-2.5 text-[13px] leading-relaxed text-white">
-            How do I request VPN access, and who owns the onboarding checklist?
+            I just started. What do I actually need to do this week, and where is VPN access documented?
           </div>
 
           <div className="max-w-[92%] rounded-2xl rounded-bl-sm border border-slate-200 bg-slate-50 px-3.5 py-2.5">
@@ -752,6 +819,15 @@ function MailIcon(props: SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="M4 7l8 6 8-6" />
+    </svg>
+  );
+}
+
+function CalendarIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="3.5" y="5" width="17" height="15" rx="2" />
+      <path d="M8 3.5v3M16 3.5v3M3.5 10h17" />
     </svg>
   );
 }
