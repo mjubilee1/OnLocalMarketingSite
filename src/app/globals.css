@@ -1,15 +1,44 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   OnLocalAI brand system
+   Navy scale derived from the logo mark (#01185E).
+--------------------------------------------------------------------------- */
+@theme {
+  --color-brand-50: #eff3fc;
+  --color-brand-100: #dce5f7;
+  --color-brand-200: #bccbec;
+  --color-brand-300: #93aade;
+  --color-brand-400: #6183c9;
+  --color-brand-500: #3b5cb0;
+  --color-brand-600: #274199;
+  --color-brand-700: #1a2f80;
+  --color-brand-800: #0d2068;
+  --color-brand-900: #01185e;
+  --color-brand-950: #030f3a;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 :root {
   color-scheme: light;
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #0b1220;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -17,8 +46,8 @@ body {
 }
 
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
 
 *::-webkit-scrollbar-track {
@@ -26,14 +55,15 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.14);
-  border-radius: 8px;
+  background: rgba(1, 24, 94, 0.16);
+  border-radius: 9px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(15, 23, 42, 0.24);
+  background: rgba(1, 24, 94, 0.3);
 }
 
+/* ---- Ambient background motion ---- */
 @keyframes float-slow {
   0%,
   100% {
@@ -55,17 +85,18 @@ body {
 }
 
 .animate-float-slow {
-  animation: float-slow 18s ease-in-out infinite;
+  animation: float-slow 20s ease-in-out infinite;
 }
 
 .animate-float-slower {
-  animation: float-slower 26s ease-in-out infinite;
+  animation: float-slower 28s ease-in-out infinite;
 }
 
+/* ---- Entrance ---- */
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -74,19 +105,37 @@ body {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.35s ease both;
+  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.animate-fade-up-slow {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- Live status dot ---- */
 @keyframes pulse-dot {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55);
+    box-shadow: 0 0 0 0 rgba(39, 65, 153, 0.5);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+    box-shadow: 0 0 0 7px rgba(39, 65, 153, 0);
   }
 }
 
 .animate-pulse-dot {
   animation: pulse-dot 2.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-float-slower,
+  .animate-fade-up,
+  .animate-fade-up-slow,
+  .animate-pulse-dot {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }

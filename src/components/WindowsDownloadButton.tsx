@@ -66,11 +66,11 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
               setCode(event.target.value);
               if (error) setError(null);
             }}
-            className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-emerald-500/30 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-brand-500/30 placeholder:text-slate-400 focus:border-brand-500 focus:ring-2"
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+            className="inline-flex items-center justify-center rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/25 transition hover:bg-brand-800"
           >
             Unlock
           </button>
@@ -82,7 +82,7 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
             href={`mailto:montrell@onlocalai.com,Subash@onlocalai.com?subject=${encodeURIComponent(
               "Request OnLocalAI access code"
             )}`}
-            className="font-medium text-emerald-700 underline-offset-2 hover:underline"
+            className="font-medium text-brand-700 underline-offset-2 hover:underline"
             onClick={() =>
               trackEvent("request_access", {
                 source: "download_request_code",
@@ -99,7 +99,7 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <a
-        className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
+        className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/25 transition hover:bg-brand-800"
         href={href}
         onClick={() =>
           trackEvent("download_windows", {
@@ -118,7 +118,7 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
 
       {macHref ? (
         <a
-          className="group inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-emerald-500/50 hover:text-slate-900"
+          className="group inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-brand-500/50 hover:text-slate-900"
           href={macHref}
           onClick={() =>
             trackEvent("download_mac", {
