@@ -9,7 +9,8 @@ const windowsDownloadUrl =
 
 const macDownloadUrl =
   process.env.NEXT_PUBLIC_DESKTOP_MAC_URL?.trim() ||
-  "https://github.com/mjubilee1/OnLocalMarketingSite/releases/latest/download/Business-AI-mac.zip";
+  "https://github.com/mjubilee1/OnLocalMarketingSite/releases/latest/download/onlocalAI-mac.zip";
+const macDownloadEnabled = false;
 
 const contactEmails = ["montrell@onlocalai.com", "Subash@onlocalai.com"];
 const contactHref = `mailto:${contactEmails.join(",")}?subject=${encodeURIComponent(
@@ -237,7 +238,7 @@ export default function MarketingHome() {
             <div id="download" className="mt-9 scroll-mt-24">
               <WindowsDownloadButton
                 href={windowsDownloadUrl || "#"}
-                macHref={macDownloadUrl || undefined}
+                macHref={macDownloadEnabled ? macDownloadUrl || undefined : undefined}
               />
             </div>
 
