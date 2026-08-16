@@ -1,0 +1,36 @@
+# robots.txt for OnLocalAI
+# Goal: let search AND AI answer-engines crawl and cite us (visibility strategy).
+
+User-agent: *
+Allow: /
+
+# --- AI answer engines & assistants (explicitly allowed so they can cite us) ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# --- Training-only crawler with no citation benefit: blocked ---
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://onlocalai.com/sitemap.xml

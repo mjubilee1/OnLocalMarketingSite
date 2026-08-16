@@ -1,6 +1,7 @@
 import type { ReactNode, SVGProps } from "react";
 import { ContactLink } from "@/components/ContactLink";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
+import { WaitlistForm } from "@/components/WaitlistForm";
 import { Logo, BrandMark } from "@/components/Logo";
 
 const windowsDownloadUrl =
@@ -141,9 +142,68 @@ const faqs = [
   },
 ];
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://onlocalai.com/#organization",
+      name: "OnLocalAI",
+      url: "https://onlocalai.com/",
+      logo: "https://onlocalai.com/brand/onlocalai-logo-colored.png",
+      description:
+        "Private, on-premises AI workspace for company knowledge, training, helpdesk, onboarding, and timesheets — running entirely on your own computer.",
+      email: "montrell@onlocalai.com",
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://onlocalai.com/#software",
+      name: "OnLocalAI",
+      applicationCategory: "BusinessApplication",
+      applicationSubCategory: "On-premises AI workspace",
+      operatingSystem: "Windows, macOS",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        description: "Early access — free to try (invite-only).",
+      },
+      publisher: { "@id": "https://onlocalai.com/#organization" },
+      description:
+        "OnLocalAI is a private, on-premises AI workspace: grounded company Q&A with citations, a document workspace with report generation, hands-on training, an AI helpdesk, onboarding milestones, and timesheets — all running on your own machine with nothing sent to the cloud.",
+      featureList: [
+        "Grounded company Q&A with citations",
+        "Department-scoped retrieval",
+        "Advanced Chat & AI report generation",
+        "Connected-worker training with quizzes and badges",
+        "AI helpdesk with SLA timers",
+        "Timesheets with AI insights",
+        "Onboarding milestones and daily briefing",
+        "Runs 100% locally / offline",
+      ],
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://onlocalai.com/#faq",
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    },
+  ],
+};
+
 export default function MarketingHome() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-white text-slate-700">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <BackdropGlow />
 
       {/* ---------------- Header ---------------- */}
@@ -203,6 +263,13 @@ export default function MarketingHome() {
                 href={windowsDownloadUrl || "#"}
                 macHref={macDownloadUrl || undefined}
               />
+            </div>
+
+            <div id="early-access" className="mt-6 max-w-md scroll-mt-24 border-t border-slate-200/80 pt-6">
+              <p className="mb-2.5 text-sm font-medium text-slate-700">
+                Don&apos;t have a code yet? Request early access:
+              </p>
+              <WaitlistForm compact source="hero" />
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500">
@@ -358,34 +425,30 @@ export default function MarketingHome() {
             <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-200/40 blur-3xl" />
             <div className="relative max-w-2xl">
               <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-                Interested? Let&apos;s talk.
+                Get early access
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
                 Bring knowledge, training, and support in-house — without sending a single
-                byte to the cloud. Reach out and we&apos;ll get you an access code.
+                byte to the cloud. Drop your email and we&apos;ll send your access code and a
+                private-AI playbook for regulated teams.
               </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-4">
-                <ContactLink
-                  href={contactHref}
-                  source="contact_section_cta"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/20 transition hover:bg-brand-800"
-                >
-                  <MailIcon className="h-4 w-4" />
-                  Contact us
-                </ContactLink>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-                  {contactEmails.map((email) => (
-                    <ContactLink
-                      key={email}
-                      href={`mailto:${email}`}
-                      source="contact_section_email"
-                      className="font-medium text-brand-800 transition hover:text-brand-900 hover:underline"
-                    >
-                      {email}
-                    </ContactLink>
-                  ))}
-                </div>
+              <div className="mt-7">
+                <WaitlistForm source="cta_band" />
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
+                <span className="text-slate-500">Prefer email?</span>
+                {contactEmails.map((email) => (
+                  <ContactLink
+                    key={email}
+                    href={`mailto:${email}`}
+                    source="contact_section_email"
+                    className="font-medium text-brand-800 transition hover:text-brand-900 hover:underline"
+                  >
+                    {email}
+                  </ContactLink>
+                ))}
               </div>
             </div>
           </div>
@@ -747,11 +810,3 @@ function ArrowRightIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-function MailIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M4 7l8 6 8-6" />
-    </svg>
-  );
-}

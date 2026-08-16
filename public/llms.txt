@@ -1,0 +1,34 @@
+# OnLocalAI
+
+> Private, on-premises AI for your whole team. OnLocalAI is a native desktop app (Windows & macOS) that delivers company knowledge Q&A, a document workspace, training, an AI helpdesk, onboarding, and timesheets — running entirely on the customer's own computer using customized open-source models. No cloud, no accounts, no telemetry: nothing leaves the machine, and it works offline.
+
+## What it is
+- Category: On-premises / private AI workspace for teams (self-hosted, offline-capable).
+- For: Privacy-regulated SMBs (legal, healthcare, finance/accounting) and small-to-mid businesses (10–200 staff) that cannot or prefer not to send data to cloud AI.
+- Key promise: The AI productivity of a team assistant with zero data-leaving-the-building risk.
+
+## Core capabilities
+- Grounded company Q&A: answers from your own policies, SOPs, and wikis with citations; retrieval is department-scoped so people only see what they're allowed to.
+- Advanced Chat & AI reports: a private per-session workspace to upload PDF/Word/CSV/Markdown, ask with citations, and generate downloadable grounded reports with executive summaries.
+- Connected-worker training: turns documents into interactive checklists, flashcards, and quizzes; task-driven learning paths resolve prerequisites, skip what's mastered, and badge employees.
+- AI helpdesk: full ticketing with SLA timers, status workflow, and assignment; AI triages priority, category, tags, and sentiment and drafts knowledge-grounded replies.
+- Timesheets with AI: natural-language time entry, weekly submit/approve workflow, utilization and billable insights.
+- Onboarding: personalized dashboard with 30-60-90 milestones and an AI daily briefing.
+- Also included: IT terminal diagnostics, scenario role-play sandbox, command palette, versioned AI-tagged knowledge base, guided walkthroughs, and directory/org chart.
+
+## How it's private
+- Runs 100% on the customer's own hardware; the model, vector index, and files never leave the machine.
+- No external API keys, no accounts, no telemetry; works air-gapped once set up.
+- Powered by customized open-source language and embedding models — no proprietary AI services, no per-token bills, no vendor lock-in.
+
+## Availability
+- Native desktop app for Windows and macOS.
+- Early access (invite-only, code-gated download).
+- Contact for access: montrell@onlocalai.com, Subash@onlocalai.com
+
+## Key pages
+- Home / product overview: https://onlocalai.com/
+- Features: https://onlocalai.com/#features
+- Privacy & architecture: https://onlocalai.com/#privacy
+- How it works: https://onlocalai.com/#how
+- FAQ: https://onlocalai.com/#faq
