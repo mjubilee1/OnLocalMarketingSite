@@ -56,8 +56,6 @@ export const metadata: Metadata = {
         alt: SITE_NAME,
       },
     ],
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
