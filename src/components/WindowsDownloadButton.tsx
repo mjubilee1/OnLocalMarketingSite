@@ -43,7 +43,7 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
       return;
     }
 
-    setError("That code isn’t valid. Request access if you need one.");
+    setError("Invalid code. Request access if you need one.");
     trackEvent("activation_failed");
   }
 

@@ -19,6 +19,8 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo,
+    Consolas, monospace;
 }
 
 :root {
@@ -43,6 +45,12 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+/* ---- Branded text selection ---- */
+::selection {
+  background: color-mix(in srgb, var(--color-brand-600) 22%, transparent);
+  color: var(--color-brand-950);
 }
 
 /* ---- Keyboard focus (mouse users unaffected) ---- */

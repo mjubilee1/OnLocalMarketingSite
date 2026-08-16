@@ -40,17 +40,17 @@ const problems = [
   {
     icon: UsersIcon,
     title: "Every hire gets a different first 90 days",
-    body: "Onboarding depends on who has time that week — a walkthrough for one hire, a folder of PDFs for the next.",
+    body: "Onboarding depends on who's free that week. A walkthrough for one hire, a PDF dump for the next.",
   },
   {
     icon: SearchIcon,
     title: "The real answers live in people, not the handbook",
-    body: "SOPs go stale the day they're written, so new hires ping Slack and managers repeat themselves.",
+    body: "SOPs go stale the day they're written. Hires ping Slack; managers repeat themselves.",
   },
   {
     icon: GraduationIcon,
     title: "Docs, training, and tickets don't add up to a path",
-    body: "Knowledge in Drive, training in a deck, support in an inbox — no one can see what a hire has actually learned.",
+    body: "Knowledge in Drive. Training in a deck. Support in an inbox. Nobody sees what a hire has learned.",
   },
 ];
 
@@ -58,38 +58,38 @@ const features = [
   {
     icon: UsersIcon,
     title: "Onboarding from day one",
-    body: "A personalized dashboard: 30-60-90 milestones, hours, open tickets, and an AI daily briefing — so every hire knows what's next.",
+    body: "Personalized dashboard: 30-60-90 milestones, hours, open tickets, AI daily briefing. Every hire knows what's next.",
   },
   {
     icon: SearchIcon,
     title: "Grounded company Q&A",
-    body: "Answers from your policies, SOPs, and wikis, with citations. Retrieval is scoped by department, so people see only what they should.",
+    body: "Answers from your policies, SOPs, and wikis — with citations. Scoped by department, so people see only what they should.",
   },
   {
     icon: GraduationIcon,
     title: "Connected-worker training",
-    body: "Turn any document into checklists, flashcards, and quizzes. Learning paths resolve prerequisites, skip what's mastered, and badge each hire.",
+    body: "Any document becomes checklists, flashcards, and quizzes. Learning paths skip what's mastered and badge each hire.",
   },
   {
     icon: TicketIcon,
     title: "AI helpdesk, built in",
-    body: "Full ticketing with SLA timers and assignment. AI triages priority, category, and sentiment, then drafts grounded replies to review and send.",
+    body: "Full ticketing with SLA timers and assignment. AI triages priority, category, and sentiment — then drafts grounded replies to send.",
   },
   {
     icon: DocumentIcon,
     title: "Advanced Chat & AI reports",
-    body: "A private per-session workspace: upload PDF, Word, CSV, or Markdown, ask with citations, then generate a downloadable report.",
+    body: "Private per-session workspace. Upload PDF, Word, CSV, or Markdown, ask with citations, export a report.",
   },
   {
     icon: ClockIcon,
     title: "Timesheets with AI assist",
-    body: "Log time in plain English, submit weekly, and approve or reject. Utilization and billable insights are generated for you.",
+    body: "Log time in plain English. Submit weekly, approve or reject. Utilization and billable insights, generated for you.",
   },
 ];
 
 const moreFeatures = [
   { icon: TerminalIcon, title: "IT terminal diagnostics", body: "Paste an error log and get a safe, step-by-step fix — destructive commands are flagged." },
-  { icon: SparklesIcon, title: "Scenario role-play sandbox", body: "Practice sales, support, and tough conversations against an AI that stays in character, then get feedback." },
+  { icon: SparklesIcon, title: "Scenario role-play sandbox", body: "Practice sales, support, and hard conversations against an in-character AI. Get feedback." },
   { icon: CommandIcon, title: "Command palette", body: "Press ⌘/Ctrl-K anywhere to jump to a section or fire a question straight at the assistant." },
   { icon: DatabaseIcon, title: "Versioned knowledge base", body: "Upload, re-index, and AI-tag documents. Re-uploads bump the version and re-embed automatically." },
   { icon: WalkthroughIcon, title: "Guided walkthroughs", body: "Training PDFs stream as step-by-step guides with the document's own screenshots inline." },
@@ -99,21 +99,21 @@ const moreFeatures = [
 const steps = [
   {
     title: "Download & enter your code",
-    body: "Grab the app for Windows, enter your access code, and you're running in a minute — no servers.",
+    body: "Grab the Windows app, enter your access code, running in a minute. No servers.",
   },
   {
     title: "Create your workspace",
-    body: "Set up your company and add teammates and managers from the Admin tab.",
+    body: "Set up your company. Add teammates and managers from the Admin tab.",
   },
   {
     title: "Add knowledge & go",
-    body: "Upload policies and training docs to index locally, then use Chat, Training, Tickets, and Timesheets.",
+    body: "Upload policies and training docs to index locally. Then Chat, Training, Tickets, Timesheets.",
   },
 ];
 
 const stack = [
   { icon: ChipIcon, title: "Customized open-source models", body: "Tuned open-source models run entirely on-device — no proprietary APIs, no per-token bills, no lock-in." },
-  { icon: DatabaseIcon, title: "On-disk vector store", body: "A persistent local index keeps every embedding on your machine. Documents are never uploaded to be indexed." },
+  { icon: DatabaseIcon, title: "On-disk vector store", body: "Persistent local index keeps every embedding on your machine. Nothing uploaded to be indexed." },
   { icon: ServerIcon, title: "Self-contained backend", body: "The whole engine is bundled in the app. No API keys, no accounts, no telemetry." },
 ];
 
@@ -257,12 +257,12 @@ export default function MarketingHome() {
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-              Handbooks go stale. Training is a PDF. The real answers live in Slack —
+              Handbooks go stale. Training&apos;s a PDF. Real answers hide in Slack —
               so every hire learns a different version of how you work.
             </p>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600">
-              OnLocalAI puts knowledge, training, and support in one private app — so every
-              hire follows the same path. Nothing leaves your machine.
+              Knowledge, training, and support in one private app. Every hire, same
+              path. Nothing leaves your machine.
             </p>
 
             <div id="download" className="mt-9 scroll-mt-24">
@@ -290,7 +290,7 @@ export default function MarketingHome() {
           <SectionHeading
             eyebrow="The problem"
             title="Growth breaks onboarding before it breaks the product"
-            subtitle="When headcount outruns process, new hires fail — not because they're unprepared, but because they never get the same playbook twice."
+            subtitle="Headcount outruns process — and no two hires ever get the same playbook."
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -309,8 +309,8 @@ export default function MarketingHome() {
           </div>
 
           <p className="mt-8 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            The cost: managers repeat themselves, ramp drags, and &ldquo;how we work&rdquo;
-            becomes whoever sat next to you. OnLocalAI makes the path consistent — without
+            The cost: slow ramp, repeated questions, and &ldquo;how we work&rdquo;
+            meaning whoever sat next to you. OnLocalAI makes the path consistent — without
             sending a byte to the cloud.
           </p>
         </section>
@@ -374,6 +374,7 @@ export default function MarketingHome() {
           <div className="relative overflow-hidden rounded-3xl border border-brand-800 bg-brand-950 p-8 text-brand-100 shadow-xl shadow-brand-900/20 sm:p-12">
             <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-brand-500/10 blur-3xl" />
+            <BrandMark className="pointer-events-none absolute -bottom-10 -right-6 h-56 w-56 text-white/[0.04]" />
 
             <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
               <div>
@@ -385,8 +386,8 @@ export default function MarketingHome() {
                   Your data never leaves the building
                 </h2>
                 <p className="mt-3 max-w-md text-sm leading-relaxed text-brand-100/80">
-                  No cloud to trust, no telemetry to opt out of. The model, index, and files
-                  live on your machine — so it keeps working with the network unplugged.
+                  No cloud to trust. No telemetry to opt out of. Model, index, and files
+                  stay on your machine — working with the network unplugged.
                 </p>
 
                 <ul className="mt-6 space-y-2.5">
@@ -457,8 +458,8 @@ export default function MarketingHome() {
                 See it on your own machine
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-                Knowledge, training, and support in one private app — nothing leaves your machine.
-                Book a demo and we&apos;ll get you set up.
+                Knowledge, training, and support in one private app. Nothing leaves your
+                machine. Book a demo — we&apos;ll set you up.
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-4">
@@ -519,7 +520,7 @@ export default function MarketingHome() {
             <Logo height={24} />
             <p className="mt-3 text-xs leading-relaxed text-slate-500">
               Private, on-premises AI for company knowledge, training, and support.
-              Runs on your own hardware — nothing leaves your machine.
+              Runs on your hardware — nothing leaves your machine.
             </p>
           </div>
 
