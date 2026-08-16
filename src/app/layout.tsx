@@ -1,33 +1,39 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { GA_MEASUREMENT_ID } from "@/lib/gtag";
+import {
+  SITE_DESCRIPTION,
+  SITE_LEGAL_NAME,
+  SITE_LOGO_PATH,
+  SITE_NAME,
+  SITE_URL,
+  organizationJsonLd,
+} from "@/lib/site";
 import "./globals.css";
 
-const siteDescription =
-  "OnLocalAI is a private, on-premises AI workspace for company knowledge, training, helpdesk, onboarding, and timesheets — running entirely on your own computer. Nothing leaves your machine.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://onlocalai.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "OnLocalAI — Private, on-premises AI for your whole team",
-    template: "%s · OnLocalAI",
+    default: `${SITE_LEGAL_NAME} — Private AI for messy, inconsistent onboarding`,
+    template: `%s · ${SITE_LEGAL_NAME}`,
   },
-  description: siteDescription,
+  description: SITE_DESCRIPTION,
   alternates: {
     canonical: "/",
   },
   keywords: [
+    "employee onboarding",
     "on-premises AI",
-    "local LLM",
     "private AI assistant",
     "offline AI",
-    "employee onboarding AI",
-    "AI helpdesk",
+    "HR onboarding software",
     "knowledge base AI",
-    "open-source AI models",
     "self-hosted AI",
   ],
-  applicationName: "OnLocalAI",
+  applicationName: SITE_LEGAL_NAME,
+  authors: [{ name: SITE_LEGAL_NAME, url: SITE_URL }],
+  creator: SITE_LEGAL_NAME,
+  publisher: SITE_LEGAL_NAME,
   icons: {
     icon: [
       { url: "/brand/onlocalai-mark.svg", type: "image/svg+xml" },
@@ -36,23 +42,28 @@ export const metadata: Metadata = {
     apple: "/brand/onlocalai-mark.svg",
   },
   openGraph: {
-    title: "OnLocalAI — Private, on-premises AI for your whole team",
-    description: siteDescription,
-    siteName: "OnLocalAI",
-    url: "https://onlocalai.com",
+    title: `${SITE_LEGAL_NAME} — Private AI for messy, inconsistent onboarding`,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    url: SITE_URL,
     type: "website",
+    locale: "en_US",
     images: [
       {
-        url: "/brand/onlocalai-logo-colored.png",
-        alt: "OnLocalAI — private, on-premises AI for your whole team",
+        url: SITE_LOGO_PATH,
+        width: 4000,
+        height: 4000,
+        alt: SITE_NAME,
+      },
+    ],
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OnLocalAI — Private, on-premises AI for your whole team",
-    description: siteDescription,
-    images: ["/brand/onlocalai-logo-colored.png"],
+    title: `${SITE_LEGAL_NAME} — Private AI for messy, inconsistent onboarding`,
+    description: SITE_DESCRIPTION,
+    images: [SITE_LOGO_PATH],
   },
 };
 
@@ -68,6 +79,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd()),
+          }}
+        />
         {children}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}

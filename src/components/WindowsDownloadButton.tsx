@@ -134,7 +134,18 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
             Alpha
           </span>
         </a>
-      ) : null}
+      ) : (
+        <span
+          aria-disabled="true"
+          className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-400"
+        >
+          <AppleIcon className="h-4 w-4" />
+          Download for Mac
+          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            Soon
+          </span>
+        </span>
+      )}
     </div>
   );
 }
