@@ -26,7 +26,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_LEGAL_NAME} — Private AI for messy, inconsistent onboarding`,
+    default: `${SITE_LEGAL_NAME} — Private on-device AI`,
     template: `%s · ${SITE_LEGAL_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -46,13 +46,7 @@ export const metadata: Metadata = {
   authors: [{ name: SITE_LEGAL_NAME, url: SITE_URL }],
   creator: SITE_LEGAL_NAME,
   publisher: SITE_LEGAL_NAME,
-  icons: {
-    icon: [
-      { url: "/brand/onlocalai-mark.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: "/brand/onlocalai-mark.svg",
-  },
+  // Icons are provided by file conventions: src/app/icon.svg and apple-icon.svg
   openGraph: {
     title: `${SITE_LEGAL_NAME} — Private AI for messy, inconsistent onboarding`,
     description: SITE_DESCRIPTION,
