@@ -4,7 +4,6 @@ import { GA_MEASUREMENT_ID } from "@/lib/gtag";
 import {
   SITE_DESCRIPTION,
   SITE_LEGAL_NAME,
-  SITE_LOGO_PATH,
   SITE_NAME,
   SITE_URL,
   organizationJsonLd,
@@ -48,11 +47,12 @@ export const metadata: Metadata = {
     url: SITE_URL,
     type: "website",
     locale: "en_US",
+    // 1200×630 social card. Design source: scripts/og-card.source.tsx
     images: [
       {
-        url: SITE_LOGO_PATH,
-        width: 4000,
-        height: 4000,
+        url: "/brand/og-card.png",
+        width: 1200,
+        height: 630,
         alt: SITE_NAME,
       },
     ],
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_LEGAL_NAME} — Private AI for messy, inconsistent onboarding`,
     description: SITE_DESCRIPTION,
-    images: [SITE_LOGO_PATH],
+    images: ["/brand/og-card.png"],
   },
 };
 

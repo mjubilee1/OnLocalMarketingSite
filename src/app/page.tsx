@@ -1,4 +1,5 @@
 import type { ReactNode, SVGProps } from "react";
+import Link from "next/link";
 import { ContactLink } from "@/components/ContactLink";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
 import { WaitlistForm } from "@/components/WaitlistForm";
@@ -165,59 +166,21 @@ const faqs = [
   },
 ];
 
+// Organization, WebSite, and SoftwareApplication schema live globally in
+// layout.tsx (organizationJsonLd). This page only adds the FAQ schema so we
+// don't emit conflicting duplicate entities.
 const structuredData = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://onlocalai.com/#organization",
-      name: "OnLocalAI",
-      url: "https://onlocalai.com/",
-      logo: "https://onlocalai.com/brand/onlocalai-logo-colored.png",
-      description:
-        "Private, on-premises AI workspace for company knowledge, training, helpdesk, onboarding, and timesheets — running entirely on your own computer.",
-      email: "montrell@onlocalai.com",
+  "@type": "FAQPage",
+  "@id": "https://onlocalai.com/#faq",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
     },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://onlocalai.com/#software",
-      name: "OnLocalAI",
-      applicationCategory: "BusinessApplication",
-      applicationSubCategory: "On-premises AI workspace",
-      operatingSystem: "Windows, macOS",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "USD",
-        description: "Early access — free to try (invite-only).",
-      },
-      publisher: { "@id": "https://onlocalai.com/#organization" },
-      description:
-        "OnLocalAI is a private, on-premises AI workspace: grounded company Q&A with citations, a document workspace with report generation, hands-on training, an AI helpdesk, onboarding milestones, and timesheets — all running on your own machine with nothing sent to the cloud.",
-      featureList: [
-        "Grounded company Q&A with citations",
-        "Department-scoped retrieval",
-        "Advanced Chat & AI report generation",
-        "Connected-worker training with quizzes and badges",
-        "AI helpdesk with SLA timers",
-        "Timesheets with AI insights",
-        "Onboarding milestones and daily briefing",
-        "Runs 100% locally / offline",
-      ],
-    },
-    {
-      "@type": "FAQPage",
-      "@id": "https://onlocalai.com/#faq",
-      mainEntity: faqs.map((faq) => ({
-        "@type": "Question",
-        name: faq.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: faq.answer,
-        },
-      })),
-    },
-  ],
+  })),
 };
 
 export default function MarketingHome() {
@@ -246,6 +209,12 @@ export default function MarketingHome() {
                 {link.label}
               </a>
             ))}
+            <Link
+              href="/compare/onlocalai-vs-chatgpt-enterprise-vs-copilot"
+              className="text-sm font-medium text-slate-600 transition hover:text-brand-900"
+            >
+              Compare
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">

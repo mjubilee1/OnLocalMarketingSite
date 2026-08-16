@@ -20,6 +20,13 @@ export const metadata: Metadata = {
     description: PAGE_DESCRIPTION,
     url: PAGE_URL,
     type: "article",
+    images: [{ url: "/brand/og-card.png", width: 1200, height: 630, alt: "OnLocalAI" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    images: ["/brand/og-card.png"],
   },
 };
 
@@ -351,8 +358,19 @@ export default function ComparisonPage() {
           ))}
         </div>
 
+        {/* Related */}
+        <div className="mt-12 rounded-2xl border border-slate-200 bg-slate-50/60 p-5 text-sm">
+          <span className="font-semibold text-slate-800">Related:</span>{" "}
+          <Link
+            href="/compare/private-chatgpt-alternatives-for-law-firms"
+            className="font-medium text-brand-800 underline-offset-2 hover:underline"
+          >
+            Private ChatGPT alternatives for law firms
+          </Link>
+        </div>
+
         {/* CTA */}
-        <div className="mt-14 rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-white p-8 shadow-sm">
+        <div className="mt-8 rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-white p-8 shadow-sm">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
             Want AI without sending data to the cloud?
           </h2>
