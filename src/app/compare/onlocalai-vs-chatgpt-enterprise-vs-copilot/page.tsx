@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode, SVGProps } from "react";
 import Link from "next/link";
-import { WaitlistForm } from "@/components/WaitlistForm";
 import { Logo } from "@/components/Logo";
+
+const bookDemoHref = `mailto:montrell@onlocalai.com,Subash@onlocalai.com?subject=${encodeURIComponent(
+  "Book a demo — OnLocalAI"
+)}`;
 
 const PAGE_URL =
   "https://onlocalai.com/compare/onlocalai-vs-chatgpt-enterprise-vs-copilot/";
@@ -167,12 +170,12 @@ export default function ComparisonPage() {
           <Link href="/" aria-label="OnLocalAI home" className="shrink-0">
             <Logo height={26} />
           </Link>
-          <Link
-            href="/#early-access"
+          <a
+            href={bookDemoHref}
             className="inline-flex items-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800"
           >
-            Get early access
-          </Link>
+            Book a demo
+          </a>
         </div>
       </header>
 
@@ -375,11 +378,15 @@ export default function ComparisonPage() {
             Want AI without sending data to the cloud?
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
-            OnLocalAI gives your team knowledge, training, and support that runs entirely on your own
-            machines. Drop your email for an access code and our private-AI playbook.
+            OnLocalAI runs entirely on your own machines. Book a demo and we&apos;ll walk you through it.
           </p>
           <div className="mt-6">
-            <WaitlistForm source="compare_page" />
+            <a
+              href={bookDemoHref}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/20 transition hover:bg-brand-800"
+            >
+              Book a demo
+            </a>
           </div>
         </div>
       </main>

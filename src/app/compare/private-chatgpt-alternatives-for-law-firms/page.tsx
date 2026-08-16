@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode, SVGProps } from "react";
 import Link from "next/link";
-import { WaitlistForm } from "@/components/WaitlistForm";
 import { Logo } from "@/components/Logo";
+
+const bookDemoHref = `mailto:montrell@onlocalai.com,Subash@onlocalai.com?subject=${encodeURIComponent(
+  "Book a demo — OnLocalAI"
+)}`;
 
 const PAGE_URL =
   "https://onlocalai.com/compare/private-chatgpt-alternatives-for-law-firms/";
@@ -224,12 +227,12 @@ export default function LawFirmAlternativesPage() {
           <Link href="/" aria-label="OnLocalAI home" className="shrink-0">
             <Logo height={26} />
           </Link>
-          <Link
-            href="/#early-access"
+          <a
+            href={bookDemoHref}
             className="inline-flex items-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800"
           >
-            Get early access
-          </Link>
+            Book a demo
+          </a>
         </div>
       </header>
 
@@ -393,11 +396,15 @@ export default function LawFirmAlternativesPage() {
             Give your firm AI that can&apos;t leak
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
-            OnLocalAI runs entirely on your own machines — knowledge, training, and support with
-            nothing leaving the office. Drop your email for an access code and our private-AI playbook.
+            OnLocalAI runs entirely on your own machines — nothing leaves the office. Book a demo to see it.
           </p>
           <div className="mt-6">
-            <WaitlistForm source="law_firm_alternatives" />
+            <a
+              href={bookDemoHref}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/20 transition hover:bg-brand-800"
+            >
+              Book a demo
+            </a>
           </div>
         </div>
       </main>
