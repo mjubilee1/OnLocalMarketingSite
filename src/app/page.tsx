@@ -1,8 +1,8 @@
-import type { ReactNode, SVGProps } from "react";
-import Link from "next/link";
 import { ContactLink } from "@/components/ContactLink";
+import { BrandMark, Logo } from "@/components/Logo";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
-import { Logo, BrandMark } from "@/components/Logo";
+import Link from "next/link";
+import type { ReactNode, SVGProps } from "react";
 
 const windowsDownloadUrl =
   process.env.NEXT_PUBLIC_DESKTOP_WINDOWS_URL?.trim() ||
@@ -240,14 +240,6 @@ export default function MarketingHome() {
         {/* ---------------- Hero ---------------- */}
         <section className="grid items-center gap-12 pb-10 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pt-20">
           <div className="animate-fade-up">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-brand-600" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-700" />
-              </span>
-              For fast-growing teams
-            </span>
-
             <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.35rem]">
               Fast-growing companies have{" "}
               <span className="bg-gradient-to-r from-brand-700 to-brand-900 bg-clip-text text-transparent">
@@ -261,8 +253,8 @@ export default function MarketingHome() {
               so every hire learns a different version of how you work.
             </p>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600">
-              Knowledge, training, and support in one private app. Every hire, same
-              path. Nothing leaves your machine.
+              Every new hire goes through the same training. No more guessing who
+              got the walkthrough.
             </p>
 
             <div id="download" className="mt-9 scroll-mt-24">
