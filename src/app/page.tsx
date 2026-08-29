@@ -241,20 +241,15 @@ export default function MarketingHome() {
         <section className="grid items-center gap-12 pb-10 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pt-20">
           <div className="animate-fade-up">
             <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.35rem]">
-              Fast-growing companies have{" "}
+              Why{" "}
               <span className="bg-gradient-to-r from-brand-700 to-brand-900 bg-clip-text text-transparent">
-                messy, inconsistent onboarding
+                OnLocalAI
               </span>
-              .
             </h1>
 
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-              Handbooks go stale. Training&apos;s a PDF. Real answers hide in Slack —
-              so every hire learns a different version of how you work.
-            </p>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600">
-              Every new hire goes through the same training. No more guessing who
-              got the walkthrough.
+              Every new hire goes through the same training. Same checklist, same
+              answers — not whoever had time that week. Nothing leaves your machine.
             </p>
 
             <div id="download" className="mt-9 scroll-mt-24">
