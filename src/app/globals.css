@@ -127,6 +127,34 @@ body {
   animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ---- Infinite marquee (Trainual logo-marquee pattern) ---- */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* half the duplicated track = one full seamless loop */
+    transform: translateX(calc(-50% - 0.375rem));
+  }
+}
+
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
 /* ---- Live status dot ---- */
 @keyframes pulse-dot {
   0%,
@@ -147,8 +175,9 @@ body {
   .animate-float-slower,
   .animate-fade-up,
   .animate-fade-up-slow,
-  .animate-pulse-dot {
-    animation: none;
+  .animate-pulse-dot,
+  .marquee-mask * {
+    animation: none !important;
   }
   html {
     scroll-behavior: auto;

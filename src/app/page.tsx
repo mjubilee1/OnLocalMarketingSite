@@ -4,6 +4,8 @@ import { BrandMark } from "@/components/Logo";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { Reveal, WordRotator, Marquee } from "@/components/motion";
+import { FeatureJourney, type JourneyStep } from "@/components/FeatureJourney";
 
 const windowsDownloadUrl =
   process.env.NEXT_PUBLIC_DESKTOP_WINDOWS_URL?.trim() ||
@@ -95,6 +97,68 @@ const moreFeatures = [
   { icon: DatabaseIcon, title: "Versioned knowledge base", body: "Upload, re-index, and AI-tag documents. Re-uploads bump the version and re-embed automatically." },
   { icon: WalkthroughIcon, title: "Guided walkthroughs", body: "Training PDFs stream as step-by-step guides with the document's own screenshots inline." },
   { icon: OrgIcon, title: "Directory & org chart", body: "Employee records, managers, and departments power both context and access control." },
+];
+
+// Industries we serve — rotates in the hero (Trainual's word-rotator pattern).
+const industries = [
+  "legal",
+  "healthcare",
+  "accounting",
+  "finance",
+  "engineering",
+  "operations",
+];
+
+// Pinned scroll showcase — each step swaps a real screenshot of the app.
+const journeySteps: JourneyStep[] = [
+  {
+    title: "Grounded company Q&A",
+    desc: "Answers from your own policies and SOPs, every claim cited and scored — scoped to the asker's department.",
+    shot: "/app/chat.webp",
+    caption: "onlocalAI · Chat",
+  },
+  {
+    title: "Onboarding from day one",
+    desc: "A personalized dashboard: daily AI briefing, notices, hours, and open tickets in one place.",
+    shot: "/app/home.webp",
+    caption: "onlocalAI · Home",
+  },
+  {
+    title: "Connected-worker training",
+    desc: "Assign any document or video, then let the AI build the path. Compliance and skills tracked per person.",
+    shot: "/app/training.webp",
+    caption: "onlocalAI · Training",
+  },
+  {
+    title: "Knowledge checks that stick",
+    desc: "Turn the same material into quizzes and flashcards. Spaced repetition scores what each hire actually retained.",
+    shot: "/app/quiz.webp",
+    caption: "onlocalAI · Knowledge Check",
+  },
+  {
+    title: "AI helpdesk with SLAs",
+    desc: "Full ticketing with timers and assignment. AI triages priority, category, and sentiment.",
+    shot: "/app/tickets.webp",
+    caption: "onlocalAI · Helpdesk",
+  },
+  {
+    title: "IT terminal diagnostics",
+    desc: "Paste an error log and get a safe, step-by-step fix — destructive commands flagged before you run them.",
+    shot: "/app/it-support.webp",
+    caption: "onlocalAI · IT Support",
+  },
+  {
+    title: "Timesheets with AI assist",
+    desc: "Log time in plain English, submit weekly, approve or reject. Utilization and billable insights generated for you.",
+    shot: "/app/timesheet.webp",
+    caption: "onlocalAI · Timesheet",
+  },
+  {
+    title: "Versioned knowledge base",
+    desc: "Upload, re-index, and AI-tag documents. Re-uploads bump the version and re-embed automatically.",
+    shot: "/app/admin.webp",
+    caption: "onlocalAI · Knowledge Base",
+  },
 ];
 
 const capabilities = [
@@ -231,6 +295,15 @@ export default function MarketingHome() {
                 path. Nothing leaves your machine.
               </p>
 
+              <p className="mt-5 flex flex-wrap items-baseline gap-x-2 text-base font-semibold text-white">
+                Built for
+                <WordRotator
+                  words={industries}
+                  className="bg-gradient-to-r from-brand-300 to-cyan-300 bg-clip-text font-extrabold text-transparent"
+                />
+                teams.
+              </p>
+
               <div id="download" className="mt-9 scroll-mt-24">
                 <WindowsDownloadButton
                   href={windowsDownloadUrl || "#"}
@@ -251,21 +324,48 @@ export default function MarketingHome() {
             </div>
           </div>
 
-          {/* Capabilities strip */}
-          <div className="relative mx-auto w-full max-w-6xl px-6 pb-16">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5 rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm sm:grid-cols-3 lg:grid-cols-6">
+          {/* Capabilities marquee */}
+          <div className="relative pb-16">
+            <Marquee>
               {capabilities.map(({ icon: Icon, label }) => (
-                <div key={label} className="flex flex-col items-start gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-brand-200">
-                    <Icon className="h-4.5 w-4.5" />
-                  </span>
-                  <span className="text-xs font-medium leading-snug text-brand-100/90">
-                    {label}
-                  </span>
-                </div>
+                <span
+                  key={label}
+                  className="flex items-center gap-2.5 whitespace-nowrap rounded-full border border-white/10 bg-white/[0.05] px-5 py-3 text-sm font-medium text-brand-100/90 backdrop-blur-sm"
+                >
+                  <Icon className="h-4 w-4 text-brand-300" />
+                  {label}
+                </span>
               ))}
-            </div>
+            </Marquee>
           </div>
+        </section>
+
+        {/* ---------------- Pinned product journey (real screenshots) ---------------- */}
+        <section className="relative bg-brand-950 text-white">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -left-32 top-1/4 h-[30rem] w-[30rem] rounded-full bg-brand-600/15 blur-3xl" />
+            <div className="absolute -right-24 bottom-1/4 h-[26rem] w-[26rem] rounded-full bg-cyan-500/10 blur-3xl" />
+          </div>
+
+          <div className="relative mx-auto w-full max-w-6xl px-6 pt-20 lg:pt-24">
+            <Reveal className="max-w-2xl">
+              <Badge tone="dark">
+                <SparklesIcon className="h-3.5 w-3.5 text-brand-300" />
+                Inside the app
+              </Badge>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Eight modules.{" "}
+                <span className="bg-gradient-to-r from-brand-300 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
+                  One private install.
+                </span>
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-brand-100/75">
+                Real screens from the desktop app — running locally, offline, on our own machine.
+              </p>
+            </Reveal>
+          </div>
+
+          <FeatureJourney steps={journeySteps} />
         </section>
 
         {/* ---------------- The problem (light) ---------------- */}
@@ -279,14 +379,13 @@ export default function MarketingHome() {
 
             <div className="mt-12 grid gap-5 sm:grid-cols-3">
               {problems.map(({ icon: Icon, title, body }, i) => (
-                <article
-                  key={title}
-                  className="rounded-[1.75rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-brand-950/[0.03] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/5"
-                >
-                  <IconChip Icon={Icon} mint={i % 2 === 1} />
-                  <h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
-                </article>
+                <Reveal key={title} delay={i * 110}>
+                  <article className="h-full rounded-[1.75rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-brand-950/[0.03] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/5">
+                    <IconChip Icon={Icon} mint={i % 2 === 1} />
+                    <h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
+                  </article>
+                </Reveal>
               ))}
             </div>
 
@@ -301,15 +400,15 @@ export default function MarketingHome() {
         {/* ---------------- Stats band (navy) ---------------- */}
         <section className="mx-auto w-full max-w-6xl px-6">
           <div className="grid grid-cols-2 gap-6 rounded-[2rem] bg-brand-950 px-8 py-10 sm:grid-cols-4 sm:px-12">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
+            {stats.map((stat, i) => (
+              <Reveal key={stat.label} delay={i * 90} className="text-center">
                 <div className="bg-gradient-to-r from-brand-200 to-cyan-300 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
                   {stat.value}
                 </div>
                 <div className="mt-2 text-xs font-medium uppercase tracking-wide text-brand-100/60">
                   {stat.label}
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -325,14 +424,13 @@ export default function MarketingHome() {
 
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {features.map(({ icon: Icon, title, body }, i) => (
-                <article
-                  key={title}
-                  className="group rounded-[1.75rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-brand-950/[0.03] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/5"
-                >
-                  <IconChip Icon={Icon} mint={i % 2 === 1} hover />
-                  <h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
-                </article>
+                <Reveal key={title} delay={(i % 3) * 110}>
+                  <article className="group h-full rounded-[1.75rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-brand-950/[0.03] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/5">
+                    <IconChip Icon={Icon} mint={i % 2 === 1} hover />
+                    <h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
+                  </article>
+                </Reveal>
               ))}
             </div>
 
@@ -425,16 +523,15 @@ export default function MarketingHome() {
 
             <ol className="mt-12 grid gap-5 sm:grid-cols-3">
               {steps.map((step, index) => (
-                <li
-                  key={step.title}
-                  className="rounded-[1.75rem] border border-slate-200/70 bg-gradient-to-b from-brand-50/70 to-white p-7 shadow-sm shadow-brand-950/[0.03]"
-                >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-900 text-lg font-extrabold text-white">
-                    {index + 1}
-                  </span>
-                  <h3 className="mt-5 text-lg font-bold text-slate-900">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.body}</p>
-                </li>
+                <Reveal key={step.title} delay={index * 130}>
+                  <li className="h-full rounded-[1.75rem] border border-slate-200/70 bg-gradient-to-b from-brand-50/70 to-white p-7 shadow-sm shadow-brand-950/[0.03]">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-900 text-lg font-extrabold text-white">
+                      {index + 1}
+                    </span>
+                    <h3 className="mt-5 text-lg font-bold text-slate-900">{step.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.body}</p>
+                  </li>
+                </Reveal>
               ))}
             </ol>
           </div>
