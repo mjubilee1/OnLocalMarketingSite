@@ -1,7 +1,8 @@
 import type { ReactNode, SVGProps } from "react";
 import { ContactLink } from "@/components/ContactLink";
+import { BrandMark, Logo } from "@/components/Logo";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
-import { BrandMark } from "@/components/Logo";
+import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -214,7 +215,7 @@ export default function MarketingHome() {
                 For fast-growing teams
               </Badge>
 
-              <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[1.03] tracking-tight sm:text-6xl lg:text-[4.15rem]">
+<h1 className="mt-6 text-balance text-5xl font-extrabold leading-[1.03] tracking-tight sm:text-6xl lg:text-[4.15rem]">
                 Fast-growing companies have{" "}
                 <span className="bg-gradient-to-r from-brand-300 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
                   messy, inconsistent onboarding
