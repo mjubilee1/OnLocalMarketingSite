@@ -52,12 +52,12 @@ export function SiteHeader({ navLinks, bookDemoHref, showGetApp = false }: SiteH
             <ArrowCircle className="h-5 w-5" />
           </ContactLink>
           {showGetApp ? (
-            <a
+            <Link
               href="/#download"
               className="hidden items-center gap-1.5 whitespace-nowrap rounded-full border border-white/25 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/50 sm:inline-flex lg:inline-flex"
             >
               Get the app
-            </a>
+            </Link>
           ) : null}
 
           <button
@@ -93,13 +93,13 @@ export function SiteHeader({ navLinks, bookDemoHref, showGetApp = false }: SiteH
             >
               Compare
             </Link>
-            <a
+            <Link
               href="/#download"
               onClick={() => setOpen(false)}
               className="mt-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
             >
               Get the app
-            </a>
+            </Link>
           </nav>
         </div>
       ) : null}

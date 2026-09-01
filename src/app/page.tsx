@@ -1,8 +1,7 @@
 import type { ReactNode, SVGProps } from "react";
 import { ContactLink } from "@/components/ContactLink";
-import { BrandMark, Logo } from "@/components/Logo";
+import { BrandMark } from "@/components/Logo";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
-import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
