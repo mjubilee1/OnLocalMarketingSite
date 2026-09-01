@@ -1,8 +1,9 @@
 import type { ReactNode, SVGProps } from "react";
-import Link from "next/link";
 import { ContactLink } from "@/components/ContactLink";
 import { WindowsDownloadButton } from "@/components/WindowsDownloadButton";
-import { Logo, BrandMark } from "@/components/Logo";
+import { BrandMark } from "@/components/Logo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const windowsDownloadUrl =
   process.env.NEXT_PUBLIC_DESKTOP_WINDOWS_URL?.trim() ||
@@ -96,6 +97,15 @@ const moreFeatures = [
   { icon: OrgIcon, title: "Directory & org chart", body: "Employee records, managers, and departments power both context and access control." },
 ];
 
+const capabilities = [
+  { icon: UsersIcon, label: "Onboarding from day one" },
+  { icon: SearchIcon, label: "Grounded company Q&A" },
+  { icon: GraduationIcon, label: "Connected-worker training" },
+  { icon: TicketIcon, label: "AI helpdesk with SLAs" },
+  { icon: DocumentIcon, label: "Advanced Chat & reports" },
+  { icon: ClockIcon, label: "Timesheets with AI" },
+];
+
 const steps = [
   {
     title: "Download & enter your code",
@@ -184,239 +194,160 @@ const structuredData = {
 
 export default function MarketingHome() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white text-slate-700">
+    <div className="min-h-screen bg-white text-slate-700">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <BackdropGlow />
 
       {/* ---------------- Header ---------------- */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-lg">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3.5">
-          <a href="#top" aria-label="OnLocalAI home" className="shrink-0">
-            <Logo height={26} />
-          </a>
+      <SiteHeader navLinks={navLinks} bookDemoHref={bookDemoHref} showGetApp />
 
-          <nav className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-slate-600 transition hover:text-brand-900"
-              >
-                {link.label}
-              </a>
-            ))}
-            <Link
-              href="/compare/onlocalai-vs-chatgpt-enterprise-vs-copilot"
-              className="text-sm font-medium text-slate-600 transition hover:text-brand-900"
-            >
-              Compare
-            </Link>
-          </nav>
+      <main id="top">
+        {/* ---------------- Hero (dark, immersive) ---------------- */}
+        <section className="relative overflow-hidden bg-brand-950 text-white">
+          <HeroGlow />
+          <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-6 pb-16 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pb-20 lg:pt-20">
+            <div className="animate-fade-up">
+              <Badge tone="dark">
+                <SparklesIcon className="h-3.5 w-3.5 text-brand-300" />
+                For fast-growing teams
+              </Badge>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <ContactLink
-              href={bookDemoHref}
-              source="header_book_demo"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 hover:shadow-md sm:px-4"
-            >
-              <CalendarIcon className="h-3.5 w-3.5" />
-              Book demo
-            </ContactLink>
-            <a
-              href="#download"
-              className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-brand-300 hover:text-brand-900 sm:inline-flex"
-            >
-              Get the app
-              <ArrowRightIcon className="h-3.5 w-3.5" />
-            </a>
-          </div>
-        </div>
-      </header>
-
-      <main id="top" className="relative z-10 mx-auto w-full max-w-6xl px-6">
-        {/* ---------------- Hero ---------------- */}
-        <section className="grid items-center gap-12 pb-10 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pt-20">
-          <div className="animate-fade-up">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-brand-600" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-700" />
-              </span>
-              For fast-growing teams
-            </span>
-
-            <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.35rem]">
-              Fast-growing companies have{" "}
-              <span className="bg-gradient-to-r from-brand-700 to-brand-900 bg-clip-text text-transparent">
-                messy, inconsistent onboarding
-              </span>
-              .
-            </h1>
-
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-              Handbooks go stale. Training&apos;s a PDF. Real answers hide in Slack —
-              so every hire learns a different version of how you work.
-            </p>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-slate-600">
-              Knowledge, training, and support in one private app. Every hire, same
-              path. Nothing leaves your machine.
-            </p>
-
-            <div id="download" className="mt-9 scroll-mt-24">
-              <WindowsDownloadButton
-                href={windowsDownloadUrl || "#"}
-                macHref={macDownloadEnabled ? macDownloadUrl || undefined : undefined}
-              />
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500">
-              <TrustItem>Runs 100% locally</TrustItem>
-              <TrustItem>Works offline</TrustItem>
-              <TrustItem>Department-scoped access</TrustItem>
-              <TrustItem>Windows &amp; macOS</TrustItem>
-            </div>
-          </div>
-
-          <div className="animate-fade-up-slow justify-self-center lg:justify-self-end">
-            <AppPreview />
-          </div>
-        </section>
-
-        {/* ---------------- The problem ---------------- */}
-        <section id="problem" className="scroll-mt-24 py-16 lg:py-20">
-          <SectionHeading
-            eyebrow="The problem"
-            title="Growth breaks onboarding before it breaks the product"
-            subtitle="Headcount outruns process — and no two hires ever get the same playbook."
-          />
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {problems.map(({ icon: Icon, title, body }) => (
-              <article
-                key={title}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-600/15">
-                  <Icon className="h-5 w-5" />
+              <h1 className="mt-6 text-balance text-5xl font-extrabold leading-[1.03] tracking-tight sm:text-6xl lg:text-[4.15rem]">
+                Fast-growing companies have{" "}
+                <span className="bg-gradient-to-r from-brand-300 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
+                  messy, inconsistent onboarding
                 </span>
-                <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
-              </article>
-            ))}
-          </div>
+                .
+              </h1>
 
-          <p className="mt-8 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            The cost: slow ramp, repeated questions, and &ldquo;how we work&rdquo;
-            meaning whoever sat next to you. OnLocalAI makes the path consistent — without
-            sending a byte to the cloud.
-          </p>
-        </section>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-brand-100/85">
+                Handbooks go stale. Training&apos;s a PDF. Real answers hide in Slack —
+                so every hire learns a different version of how you work.
+              </p>
+              <p className="mt-3 max-w-xl text-base leading-relaxed text-brand-100/70">
+                Knowledge, training, and support in one private app. Every hire, same
+                path. Nothing leaves your machine.
+              </p>
 
-        {/* ---------------- Stats strip ---------------- */}
-        <section className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 shadow-sm sm:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="bg-white px-5 py-6 text-center">
-              <div className="text-2xl font-semibold tracking-tight text-brand-900">{stat.value}</div>
-              <div className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-                {stat.label}
+              <div id="download" className="mt-9 scroll-mt-24">
+                <WindowsDownloadButton
+                  href={windowsDownloadUrl || "#"}
+                  macHref={macDownloadEnabled ? macDownloadUrl || undefined : undefined}
+                />
+              </div>
+
+              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-brand-100/70">
+                <TrustItem>Runs 100% locally</TrustItem>
+                <TrustItem>Works offline</TrustItem>
+                <TrustItem>Department-scoped access</TrustItem>
+                <TrustItem>Windows &amp; macOS</TrustItem>
               </div>
             </div>
-          ))}
-        </section>
 
-        {/* ---------------- Features ---------------- */}
-        <section id="features" className="scroll-mt-24 py-16 lg:py-20">
-          <SectionHeading
-            eyebrow="The fix"
-            title="One private workspace so every hire gets the same path"
-            subtitle="Knowledge, training, tickets, and 30–60–90 onboarding in one app — grounded in your docs, scoped by department, running on your hardware."
-          />
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map(({ icon: Icon, title, body }) => (
-              <article
-                key={title}
-                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-900/5"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-600/15 transition group-hover:bg-brand-900 group-hover:text-white">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
-              </article>
-            ))}
+            <div className="animate-fade-up-slow justify-self-center lg:justify-self-end">
+              <AppPreview />
+            </div>
           </div>
 
-          {/* Secondary feature list */}
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-6">
-            <h3 className="text-sm font-semibold text-slate-900">And more — all on-device</h3>
-            <div className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-              {moreFeatures.map(({ icon: Icon, title, body }) => (
-                <div key={title} className="flex gap-3">
-                  <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-white text-brand-700 ring-1 ring-inset ring-slate-200">
-                    <Icon className="h-4 w-4" />
+          {/* Capabilities strip */}
+          <div className="relative mx-auto w-full max-w-6xl px-6 pb-16">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-5 rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm sm:grid-cols-3 lg:grid-cols-6">
+              {capabilities.map(({ icon: Icon, label }) => (
+                <div key={label} className="flex flex-col items-start gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-brand-200">
+                    <Icon className="h-4.5 w-4.5" />
                   </span>
-                  <div>
-                    <div className="text-sm font-semibold text-slate-900">{title}</div>
-                    <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{body}</p>
-                  </div>
+                  <span className="text-xs font-medium leading-snug text-brand-100/90">
+                    {label}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ---------------- Privacy / architecture ---------------- */}
-        <section id="privacy" className="scroll-mt-24 py-4">
-          <div className="relative overflow-hidden rounded-3xl border border-brand-800 bg-brand-950 p-8 text-brand-100 shadow-xl shadow-brand-900/20 sm:p-12">
-            <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-brand-500/10 blur-3xl" />
-            <BrandMark className="pointer-events-none absolute -bottom-10 -right-6 h-56 w-56 text-white/[0.04]" />
+        {/* ---------------- The problem (light) ---------------- */}
+        <section id="problem" className="scroll-mt-24 bg-white">
+          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+            <SectionHeading
+              eyebrow="The problem"
+              title="Growth breaks onboarding before it breaks the product"
+              subtitle="Headcount outruns process — and no two hires ever get the same playbook."
+            />
 
-            <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-brand-100">
-                  <LockIcon className="h-3.5 w-3.5" />
-                  Private by architecture
-                </span>
-                <h2 className="mt-5 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  Your data never leaves the building
-                </h2>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-brand-100/80">
-                  No cloud to trust. No telemetry to opt out of. Model, index, and files
-                  stay on your machine — working with the network unplugged.
-                </p>
+            <div className="mt-12 grid gap-5 sm:grid-cols-3">
+              {problems.map(({ icon: Icon, title, body }, i) => (
+                <article
+                  key={title}
+                  className="rounded-[1.75rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-brand-950/[0.03] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/5"
+                >
+                  <IconChip Icon={Icon} mint={i % 2 === 1} />
+                  <h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
+                </article>
+              ))}
+            </div>
 
-                <ul className="mt-6 space-y-2.5">
-                  {[
-                    "No external API keys or accounts",
-                    "Department isolation enforced at retrieval",
-                    "Grounded answers — 'I don't know' over invention",
-                    "Runs air-gapped once models are pulled",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-brand-50">
-                      <CheckIcon className="mt-0.5 h-4 w-4 flex-none text-brand-300" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+            <p className="mt-8 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              The cost: slow ramp, repeated questions, and &ldquo;how we work&rdquo;
+              meaning whoever sat next to you. OnLocalAI makes the path consistent — without
+              sending a byte to the cloud.
+            </p>
+          </div>
+        </section>
+
+        {/* ---------------- Stats band (navy) ---------------- */}
+        <section className="mx-auto w-full max-w-6xl px-6">
+          <div className="grid grid-cols-2 gap-6 rounded-[2rem] bg-brand-950 px-8 py-10 sm:grid-cols-4 sm:px-12">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="bg-gradient-to-r from-brand-200 to-cyan-300 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+                  {stat.value}
+                </div>
+                <div className="mt-2 text-xs font-medium uppercase tracking-wide text-brand-100/60">
+                  {stat.label}
+                </div>
               </div>
+            ))}
+          </div>
+        </section>
 
-              <div className="grid gap-3">
-                {stack.map(({ icon: Icon, title, body }) => (
-                  <div
-                    key={title}
-                    className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm"
-                  >
-                    <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-white/10 text-brand-200">
-                      <Icon className="h-5 w-5" />
+        {/* ---------------- Features (light) ---------------- */}
+        <section id="features" className="scroll-mt-24 bg-white">
+          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+            <SectionHeading
+              eyebrow="The fix"
+              title="One private workspace so every hire gets the same path"
+              subtitle="Knowledge, training, tickets, and 30–60–90 onboarding in one app — grounded in your docs, scoped by department, running on your hardware."
+            />
+
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map(({ icon: Icon, title, body }, i) => (
+                <article
+                  key={title}
+                  className="group rounded-[1.75rem] border border-slate-200/70 bg-white p-7 shadow-sm shadow-brand-950/[0.03] transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/5"
+                >
+                  <IconChip Icon={Icon} mint={i % 2 === 1} hover />
+                  <h3 className="mt-5 text-lg font-bold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
+                </article>
+              ))}
+            </div>
+
+            {/* Secondary feature list */}
+            <div className="mt-6 rounded-[1.75rem] border border-slate-200/70 bg-brand-50/50 p-7">
+              <h3 className="text-sm font-bold text-slate-900">And more — all on-device</h3>
+              <div className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+                {moreFeatures.map(({ icon: Icon, title, body }) => (
+                  <div key={title} className="flex gap-3">
+                    <span className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-white text-brand-700 ring-1 ring-inset ring-slate-200">
+                      <Icon className="h-4 w-4" />
                     </span>
                     <div>
-                      <div className="text-sm font-semibold text-white">{title}</div>
-                      <p className="mt-1 text-xs leading-relaxed text-brand-100/70">{body}</p>
+                      <div className="text-sm font-semibold text-slate-900">{title}</div>
+                      <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{body}</p>
                     </div>
                   </div>
                 ))}
@@ -425,60 +356,124 @@ export default function MarketingHome() {
           </div>
         </section>
 
-        {/* ---------------- How it works ---------------- */}
-        <section id="how" className="scroll-mt-24 py-16 lg:py-20">
-          <SectionHeading
-            eyebrow="Get started"
-            title="Up and running in three steps"
-            subtitle="No servers, no DevOps. If you can install an app, you can run OnLocalAI."
-          />
+        {/* ---------------- Privacy / architecture (dark) ---------------- */}
+        <section id="privacy" className="scroll-mt-24 bg-white">
+          <div className="mx-auto w-full max-w-6xl px-6 pb-8">
+            <div className="relative overflow-hidden rounded-[2rem] bg-brand-950 p-8 text-brand-100 shadow-xl shadow-brand-900/20 sm:p-14">
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-brand-600/25 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+              <BrandMark className="pointer-events-none absolute -bottom-10 -right-6 h-56 w-56 text-white/[0.04]" />
 
-          <ol className="mt-10 grid gap-4 sm:grid-cols-3">
-            {steps.map((step, index) => (
-              <li
-                key={step.title}
-                className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 text-sm font-semibold text-white">
-                  {index + 1}
-                </span>
-                <h3 className="mt-4 text-base font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.body}</p>
-              </li>
-            ))}
-          </ol>
+              <div className="relative grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+                <div>
+                  <Badge tone="dark">
+                    <LockIcon className="h-3.5 w-3.5" />
+                    Private by architecture
+                  </Badge>
+                  <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                    Your data never leaves the building
+                  </h2>
+                  <p className="mt-4 max-w-md text-sm leading-relaxed text-brand-100/80">
+                    No cloud to trust. No telemetry to opt out of. Model, index, and files
+                    stay on your machine — working with the network unplugged.
+                  </p>
+
+                  <ul className="mt-6 space-y-2.5">
+                    {[
+                      "No external API keys or accounts",
+                      "Department isolation enforced at retrieval",
+                      "Grounded answers — 'I don't know' over invention",
+                      "Runs air-gapped once models are pulled",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2.5 text-sm text-brand-50">
+                        <CheckIcon className="mt-0.5 h-4 w-4 flex-none text-cyan-300" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="grid gap-3">
+                  {stack.map(({ icon: Icon, title, body }) => (
+                    <div
+                      key={title}
+                      className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm"
+                    >
+                      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-white/10 text-brand-200">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <div>
+                        <div className="text-sm font-semibold text-white">{title}</div>
+                        <p className="mt-1 text-xs leading-relaxed text-brand-100/70">{body}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        {/* ---------------- Contact CTA ---------------- */}
-        <section className="py-4">
-          <div className="relative overflow-hidden rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-white p-8 shadow-sm sm:p-12">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-200/40 blur-3xl" />
-            <div className="relative max-w-2xl">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-                See it on your own machine
+        {/* ---------------- How it works (light) ---------------- */}
+        <section id="how" className="scroll-mt-24 bg-white">
+          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+            <SectionHeading
+              eyebrow="Get started"
+              title="Up and running in three steps"
+              subtitle="No servers, no DevOps. If you can install an app, you can run OnLocalAI."
+            />
+
+            <ol className="mt-12 grid gap-5 sm:grid-cols-3">
+              {steps.map((step, index) => (
+                <li
+                  key={step.title}
+                  className="rounded-[1.75rem] border border-slate-200/70 bg-gradient-to-b from-brand-50/70 to-white p-7 shadow-sm shadow-brand-950/[0.03]"
+                >
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-900 text-lg font-extrabold text-white">
+                    {index + 1}
+                  </span>
+                  <h3 className="mt-5 text-lg font-bold text-slate-900">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* ---------------- Contact CTA (dark) ---------------- */}
+        <section className="mx-auto w-full max-w-6xl px-6 pb-8">
+          <div className="relative overflow-hidden rounded-[2rem] bg-brand-950 px-8 py-16 text-center shadow-xl shadow-brand-900/20 sm:px-12">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-brand-600/25 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+            <div className="relative mx-auto max-w-2xl">
+              <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                See it on your own{" "}
+                <span className="bg-gradient-to-r from-brand-300 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
+                  machine
+                </span>
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+              <p className="mt-4 text-sm leading-relaxed text-brand-100/80 sm:text-base">
                 Knowledge, training, and support in one private app. Nothing leaves your
                 machine. Book a demo — we&apos;ll set you up.
               </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-4">
+              <div className="mt-8 flex flex-col items-center gap-4">
                 <ContactLink
                   href={bookDemoHref}
                   source="cta_band_book_demo"
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/20 transition hover:bg-brand-800"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-brand-950/30 transition hover:bg-brand-100"
                 >
-                  <CalendarIcon className="h-4 w-4" />
                   Book a demo
+                  <ArrowCircle className="h-5 w-5" />
                 </ContactLink>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
-                  <span className="text-slate-500">or email</span>
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-brand-100/70">
+                  <span>or email</span>
                   {contactEmails.map((email) => (
                     <ContactLink
                       key={email}
                       href={`mailto:${email}`}
                       source="contact_section_email"
-                      className="font-medium text-brand-800 transition hover:text-brand-900 hover:underline"
+                      className="font-medium text-brand-200 transition hover:text-white hover:underline"
                     >
                       {email}
                     </ContactLink>
@@ -489,63 +484,52 @@ export default function MarketingHome() {
           </div>
         </section>
 
-        {/* ---------------- FAQ ---------------- */}
-        <section id="faq" className="scroll-mt-24 py-16 lg:py-20">
-          <SectionHeading
-            eyebrow="FAQ"
-            title="Answers on privacy, setup & capabilities"
-          />
+        {/* ---------------- FAQ (light) ---------------- */}
+        <section id="faq" className="scroll-mt-24 bg-white">
+          <div className="mx-auto w-full max-w-6xl px-6 py-20 lg:py-24">
+            <SectionHeading eyebrow="FAQ" title="Answers on privacy, setup & capabilities" />
 
-          <div className="mt-10 grid gap-3">
-            {faqs.map((faq) => (
-              <details
-                key={faq.question}
-                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition open:border-brand-300 open:shadow-md"
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-900">
-                  {faq.question}
-                  <ChevronIcon className="h-4 w-4 flex-none text-slate-400 transition group-open:rotate-180 group-open:text-brand-700" />
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
-              </details>
-            ))}
+            <div className="mt-12 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="group rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm shadow-brand-950/[0.03] transition open:border-brand-200 open:bg-brand-50/40"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold text-slate-900">
+                    {faq.question}
+                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand-50 text-brand-600 transition group-open:rotate-180 group-open:bg-brand-900 group-open:text-white">
+                      <ChevronIcon className="h-4 w-4" />
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
       </main>
 
-      {/* ---------------- Footer ---------------- */}
-      <footer className="relative z-10 border-t border-slate-200 bg-slate-50/60">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-start sm:justify-between">
-          <div className="max-w-sm">
-            <Logo height={24} />
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              Private, on-premises AI for company knowledge, training, and support.
-              Runs on your hardware — nothing leaves your machine.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 text-sm sm:items-end">
-            <nav className="flex flex-wrap gap-x-5 gap-y-2 text-slate-600">
-              {navLinks.map((link) => (
-                <a key={link.href} href={link.href} className="transition hover:text-brand-900">
-                  {link.label}
-                </a>
-              ))}
-              <ContactLink href={contactHref} source="footer_contact" className="transition hover:text-brand-900">
-                Contact
-              </ContactLink>
-            </nav>
-            <span className="text-xs text-slate-500">
-              Early access · free to try. © {new Date().getFullYear()} OnLocalAI.
-            </span>
-          </div>
-        </div>
-      </footer>
+      {/* ---------------- Footer (dark) ---------------- */}
+      <SiteFooter navLinks={navLinks} contactHref={contactHref} />
     </div>
   );
 }
 
 /* ============================ Building blocks ============================ */
+
+function Badge({ children, tone = "light" }: { children: ReactNode; tone?: "light" | "dark" }) {
+  const cls =
+    tone === "dark"
+      ? "border-white/15 bg-white/5 text-brand-100 backdrop-blur"
+      : "border-brand-200 bg-brand-50 text-brand-700";
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold ${cls}`}
+    >
+      {children}
+    </span>
+  );
+}
 
 function SectionHeading({
   eyebrow,
@@ -558,34 +542,61 @@ function SectionHeading({
 }) {
   return (
     <div className="max-w-2xl">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">
+      <Badge tone="light">
+        <SparklesIcon className="h-3.5 w-3.5 text-brand-500" />
         {eyebrow}
-      </span>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+      </Badge>
+      <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">{subtitle}</p>
+        <p className="mt-4 text-base leading-relaxed text-slate-600">{subtitle}</p>
       ) : null}
     </div>
+  );
+}
+
+function IconChip({
+  Icon,
+  mint = false,
+  hover = false,
+}: {
+  Icon: (props: SVGProps<SVGSVGElement>) => ReactNode;
+  mint?: boolean;
+  hover?: boolean;
+}) {
+  const base = mint
+    ? "bg-teal-50 text-teal-600 ring-teal-600/15"
+    : "bg-brand-50 text-brand-700 ring-brand-600/15";
+  const hoverCls = hover
+    ? mint
+      ? " transition group-hover:bg-teal-600 group-hover:text-white"
+      : " transition group-hover:bg-brand-900 group-hover:text-white"
+    : "";
+  return (
+    <span
+      className={`flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ring-inset ${base}${hoverCls}`}
+    >
+      <Icon className="h-5.5 w-5.5" />
+    </span>
   );
 }
 
 function TrustItem({ children }: { children: ReactNode }) {
   return (
     <span className="flex items-center gap-1.5">
-      <CheckIcon className="h-3.5 w-3.5 text-brand-600" />
+      <CheckIcon className="h-3.5 w-3.5 text-cyan-300" />
       {children}
     </span>
   );
 }
 
-function BackdropGlow() {
+function HeroGlow() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="animate-float-slow absolute -left-24 -top-24 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
-      <div className="animate-float-slower absolute -right-16 top-40 h-80 w-80 rounded-full bg-sky-200/30 blur-3xl" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-900/10 to-transparent" />
+      <div className="animate-float-slow absolute -left-24 -top-24 h-96 w-96 rounded-full bg-brand-600/25 blur-3xl" />
+      <div className="animate-float-slower absolute -right-16 top-20 h-[26rem] w-[26rem] rounded-full bg-cyan-500/12 blur-3xl" />
+      <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-brand-500/15 blur-3xl" />
     </div>
   );
 }
@@ -593,8 +604,8 @@ function BackdropGlow() {
 function AppPreview() {
   return (
     <div className="relative w-full max-w-md">
-      <div className="pointer-events-none absolute -inset-4 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-200/50 via-transparent to-sky-200/40 blur-2xl" />
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-brand-900/10">
+      <div className="pointer-events-none absolute -inset-4 -z-10 rounded-[2.25rem] bg-gradient-to-br from-brand-500/30 via-transparent to-cyan-400/25 blur-2xl" />
+      <div className="rounded-[1.5rem] border border-white/10 bg-white shadow-2xl shadow-brand-950/40">
         <div className="flex items-center gap-1.5 border-b border-slate-200 px-4 py-3">
           <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
@@ -662,6 +673,16 @@ function AppPreview() {
 }
 
 /* ============================ Icons ============================ */
+
+function ArrowCircle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <circle cx="12" cy="12" r="11" fill="currentColor" fillOpacity="0.12" />
+      <path d="M9 8l4 4-4 4" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 12h6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function LockIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -833,23 +854,6 @@ function ArrowUpIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M12 19V5M6 11l6-6 6 6" />
-    </svg>
-  );
-}
-
-function ArrowRightIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
-function CalendarIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3.5" y="5" width="17" height="15" rx="2" />
-      <path d="M8 3.5v3M16 3.5v3M3.5 10h17" />
     </svg>
   );
 }

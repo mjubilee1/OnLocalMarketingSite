@@ -1,11 +1,23 @@
 import type { Metadata } from "next";
 import type { ReactNode, SVGProps } from "react";
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const bookDemoHref = `mailto:montrell@onlocalai.com,Subash@onlocalai.com?subject=${encodeURIComponent(
   "Book a demo — OnLocalAI"
 )}`;
+const contactHref = `mailto:montrell@onlocalai.com,Subash@onlocalai.com?subject=${encodeURIComponent(
+  "Interested in OnLocalAI"
+)}`;
+
+const navLinks = [
+  { label: "The problem", href: "/#problem" },
+  { label: "Features", href: "/#features" },
+  { label: "Privacy", href: "/#privacy" },
+  { label: "How it works", href: "/#how" },
+  { label: "FAQ", href: "/#faq" },
+];
 
 const PAGE_URL =
   "https://onlocalai.com/compare/onlocalai-vs-chatgpt-enterprise-vs-copilot/";
@@ -165,19 +177,7 @@ export default function ComparisonPage() {
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-lg">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3.5">
-          <Link href="/" aria-label="OnLocalAI home" className="shrink-0">
-            <Logo height={26} />
-          </Link>
-          <a
-            href={bookDemoHref}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800"
-          >
-            Book a demo
-          </a>
-        </div>
-      </header>
+      <SiteHeader navLinks={navLinks} bookDemoHref={bookDemoHref} />
 
       <main className="mx-auto w-full max-w-3xl px-6 py-12 lg:py-16">
         {/* Breadcrumb */}
@@ -187,7 +187,7 @@ export default function ComparisonPage() {
           <span className="text-slate-700">Compare</span>
         </nav>
 
-        <h1 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="text-balance text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl">
           OnLocalAI vs ChatGPT Enterprise vs Microsoft Copilot
         </h1>
         <p className="mt-3 text-base leading-relaxed text-slate-600">
@@ -212,7 +212,7 @@ export default function ComparisonPage() {
         </div>
 
         {/* At-a-glance table */}
-        <h2 className="mt-12 text-xl font-semibold tracking-tight text-slate-900">
+        <h2 className="mt-12 text-2xl font-extrabold tracking-tight text-slate-900">
           At a glance
         </h2>
         <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
@@ -310,7 +310,7 @@ export default function ComparisonPage() {
         />
 
         {/* Who each is for */}
-        <h2 className="mt-12 text-xl font-semibold tracking-tight text-slate-900">
+        <h2 className="mt-12 text-2xl font-extrabold tracking-tight text-slate-900">
           Who each one is best for
         </h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
@@ -343,7 +343,7 @@ export default function ComparisonPage() {
         </div>
 
         {/* FAQ */}
-        <h2 className="mt-14 text-xl font-semibold tracking-tight text-slate-900">
+        <h2 className="mt-14 text-2xl font-extrabold tracking-tight text-slate-900">
           Frequently asked questions
         </h2>
         <div className="mt-5 grid gap-3">
@@ -373,31 +373,34 @@ export default function ComparisonPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-8 rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-50 via-white to-white p-8 shadow-sm">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Want AI without sending data to the cloud?
-          </h2>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
-            OnLocalAI runs entirely on your own machines. Book a demo and we&apos;ll walk you through it.
-          </p>
-          <div className="mt-6">
-            <a
-              href={bookDemoHref}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/20 transition hover:bg-brand-800"
-            >
-              Book a demo
-            </a>
+        <div className="relative mt-10 overflow-hidden rounded-[2rem] bg-brand-950 p-8 text-center shadow-xl shadow-brand-900/20 sm:p-12">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-brand-600/25 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="relative mx-auto max-w-xl">
+            <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              Want AI without sending data to the{" "}
+              <span className="bg-gradient-to-r from-brand-300 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
+                cloud
+              </span>
+              ?
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-brand-100/80">
+              OnLocalAI runs entirely on your own machines. Book a demo and we&apos;ll walk you through it.
+            </p>
+            <div className="mt-7">
+              <a
+                href={bookDemoHref}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-brand-950/30 transition hover:bg-brand-100"
+              >
+                Book a demo
+              </a>
+            </div>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-slate-50/60">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-6 py-8 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <Logo height={22} />
-          <span>Private, on-premises AI for your whole team. © {new Date().getFullYear()} OnLocalAI.</span>
-        </div>
-      </footer>
+      <SiteFooter navLinks={navLinks} contactHref={contactHref} />
     </div>
   );
 }
@@ -407,7 +410,7 @@ export default function ComparisonPage() {
 function DeepDive({ title, body }: { title: string; body: ReactNode }) {
   return (
     <section className="mt-12">
-      <h2 className="text-xl font-semibold tracking-tight text-slate-900">{title}</h2>
+      <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">{title}</h2>
       <div className="mt-3 text-sm leading-relaxed text-slate-600">{body}</div>
     </section>
   );

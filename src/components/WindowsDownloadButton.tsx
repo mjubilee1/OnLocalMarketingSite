@@ -66,23 +66,23 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
               setCode(event.target.value);
               if (error) setError(null);
             }}
-            className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-brand-500/30 placeholder:text-slate-400 focus:border-brand-500 focus:ring-2"
+            className="min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm text-white outline-none ring-brand-300/40 placeholder:text-white/50 focus:border-white/40 focus:ring-2"
           />
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/25 transition hover:bg-brand-800"
+            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-brand-950/30 transition hover:bg-brand-100"
           >
             Unlock
           </button>
         </form>
-        {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
-        <p className="mt-2 text-xs text-slate-500">
+        {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
+        <p className="mt-2 text-xs text-brand-100/70">
           Early access is code-gated.{" "}
           <a
             href={`mailto:montrell@onlocalai.com,Subash@onlocalai.com?subject=${encodeURIComponent(
               "Request OnLocalAI access code"
             )}`}
-            className="font-medium text-brand-700 underline-offset-2 hover:underline"
+            className="font-medium text-brand-200 underline-offset-2 hover:text-white hover:underline"
             onClick={() =>
               trackEvent("request_access", {
                 source: "download_request_code",
@@ -99,7 +99,7 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <a
-        className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/25 transition hover:bg-brand-800"
+        className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-brand-950/30 transition hover:bg-brand-100"
         href={href}
         onClick={() =>
           trackEvent("download_windows", {
@@ -111,14 +111,14 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
       >
         <WindowsIcon className="h-4 w-4" />
         Download for Windows
-        <span className="rounded-md bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+        <span className="rounded-md bg-brand-900/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-800">
           Alpha
         </span>
       </a>
 
       {macHref ? (
         <a
-          className="group inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-brand-500/50 hover:text-slate-900"
+          className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/50"
           href={macHref}
           onClick={() =>
             trackEvent("download_mac", {
@@ -137,11 +137,11 @@ export function WindowsDownloadButton({ href, macHref }: WindowsDownloadButtonPr
       ) : (
         <span
           aria-disabled="true"
-          className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-400"
+          className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white/40"
         >
           <AppleIcon className="h-4 w-4" />
           Download for Mac
-          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+          <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/40">
             Soon
           </span>
         </span>

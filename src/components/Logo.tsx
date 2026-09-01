@@ -23,23 +23,29 @@ type LogoProps = {
   className?: string;
   /** Height of the wordmark in pixels. */
   height?: number;
+  /** "dark" = navy on light backgrounds, "light" = white on dark backgrounds. */
+  tone?: "dark" | "light";
 };
 
 /**
- * Full lockup: circular mark + "onlocalAI" wordmark, set in the brand navy.
+ * Full lockup: circular mark + "onlocalAI" wordmark.
+ * Navy by default; pass tone="light" for white-on-dark headers/footers.
  */
-export function Logo({ className, height = 26 }: LogoProps) {
+export function Logo({ className, height = 26, tone = "dark" }: LogoProps) {
+  const light = tone === "light";
+  const markAndWord = light ? "text-white" : "text-brand-900";
+  const ai = light ? "text-brand-300" : "text-brand-600";
   return (
     <span
-      className={`inline-flex items-center gap-2 text-brand-900 ${className ?? ""}`}
+      className={`inline-flex items-center gap-2 ${className ?? ""}`}
       style={{ height }}
     >
-      <BrandMark className="h-full w-auto" style={{ height }} />
+      <BrandMark className={`h-full w-auto ${markAndWord}`} style={{ height }} />
       <span
-        className="font-semibold tracking-tight text-brand-900"
+        className={`font-semibold tracking-tight ${markAndWord}`}
         style={{ fontSize: height * 0.92, letterSpacing: "-0.02em" }}
       >
-        onlocal<span className="text-brand-600">AI</span>
+        onlocal<span className={ai}>AI</span>
       </span>
     </span>
   );
