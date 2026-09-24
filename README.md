@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# onlocalAI
 
-## Getting Started
+**[onlocalai.com](https://onlocalai.com)**
 
-First, run the development server:
+Onboarding and training for event companies that hire lots of short-term casual staff. It takes a new crew member from scanning a QR code to being ready for a shift in under an hour, all on their phone.
+
+It has two apps:
+
+| | For | Where |
+|---|---|---|
+| **Manager portal** | Crew managers and ops | `/admin` |
+| **Crew app** (mobile-first) | Casual event staff | `/app` |
+| **Self sign-up** | New hires | `/join/CREW2026` |
+
+## Run it
 
 ```bash
+npm install
+cp .env.example .env.local   # then add your OpenRouter key
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:5173. The app comes loaded with demo data: 16 crew, 6 roles, 9 courses and 4 events. Use **Reset demo data** in the manager sidebar to start over. In the crew app, the **Viewing as** dropdown at the top lets you see the app as any crew member.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features, and where the ideas came from
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Feature | What it does here | Inspired by |
+|---|---|---|
+| **QR / link self-sign-up** | One link or printable poster. The person picks roles and sees the pay rate and how long it takes to get ready. | Rosterfy, Liveforce, Instawork |
+| **Bulk invite** | Paste `name, email, phone, role` from a spreadsheet or ATS | Rippling, BambooHR |
+| **Role-based onboarding flows** | Each role is a "Sign → Learn → Certify" checklist. A change applies to everyone right away. | BambooHR onboarding templates, Trainual roles |
+| **E-signature** | Draw with a finger or type your name. Records the date and time. | DocuSign, Gusto, Deel |
+| **Two-party contracts** | The manager fills in your Event Planning Service Contract PDF. The crew member reviews a plain-language summary, adds their address and signs on their phone, and the manager countersigns. Either side can download the PDF: a watermarked draft that's still fillable, or a locked signed copy with a signature certificate | DocuSign, Dropbox Sign, Rippling documents |
+| **Microlearning player** | Swipeable cards, progress bar, resumes where you left off | EdApp (SafetyCulture), 7taps |
+| **Instant-feedback quizzes** | Right/wrong feedback with an explanation, a pass mark, and retry | EdApp, TalentLMS, Lessonly |
+| **Course builder with live phone preview** | Card, video and quiz lessons, reordering, draft/publish | Trainual, EdApp authoring |
+| **Video links** | Paste a normal YouTube (including Shorts and `?t=` start times), Vimeo (including unlisted), Loom, Google Drive or direct .mp4/.webm link. The title and length are filled in automatically. Videos can be added in the builder or when creating a course with AI | EdApp, Trainual, 7taps |
+| **Template library** | Ready-made courses: cash handling, waste sorting, VIP etiquette, radio | EdApp content library, TalentLMS |
+| **Gamification** | Points, levels (Rookie → Legend), badges, leaderboard, confetti | EdApp, Connecteam, WorkRamp |
+| **Certificate wallet + expiry tracking** | Upload a photo or PDF. Managers verify it. Expiry is calculated automatically, with alerts 30 days ahead. | Liveforce, Rosterfy, Deputy |
+| **Readiness score** | 0–100% per person and per event. Only people at 100% can claim shifts. | Rosterfy "compliance gating" |
+| **Event-specific training** | Extra courses added to one event on top of role training | Rosterfy event credentials |
+| **Event briefing** | Call time, map link, dress code, parking, run sheet, tap-to-call contacts | Rosterfy, Liveforce, Connecteam |
+| **Shift marketplace** | Crew claim open shifts that match their roles, then confirm or release them | Instawork, Deputy, Sling |
+| **Auto-fill roster** | Fills open slots with fully ready crew, ranked by rating | Deputy auto-scheduling, Shiftboard |
+| **QR check-in pass** | Personal pass per shift. The supervisor scans it or types the code. | Rosterfy, Liveforce |
+| **Post-event ratings** | Star ratings per person feed a reliability score | Instawork, Qwick |
+| **Rehire pool / alumni** | 4.5★+ performers kept for re-engagement, with training history preserved | Rosterfy talent pools, Workday rehire |
+| **Nudges** | One-click or bulk reminders for people who aren't ready yet | BambooHR, Rippling task reminders |
+| **"Needs attention" dashboard** | At-risk crew for events in the next 14 days, expiring or unverified certs, stalled invites | Rippling, Deputy |
+| **Time-to-ready analytics** | Average hours from sign-up to fully ready, and training completion rate | WorkRamp, TalentLMS reporting |
+| **AI course creation** | A manager describes a topic (and can paste their own SOP). AI writes cards and a scenario quiz in any of 9 languages and saves it as a draft to review | Trainual AI, EdApp Create with AI, TalentLMS AI |
+| **AI role designer** | Describe a new role in plain words. AI proposes the name, pay (based on your existing rates), and the documents, courses and certificates it needs from your library, with a reason for each. It also flags training gaps you can draft with AI in one click | Rippling / BambooHR onboarding templates, Trainual AI |
+| **AI card assistant** | In the builder: add an AI card or quiz, or rewrite a card (simpler, shorter, add an example, translate) | Trainual, 7taps |
+| **Language preference** | Captured at sign-up (the base for multilingual content) | Connecteam, EdApp translations |
 
-## Learn More
+## AI training materials
 
-To learn more about Next.js, take a look at the following resources:
+Crew managers can use AI in three places:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Onboarding flows → Create role with AI.** Describe the role. AI chooses from **your own** documents, courses and certificates. The server drops any id that isn't in your library and always keeps the paperwork every role shares. It suggests pay within your existing range and lists training gaps. Each gap has a "Draft with AI" button that opens the course creator, pre-filled and linked to the new role.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Training → Create with AI.** Describe what crew should learn, pick roles, length and language, and optionally paste an SOP or policy. You get a full course (cards plus a quiz), saved as a **draft** that can be added to those roles' onboarding flows. Drafts stay hidden from crew and don't count towards readiness until a manager publishes them.
+- **Course builder → AI / Rewrite with AI.** Add a single card or quiz, or rewrite a card: simpler, shorter, add an example, or translate it.
 
-## Deploy on Vercel
+**How it works.** `server/ai.ts` calls OpenRouter's **free** models. The key is never sent to the browser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Free models are often rate-limited, so each request tries models in order until one succeeds:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Order | Model | Why it's in this position (benchmarked Sep 2026) |
+|---|---|---|
+| 1 | Nex N2.5 Mini | Most practical content, fastest (≈5–30s), uses a provider-enforced JSON schema |
+| 2 | Nemotron 3 Super 120B | Strong content, ≈35s with low reasoning effort |
+| 3 | Qwen 3.8 27B | Good quality, often rate-limited |
+| 4 | Gemma 4 31B | Good writer, often rate-limited |
+| 5 | Dots 3 Note | Reliable but slow (≈75s) |
+| 6 | OpenRouter free router | Last resort |
+
+The server also repairs broken JSON and fixes formatting quirks (such as bullets crammed onto one line or headings that repeat the title). It also checks every quiz answer before a course reaches the manager.
+
+Free models change often. To change the order without touching code, set `OPENROUTER_MODELS` in `.env.local`. The free tier allows 1,000 requests per day on this account.
+
+**Production.** In dev and `vite preview`, the AI routes run inside the Vite server (`server/vitePlugin.ts`). When you deploy, run `handleAI()` from `server/ai.ts` in a serverless function (Vercel, Netlify or Cloudflare) at `/api/ai/course` and `/api/ai/lesson`, and set `OPENROUTER_API_KEY` as a secret there. Also add manager authentication and per-user rate limits so the endpoint can't be misused.
+
+## Company profile
+
+**Company profile** in the manager sidebar holds the crew manager's legal company name, address, email and phone, plus the name and title of the person who signs for the company. It appears on everything crew sign:
+
+- **Documents.** Document text uses placeholders: `{{company}}`, `{{company_address}}`, `{{company_email}}`, `{{company_phone}}`, `{{manager}}`. The Paperwork editor has buttons to insert them and a live preview. A signed document keeps the company name it was signed under.
+- **Contracts.** The profile fills the PDF's Client name and address. Every page gets a company letterhead, and the signature certificate names the issuing company. Saving the profile updates every contract **nobody has signed yet**; signed contracts are never changed.
+- Until a manager saves their profile, the dashboard shows a reminder.
+
+## Contracts
+
+**Contracts** in the manager portal uses `public/contracts/event-planning-service-contract.pdf`, a fillable template from eSign. `src/lib/contractPdf.ts` fills its 30 form fields directly, so the downloaded document is the real template and not a copy of it.
+
+1. **Create.** Pick a crew member, and optionally an event. Dates, services, role and hourly rate are filled in from the event and their shift. The form follows the PDF's numbered sections.
+2. **Send.** Sending is blocked until the required fields are complete (for example, the governing state).
+3. **Sign.** Either party can sign first, by drawing or typing. The company's signature records the named person signing on its behalf. Once anyone signs, the terms lock. To change anything, void the contract and duplicate it.
+4. **Download.** Before both parties have signed, the PDF is a watermarked draft that stays fillable, so it can also be completed offline. Once both have signed, the PDF is locked and gets page 6: a signature certificate with who signed, when, how, and a SHA-256 fingerprint showing both parties signed identical terms. A blank template is also available.
+
+Limitations: text uses the PDF's standard fonts, so characters outside Western European alphabets (for example Chinese or Arabic names) print as "?". Embedding a Unicode font would fix this. The e-signature flow records intent, consent and an audit trail, but check it meets the e-signature rules where you operate before relying on it.
+
+## Tech
+
+- React 19, TypeScript, Vite, Tailwind CSS v4
+- Zustand for state, saved to `localStorage` so the demo keeps working without a backend
+- `qrcode.react` for invite and check-in QR codes, `lucide-react` for icons
+
+## Code map
+
+```
+src/
+  types.ts              data model (Course, Role, Staff, EventItem, …)
+  store.ts              all state + actions (progress, badges, rostering)
+  lib/readiness.ts      the readiness engine: what each person still needs
+  lib/badges.ts         badges + levels
+  data/courses.ts       real training content + template library
+  data/seed.ts          demo roles, docs, certs, crew, events
+  pages/admin/*         manager portal
+  pages/worker/*        crew mobile app
+```
+
+## Path to production
+
+This is a working front-end prototype. Before real use it needs:
+
+1. **Backend + auth.** Replace the Zustand store actions with API calls (Supabase, Firebase, or Postgres + a Node API). Add manager SSO and passwordless SMS or magic-link login for crew.
+2. **Real notifications.** Nudges and invites are simulated. Connect Twilio (SMS), Resend or SendGrid (email), and web push.
+3. **File storage.** Certificate uploads currently store only the file name. Use S3 or R2 with signed URLs.
+4. **Legally robust e-sign.** Save a PDF of each signed document with an audit trail (IP, device, hash), or integrate DocuSign or Dropbox Sign.
+5. **Payroll and tax.** Collect tax and bank details through Gusto, Deel or Rippling APIs rather than storing them yourself.
+6. **AI upgrades.** Accept SOP PDF/Word uploads (not just pasted text), auto-translate whole courses into each crew member's language, and consider a paid model for safety-critical content.
+7. **Translation.** Automatically translate courses into each crew member's preferred language.
+8. **Camera QR scanning** for supervisor check-in, and **PWA/offline** support for venues with poor signal.
