@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { CopyPlus, MapPin, Plus } from 'lucide-react';
-import { Button, Card, DateBadge, PageHeader, Pill, Progress, Tabs } from '../../components/ui';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { CopyPlus, LayoutTemplate, MapPin, Plus } from 'lucide-react';
+import { Button, Card, DateBadge, Field, Input, Modal, PageHeader, Pill, Progress, Tabs } from '../../components/ui';
+import { NewEventPicker } from './EventTemplates';
+import { templateFromEvent } from '../../lib/eventTemplates';
+import type { EventItem } from '../../types';
 import { eventReadiness } from '../../lib/readiness';
 import { countdown, daysUntil, pct } from '../../lib/utils';
 import { useCatalog, useStore } from '../../store';
@@ -16,6 +19,11 @@ export default function Events() {
   const cat = useCatalog();
   const nav = useNavigate();
   const [tab, setTab] = useState<Filter>('upcoming');
+  const [params, setParams] = useSearchParams();
+  const [picking, setPicking] = useState(params.get('new') === '1');
+  const [saveAs, setSaveAs] = useState<EventItem | null>(null);
+  const [templateName, setTemplateName] = useState('');
+  const upsertTemplate = useStore((s) => s.upsertEventTemplate);
 
   const groups: Record<Filter, typeof events> = {
     upcoming: events.filter((e) => e.status === 'published' && daysUntil(e.date) >= 0),
@@ -28,14 +36,25 @@ export default function Events() {
     <>
       <PageHeader
         title="Events"
-        sub="Plan shifts, roster ready crew, and publish briefings."
         actions={
-          <Link to="/admin/events/new">
-            <Button>
+          <>
+            <Link to="/admin/events/templates">
+              <Button variant="secondary">
+                <LayoutTemplate size={16} /> Templates
+              </Button>
+            </Link>
+            <Button onClick={() => setPicking(true)}>
               <Plus size={16} /> New event
             </Button>
-          </Link>
+          </>
         }
+      />
+      <NewEventPicker
+        open={picking}
+        onClose={() => {
+          setPicking(false);
+          if (params.get('new')) setParams({});
+        }}
       />
       <Tabs
         value={tab}
@@ -88,7 +107,18 @@ export default function Events() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex justify-end border-t border-slate-100 pt-3">
+              <div className="mt-4 flex justify-end gap-1 border-t border-slate-100 pt-3">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    setTemplateName(`${e.name} template`);
+                    setSaveAs(e);
+                  }}
+                >
+                  <LayoutTemplate size={14} /> Save as template
+                </Button>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -99,7 +129,7 @@ export default function Events() {
                     nav(`/admin/events/${id}/edit`);
                   }}
                 >
-                  <CopyPlus size={14} /> Duplicate as template
+                  <CopyPlus size={14} /> Duplicate
                 </Button>
               </div>
             </Card>
@@ -107,6 +137,30 @@ export default function Events() {
         })}
         {list.length === 0 && <div className="col-span-full py-16 text-center text-slate-500">No events here yet.</div>}
       </div>
+
+      <Modal open={!!saveAs} onClose={() => setSaveAs(null)} title="Save as template">
+        {saveAs && (
+          <form
+            className="space-y-4"
+            onSubmit={(ev) => {
+              ev.preventDefault();
+              if (!templateName.trim()) return;
+              upsertTemplate(templateFromEvent(saveAs, templateName.trim()));
+              setSaveAs(null);
+              toast(`Template “${templateName.trim()}” saved`, '📋');
+            }}
+          >
+            <Field label="Template name">
+              <Input autoFocus value={templateName} onChange={(ev) => setTemplateName(ev.target.value)} />
+            </Field>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={!templateName.trim()}>
+                Save template
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </>
   );
 }

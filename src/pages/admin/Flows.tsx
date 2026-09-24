@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Check, Clock, FileSignature, GraduationCap, Plus, ShieldCheck, Sparkles, Trash2 } from 'lucide-react';
+import { Check, Clock, FileSignature, GraduationCap, Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import { OnlocalMark } from '../../components/brand';
 import { Button, Card, Field, Input, Modal, PageHeader } from '../../components/ui';
 import { CreateCourseModal } from '../../components/ai';
 import { CreateRoleModal } from '../../components/aiRole';
@@ -38,14 +39,13 @@ export default function Flows() {
     <>
       <PageHeader
         title="Onboarding flows"
-        sub="Each role has its own checklist. Crew see only what their roles need — and changes apply instantly to everyone."
         actions={
           <>
           <Button variant="secondary" onClick={() => setEditing({ id: uid('r-'), name: '', color: 'indigo', description: '', hourlyRate: 25, courseIds: ['c-welcome', 'c-safety'], docIds: ['d-agreement', 'd-conduct'], certIds: [] })}>
             <Plus size={16} /> New role
           </Button>
           <Button onClick={() => setAiRole(true)} className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700">
-            <Sparkles size={16} /> Create role with AI
+            <OnlocalMark size={16} /> Create role with onlocalAI
           </Button>
           </>
         }

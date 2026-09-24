@@ -182,7 +182,6 @@ export default function ContractEditor() {
           </Section>
 
           <Section n="4." title="Payment amount">
-            <p className="-mt-2 text-xs text-slate-500">Tick all that apply.</p>
             <Toggle disabled={locked} on={t.payHourly} label="Per hour" onChange={(payHourly) => setT({ payHourly })}>
               <div className="flex items-center gap-2 text-sm">
                 $ <Input disabled={locked} inputMode="decimal" value={t.hourlyRate} onChange={(e) => setT({ hourlyRate: e.target.value })} className="w-28" /> / hour
@@ -270,7 +269,6 @@ export default function ContractEditor() {
           <Section n="22." title="Additional terms and conditions">
             <Textarea disabled={locked} rows={4} value={t.additionalTerms} onChange={(e) => setT({ additionalTerms: e.target.value })} placeholder="Optional" />
           </Section>
-          <p className="text-xs text-slate-400">Sections 8–19, 21 and 23 are standard clauses from the template and appear in full in the PDF.</p>
         </div>
 
         <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
@@ -302,8 +300,7 @@ export default function ContractEditor() {
                   onClick={() => {
                     if (dirty) store.saveContract(c, 'Terms updated');
                     store.sendContract(c.id);
-                    store.nudge([c.staffId]);
-                    store.toast(`Sent to ${c.staff.name} to review and sign`, '📨');
+                    store.toast(`Sent: it's now in ${c.staff.name.split(' ')[0]}'s crew app to review and sign`, '📨');
                   }}
                 >
                   <Send size={16} /> Send to {c.staff.name.split(' ')[0]} to sign
@@ -331,9 +328,6 @@ export default function ContractEditor() {
                     ))}
                   </ul>
                 </div>
-              )}
-              {st === 'draft' && !missing.length && (
-                <p className="text-xs text-slate-500">You can sign first or after {c.staff.name.split(' ')[0]}. Once anyone signs, the terms lock.</p>
               )}
             </div>
           </Card>

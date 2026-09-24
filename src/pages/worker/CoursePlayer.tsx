@@ -4,6 +4,7 @@ import { CircleCheck, CircleX, X } from 'lucide-react';
 import { Button, RichText } from '../../components/ui';
 import { Confetti } from '../../components/extras';
 import { VideoEmbed } from '../../components/video';
+import { LessonPhoto } from '../../components/courseCard';
 import { badge } from '../../lib/badges';
 import { courseProgress, requirements } from '../../lib/readiness';
 import { cn } from '../../lib/utils';
@@ -213,6 +214,7 @@ export default function CoursePlayer() {
           </div>
           <h1 className="mb-5 mt-1 text-2xl font-bold text-slate-900">{lesson.title}</h1>
           {lesson.kind === 'video' && <VideoEmbed url={lesson.videoUrl} title={lesson.title} className="mb-5" showOpenLink />}
+          {lesson.kind === 'card' && lesson.image && <LessonPhoto image={lesson.image} className="mb-5" />}
           {lesson.kind === 'quiz' ? (
             <Quiz lesson={lesson} passMark={course.passingScore} onPass={(score) => advance(score)} />
           ) : (

@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Check, CircleCheck, Clock, ExternalLink, FileSignature, Package, Scale, Search, TriangleAlert } from 'lucide-react';
 import { Button, Card, Empty, Input, Modal, PageHeader, Pill, RichText, Select, Tabs } from '../../components/ui';
+import { CourseCard, CoverBadge } from '../../components/courseCard';
 import { BUNDLES, LIBRARY_COURSES, LIBRARY_DOCS } from '../../data/library';
-import { KIND_LABEL, REGION_FLAG, REGION_LABEL, RESEARCHED, type LibraryCourse, type LibraryDoc, type Region, type RoleTag, type TemplateKind } from '../../data/library/types';
+import { KIND_LABEL, type LibraryCourse, type LibraryDoc, type RoleTag, type TemplateKind } from '../../data/library/types';
 import { fillPlaceholders } from '../../lib/company';
 import { addCourseTemplate, addDocTemplate, recommendedRoleIds } from '../../lib/library';
-import { cn, fmtDate } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import { useCatalog, useCompany, useStore } from '../../store';
 
 type Tab = 'courses' | 'docs' | 'packs';
@@ -18,18 +19,6 @@ const KIND_STYLE: Record<TemplateKind, string> = {
   service: 'bg-sky-50 text-sky-700',
   operations: 'bg-slate-100 text-slate-700',
 };
-
-function Regions({ regions }: { regions: Region[] }) {
-  return (
-    <span className="flex gap-1" title={regions.map((r) => REGION_LABEL[r]).join(', ')}>
-      {regions.map((r) => (
-        <span key={r} className="text-sm leading-none">
-          {REGION_FLAG[r]}
-        </span>
-      ))}
-    </span>
-  );
-}
 
 function Sources({ sources }: { sources: { label: string; url: string }[] }) {
   if (!sources.length) return null;
@@ -88,7 +77,7 @@ function CoursePreview({ t, onClose, onAdd }: { t: LibraryCourse; onClose: () =>
             <Clock size={11} /> {c.estMinutes} min
           </Pill>
           <Pill className="bg-slate-100 text-slate-600">{c.lessons.length} cards</Pill>
-          <Regions regions={t.regions} />
+          
         </div>
         {t.legal && (
           <div className="flex gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-900">
@@ -167,7 +156,6 @@ function AddCourseModal({ t, onClose }: { t: LibraryCourse; onClose: () => void 
       <div className="space-y-4">
         <div>
           <div className="mb-1 text-sm font-medium text-slate-700">Required for these roles</div>
-          <p className="mb-2 text-xs text-slate-500">Crew in these roles will see it in their onboarding checklist. Leave all unticked to add it as optional training.</p>
           <RolePicker tags={t.roles} value={roleIds} onChange={setRoleIds} />
         </div>
         {!existing && (
@@ -209,7 +197,7 @@ function DocCard({ t }: { t: LibraryDoc }) {
         <div className="flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold">{t.doc.title}</h3>
-            <Regions regions={t.regions} />
+            
           </div>
           <p className="mt-1 text-sm text-slate-600">{t.why}</p>
         </div>
@@ -238,7 +226,6 @@ function DocCard({ t }: { t: LibraryDoc }) {
         <Modal open onClose={() => setPreview(false)} title={t.doc.title} wide>
           <div className="space-y-4">
             <div className="max-h-[50vh] overflow-auto whitespace-pre-line rounded-lg bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">{fillPlaceholders(t.doc.body, company)}</div>
-            <p className="text-xs text-slate-500">Shown with your company profile filled in. It's a starting point: have it checked against your own policies and local law.</p>
             <Sources sources={t.sources} />
           </div>
         </Modal>
@@ -272,39 +259,45 @@ export default function TemplateLibrary() {
   const toast = useStore((s) => s.toast);
   const [tab, setTab] = useState<Tab>('courses');
   const [q, setQ] = useState('');
-  const [region, setRegion] = useState<Region | ''>('');
   const [kind, setKind] = useState<TemplateKind | ''>('');
   const [role, setRole] = useState('');
   const [preview, setPreview] = useState<LibraryCourse | null>(null);
   const [adding, setAdding] = useState<LibraryCourse | null>(null);
 
   const installed = (id: string) => courses.some((c) => c.templateId === id);
-  const matchRegion = (rs: Region[]) => !region || rs.includes(region) || (region !== 'Global' && rs.includes('Global'));
   const list = useMemo(
     () =>
-      LIBRARY_COURSES.filter((t) => matchRegion(t.regions))
-        .filter((t) => !kind || t.kind === kind)
+      LIBRARY_COURSES.filter((t) => !kind || t.kind === kind)
         .filter((t) => !role || t.roles.includes('all') || (t.roles as string[]).includes(role))
         .filter((t) => !q || `${t.course.title} ${t.course.description} ${t.course.category} ${t.legal ?? ''}`.toLowerCase().includes(q.toLowerCase())),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [q, region, kind, role],
+    [q, kind, role],
   );
-  const docs = LIBRARY_DOCS.filter((d) => matchRegion(d.regions));
+  const docs = LIBRARY_DOCS;
 
   const addBundle = (bundleId: string) => {
     const b = BUNDLES.find((x) => x.id === bundleId)!;
     let n = 0;
+    let drafts = 0;
     for (const id of b.courseIds) {
       const t = LIBRARY_COURSES.find((x) => x.course.id === id);
       if (!t) continue;
-      if (addCourseTemplate(t, recommendedRoleIds(t.roles, useStore.getState().roles), !t.customise).isNew) n++;
+      if (addCourseTemplate(t, recommendedRoleIds(t.roles, useStore.getState().roles), !t.customise).isNew) {
+        n++;
+        if (t.customise) drafts++;
+      }
     }
     let d = 0;
     for (const id of b.docIds ?? []) {
       const t = LIBRARY_DOCS.find((x) => x.doc.id === id);
       if (t && addDocTemplate(t, recommendedRoleIds(t.roles, useStore.getState().roles)).isNew) d++;
     }
-    toast(n + d ? `${b.name}: added ${n} course${n === 1 ? '' : 's'}${d ? ` and ${d} document${d === 1 ? '' : 's'}` : ''}, assigned to recommended roles` : `${b.name} is already in your library`, b.emoji);
+    toast(
+      n + d
+        ? `${b.name}: added ${n} course${n === 1 ? '' : 's'}${d ? ` and ${d} document${d === 1 ? '' : 's'}` : ''}.${drafts ? ` ${drafts} saved as drafts until you add your local details.` : ''}`
+        : `${b.name} is already in your library`,
+      b.emoji,
+    );
   };
 
   return (
@@ -312,17 +305,7 @@ export default function TemplateLibrary() {
       <Link to="/admin/training" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
         <ArrowLeft size={14} /> Training
       </Link>
-      <PageHeader
-        title="Template library"
-        sub={`${LIBRARY_COURSES.length} ready-made courses and ${LIBRARY_DOCS.length} policy documents for event crews, researched ${fmtDate(RESEARCHED)} from official regulators and industry guidance.`}
-      />
-      <div className="mb-5 flex gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-900">
-        <Scale size={14} className="mt-0.5 shrink-0" />
-        <span>
-          These templates teach the essentials and link their sources, but they are <strong>not a substitute for accredited certification</strong>. Where a licence or certificate is legally required
-          (e.g. alcohol service, food handling, security), crew still need the official course. Laws change, so check the sources for your location before relying on them.
-        </span>
-      </div>
+      <PageHeader title="Template library" />
 
       <Tabs
         value={tab}
@@ -342,17 +325,6 @@ export default function TemplateLibrary() {
               <Input className="pl-9" placeholder="Search e.g. heat, alcohol, lost child" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
           )}
-          <div className="flex flex-wrap gap-1">
-            {(['', 'Global', 'US', 'UK', 'AU'] as const).map((r) => (
-              <button
-                key={r || 'any'}
-                onClick={() => setRegion(r)}
-                className={cn('rounded-full px-3 py-1.5 text-xs font-medium ring-1 cursor-pointer', region === r ? 'bg-indigo-600 text-white ring-indigo-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50')}
-              >
-                {r ? `${REGION_FLAG[r]} ${r === 'Global' ? 'Universal' : r}` : 'All regions'}
-              </button>
-            ))}
-          </div>
           {tab === 'courses' && (
             <>
               <Select className="w-auto" value={kind} onChange={(e) => setKind(e.target.value as TemplateKind | '')}>
@@ -377,57 +349,62 @@ export default function TemplateLibrary() {
       )}
 
       {tab === 'courses' && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {list.map((t) => {
             const c = t.course;
             const done = installed(c.id);
             return (
-              <Card key={c.id} className="flex flex-col p-5">
-                <button onClick={() => setPreview(t)} className="flex flex-1 flex-col text-left cursor-pointer">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-2xl">{c.emoji}</div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold leading-snug text-slate-900">{c.title}</h3>
-                        <Regions regions={t.regions} />
-                      </div>
-                      <div className="mt-0.5 text-xs text-slate-500">
-                        {c.estMinutes} min · {c.lessons.length} cards · {c.lessons.reduce((a, l) => a + (l.questions?.length ?? 0), 0)} quiz questions
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-3 line-clamp-2 text-sm text-slate-600">{c.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    <Pill className={KIND_STYLE[t.kind]}>{KIND_LABEL[t.kind]}</Pill>
+              <CourseCard
+                key={c.id}
+                c={c}
+                provider="onlocalAI Library"
+                onClick={() => setPreview(t)}
+                badges={
+                  <>
+                    <CoverBadge>{KIND_LABEL[t.kind]}</CoverBadge>
                     {t.legal && (
-                      <Pill className="bg-rose-50 text-rose-700">
+                      <CoverBadge tone="red">
                         <Scale size={10} /> Legally required in places
-                      </Pill>
+                      </CoverBadge>
+                    )}
+                  </>
+                }
+                stat={<span>{c.lessons.reduce((a, l) => a + (l.questions?.length ?? 0), 0)} quiz questions</span>}
+                footer={
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-[11px] text-slate-500">
+                      {t.roles.includes('all') ? 'All crew' : t.roles.map((r) => cat.roles.find((x) => x.id === r)?.name).filter(Boolean).join(', ')}
+                    </span>
+                    {done ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAdding(t);
+                        }}
+                      >
+                        <CircleCheck size={14} className="text-emerald-600" /> Added
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAdding(t);
+                        }}
+                      >
+                        Add
+                      </Button>
                     )}
                   </div>
-                </button>
-                <div className="mt-4 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-                  <span className="truncate text-[11px] text-slate-400">
-                    {t.roles.includes('all') ? 'All crew' : t.roles.map((r) => cat.roles.find((x) => x.id === r)?.name).filter(Boolean).join(', ')}
-                  </span>
-                  {done ? (
-                    <Button size="sm" variant="ghost" onClick={() => setAdding(t)}>
-                      <CircleCheck size={14} className="text-emerald-600" /> Added
-                    </Button>
-                  ) : (
-                    <Button size="sm" onClick={() => setAdding(t)}>
-                      Add
-                    </Button>
-                  )}
-                </div>
-              </Card>
+                }
+              />
             );
           })}
           {list.length === 0 && (
             <div className="col-span-full">
-              <Empty icon={<BookOpen size={28} />} title="No templates match">
-                Try another region or clear the filters.
-              </Empty>
+              <Empty icon={<BookOpen size={28} />} title="No templates match" />
             </div>
           )}
         </div>
@@ -454,7 +431,7 @@ export default function TemplateLibrary() {
                   <div>
                     <h3 className="font-semibold">{b.name}</h3>
                     <div className="text-xs text-slate-500">
-                      {items.length} courses{docItems.length ? ` · ${docItems.length} documents` : ''} · ~{items.reduce((a, t) => a + t.course.estMinutes, 0)} min
+                      {items.length} courses{docItems.length ? ` · ${docItems.length} document${docItems.length === 1 ? '' : 's'}` : ''} · ~{items.reduce((a, t) => a + t.course.estMinutes, 0)} min
                     </div>
                   </div>
                 </div>

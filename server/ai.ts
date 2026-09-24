@@ -355,7 +355,7 @@ function reasonFrom(status: number, j: any): string {
   return (raw || `HTTP ${status}`).slice(0, 120);
 }
 
-async function callWithFallback(o: CallOpts) {
+export async function callWithFallback(o: CallOpts) {
   const t0 = Date.now();
   for (const [i, m] of o.models.entries()) {
     if (o.signal?.aborted) throw new Error('cancelled');

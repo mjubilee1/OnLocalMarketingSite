@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ContractStagePill } from '../../components/contract';
 import { NewContractModal } from './Contracts';
-import { ArrowLeft, BadgeCheck, CheckCircle2, Circle, FileSignature, GraduationCap, Mail, Megaphone, Phone, ShieldCheck, Smartphone } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, Camera, CheckCircle2, Circle, FileSignature, GraduationCap, Mail, Megaphone, Phone, ShieldCheck, Smartphone } from 'lucide-react';
 import { Avatar, Button, Card, Empty, PageHeader, Pill, Progress, RolePill, Stars, StatusPill } from '../../components/ui';
 import { avgRating, readiness, type ReqKind } from '../../lib/readiness';
 import { badge, level } from '../../lib/badges';
 import { cn, daysUntil, fmtDate, relTime } from '../../lib/utils';
+import { useCrewEmail } from '../../lib/email';
 import { useCatalog, useStore } from '../../store';
 
-const KIND_ICON: Record<ReqKind, typeof Circle> = { doc: FileSignature, course: GraduationCap, cert: ShieldCheck };
+const KIND_ICON: Record<ReqKind, typeof Circle> = { profile: Camera, doc: FileSignature, course: GraduationCap, cert: ShieldCheck };
 
 export default function Person() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ export default function Person() {
   const cat = useCatalog();
   const nav = useNavigate();
   const [newContract, setNewContract] = useState(false);
+  const { send: sendEmail } = useCrewEmail();
 
   if (!s) return <Empty title="Crew member not found" />;
   const r = readiness(s, cat);
@@ -42,6 +44,14 @@ export default function Person() {
               <Phone size={14} /> {s.phone}
             </span>
             <span>🌐 {s.language}</span>
+            {s.lastEmail &&
+              (s.lastEmail.ok ? (
+                <span className="text-emerald-700">
+                  ✓ {s.lastEmail.kind} emailed {relTime(s.lastEmail.at)}
+                </span>
+              ) : (
+                <span className="text-rose-600">✗ last email failed: {s.lastEmail.error}</span>
+              ))}
           </span>
         }
         actions={
@@ -66,11 +76,10 @@ export default function Person() {
             </Button>
             <Button
               onClick={() => {
-                store.nudge([s.id]);
-                store.toast(`Reminder sent to ${s.name}`, '📣');
+                void sendEmail(s.status === 'invited' ? 'invite' : 'reminder', [s.id]);
               }}
             >
-              <Megaphone size={16} /> Send reminder
+              <Megaphone size={16} /> {s.status === 'invited' ? 'Resend invite' : 'Email reminder'}
             </Button>
           </>
         }
@@ -108,7 +117,8 @@ export default function Person() {
                         {course && (course.completedAt ? `Completed ${relTime(course.completedAt)}` : `In progress — ${Math.round(it.progress * 100)}%`)}
                         {scores.length > 0 && ` • quiz ${Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)}%`}
                         {it.kind === 'cert' && (cert ? `#${cert.number} • expires ${fmtDate(cert.expiresAt)}${cert.fileName ? ` • ${cert.fileName}` : ''}` : 'Not uploaded')}
-                        {!doc && !course && it.kind !== 'cert' && 'Not started'}
+                        {it.kind === 'profile' && (it.detail ?? 'Photo and mobile number added')}
+                        {!doc && !course && it.kind !== 'cert' && it.kind !== 'profile' && 'Not started'}
                       </div>
                     </div>
                     {doc && !doc.typed && <img src={doc.signature} alt="signature" className="h-8 rounded bg-slate-50" />}
@@ -163,7 +173,7 @@ export default function Person() {
 
         <div className="space-y-6">
           <Card className="p-5 text-center">
-            <Avatar name={s.name} size="xl" />
+            <Avatar name={s.name} photo={s.photo} size="xl" />
             <div className="mt-3 flex flex-wrap justify-center gap-1">
               {s.roleIds.map((rid) => (
                 <RolePill key={rid} role={cat.roles.find((x) => x.id === rid)} />

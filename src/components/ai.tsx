@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircleCheck, CircleX, FileText, Loader2, Plus, RotateCcw, Sparkles, Trash2, TriangleAlert, Video } from 'lucide-react';
+import { CircleCheck, CircleX, FileText, Loader2, Plus, RotateCcw, Trash2, TriangleAlert, Video } from 'lucide-react';
+import { OnlocalMark } from './brand';
 import { Button, Field, Input, Modal, Pill, RichText, Select, Textarea } from './ui';
 import { VideoEmbed, VideoLinkInput } from './video';
 import { parseVideo } from '../lib/video';
 import { aiStatus, generateCourse, generateLesson, type AIEvent, type AIStatus } from '../lib/ai';
+import { queueAutoCover } from '../lib/images';
 import { cn, LANGUAGES, uid } from '../lib/utils';
 import { useCatalog, useStore } from '../store';
 import type { Course, Lesson } from '../types';
@@ -112,14 +114,14 @@ export function ErrorBox({ message }: { message: string }) {
 
 const ReviewNote = () => (
   <p className="rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
-    AI can get things wrong. Check facts — especially laws, limits, procedures and phone numbers — against your own policies before publishing.
+    onlocalAI can get things wrong. Check facts — especially laws, limits, procedures and phone numbers — against your own policies before publishing.
   </p>
 );
 
 export function NotConfigured() {
   return (
     <div className="space-y-2 text-sm text-slate-600">
-      <ErrorBox message="AI isn't set up on this server yet." />
+      <ErrorBox message="onlocalAI isn't set up on this server yet." />
       <p>
         Add <code className="rounded bg-slate-100 px-1">OPENROUTER_API_KEY=…</code> to <code className="rounded bg-slate-100 px-1">.env.local</code> in the project root and restart the dev server.
       </p>
@@ -252,6 +254,7 @@ export function CreateCourseModal({
     if (!result) return;
     const c = result.course;
     upsertCourse(c);
+    queueAutoCover(c.id);
     // Read roles fresh from the store: a role may have been created moments ago.
     if (attachRoles) for (const r of useStore.getState().roles.filter((x) => roleIds.includes(x.id))) upsertRole({ ...r, courseIds: [...r.courseIds, c.id] });
     toast(stayOnSave ? `Draft “${c.title}” saved to Training — publish it when reviewed` : 'Draft saved — review it, then publish', '✨');
@@ -267,7 +270,7 @@ export function CreateCourseModal({
   const phase = result ? 'review' : job.running ? 'running' : 'form';
 
   return (
-    <Modal open={open} onClose={close} title="✨ Create a course with AI" wide>
+    <Modal open={open} onClose={close} title="Create a course with onlocalAI" wide>
       {status && !status.configured ? (
         <NotConfigured />
       ) : phase === 'form' ? (
@@ -361,12 +364,11 @@ export function CreateCourseModal({
                   <Plus size={14} /> Add a video link
                 </button>
               )}
-              {videos.length > 0 && <p className="text-xs text-slate-400">Videos are placed between the AI's cards, before the quiz. The AI doesn't watch them, so check they match.</p>}
             </div>
           </div>
 
           {showSource ? (
-            <Field label="Your source material (optional)" hint="Paste an SOP, venue notes or policy. The AI will base the course on it and won't contradict it.">
+            <Field label="Your source material (optional)">
               <Textarea rows={6} value={source} onChange={(e) => setSource(e.target.value.slice(0, 20000))} placeholder="Paste text here…" className="text-xs" />
             </Field>
           ) : (
@@ -375,10 +377,9 @@ export function CreateCourseModal({
             </button>
           )}
 
-          <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
-            <span className="text-xs text-slate-400">{status?.models.length ? `Uses free models: ${status.models.slice(0, 3).join(', ')}…` : ''}</span>
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
             <Button type="submit" disabled={request.trim().length < 3 || videos.some((v) => v.url.trim() && !parseVideo(v.url))}>
-              <Sparkles size={16} /> Generate course
+              <OnlocalMark size={16} /> Generate course
             </Button>
           </div>
         </form>
@@ -432,7 +433,7 @@ function CourseReview({
               {cards.length} cards · {quiz.reduce((a, q) => a + (q.questions?.length ?? 0), 0)} quiz questions
             </Pill>
             <Pill className="bg-violet-50 text-violet-700">
-              <Sparkles size={10} /> {result.label}
+              <OnlocalMark size={10} /> {result.label}
             </Pill>
           </div>
         </div>
@@ -548,7 +549,7 @@ export function AILessonModal({
   };
 
   return (
-    <Modal open={open} onClose={close} title={rewrite ? `✨ Rewrite “${lesson!.title}”` : '✨ Add a card with AI'}>
+    <Modal open={open} onClose={close} title={rewrite ? `Rewrite “${lesson!.title}” with onlocalAI` : 'Add a card with onlocalAI'}>
       {status && !status.configured ? (
         <NotConfigured />
       ) : job.running ? (
@@ -612,7 +613,7 @@ export function AILessonModal({
           <ReviewNote />
           <div className="flex justify-end">
             <Button type="submit" disabled={!rewrite && kind === 'card' && instruction.trim().length < 3}>
-              <Sparkles size={16} /> {rewrite ? 'Rewrite' : 'Generate'}
+              <OnlocalMark size={16} /> {rewrite ? 'Rewrite' : 'Generate'}
             </Button>
           </div>
         </form>

@@ -34,7 +34,7 @@ export default function Paperwork() {
 
   return (
     <>
-      <PageHeader title="Paperwork & certifications" sub="Documents crew e-sign on their phone, and the licences you need to see before they work." />
+      <PageHeader title="Paperwork & certifications" />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -94,9 +94,6 @@ export default function Paperwork() {
               );
             })}
           </div>
-          <p className="m-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-            Crew get automatic reminders 30 days before a certificate expires. Expired certificates immediately mark them “not ready” for roles that need it.
-          </p>
         </Card>
       </div>
 
@@ -118,7 +115,7 @@ export default function Paperwork() {
             <Field label="Short description">
               <Input value={doc.description} onChange={(e) => setDoc({ ...doc, description: e.target.value })} />
             </Field>
-            <Field label="Document text" hint="Crew read this and sign with their finger. Changing it doesn't invalidate existing signatures.">
+            <Field label="Document text">
               <Textarea ref={bodyRef} rows={12} value={doc.body} onChange={(e) => setDoc({ ...doc, body: e.target.value })} />
             </Field>
             <div className="-mt-2 flex flex-wrap items-center gap-1.5 text-xs">

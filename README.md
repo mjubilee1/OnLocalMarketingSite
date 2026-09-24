@@ -27,7 +27,7 @@ Open http://localhost:5173. The app comes loaded with demo data: 16 crew, 6 role
 | Feature | What it does here | Inspired by |
 |---|---|---|
 | **QR / link self-sign-up** | One link or printable poster. The person picks roles and sees the pay rate and how long it takes to get ready. | Rosterfy, Liveforce, Instawork |
-| **Bulk invite** | Paste `name, email, phone, role` from a spreadsheet or ATS | Rippling, BambooHR |
+| **Email invites & reminders** | Invite people one at a time by email. Each person gets a personal link that pre-fills their sign-up. Real delivery through Resend or SMTP, with the true outcome shown per person, plus copy-link and email-app fallbacks when email isn't set up | Rippling, BambooHR |
 | **Role-based onboarding flows** | Each role is a "Sign → Learn → Certify" checklist. A change applies to everyone right away. | BambooHR onboarding templates, Trainual roles |
 | **E-signature** | Draw with a finger or type your name. Records the date and time. | DocuSign, Gusto, Deel |
 | **Two-party contracts** | The manager fills in your Event Planning Service Contract PDF. The crew member reviews a plain-language summary, adds their address and signs on their phone, and the manager countersigns. Either side can download the PDF: a watermarked draft that's still fillable, or a locked signed copy with a signature certificate | DocuSign, Dropbox Sign, Rippling documents |
@@ -35,10 +35,12 @@ Open http://localhost:5173. The app comes loaded with demo data: 16 crew, 6 role
 | **Instant-feedback quizzes** | Right/wrong feedback with an explanation, a pass mark, and retry | EdApp, TalentLMS, Lessonly |
 | **Course builder with live phone preview** | Card, video and quiz lessons, reordering, draft/publish | Trainual, EdApp authoring |
 | **Video links** | Paste a normal YouTube (including Shorts and `?t=` start times), Vimeo (including unlisted), Loom, Google Drive or direct .mp4/.webm link. The title and length are filled in automatically. Videos can be added in the builder or when creating a course with AI | EdApp, Trainual, 7taps |
-| **Template library** | Ready-made courses: cash handling, waste sorting, VIP etiquette, radio | EdApp content library, TalentLMS |
+| **Researched US template library** | 21 courses, 8 policy documents and 6 starter packs for US event companies, filterable by type and role. Each has sources and a legal note, is assigned to roles when added, and starts as a draft if it needs local details. See `docs/training-research-2026-09.md` | Mitti (formerly SafetyCulture/EdApp), TalentLMS, Trainual |
 | **Gamification** | Points, levels (Rookie → Legend), badges, leaderboard, confetti | EdApp, Connecteam, WorkRamp |
 | **Certificate wallet + expiry tracking** | Upload a photo or PDF. Managers verify it. Expiry is calculated automatically, with alerts 30 days ahead. | Liveforce, Rosterfy, Deputy |
 | **Readiness score** | 0–100% per person and per event. Only people at 100% can claim shifts. | Rosterfy "compliance gating" |
+| **AI photos for courses and cards** | AI reads each course and each text card and writes photo searches; photos come from Pexels, Unsplash or Openverse (all licensed for commercial use, photographer credited). Covers show on course cards; card photos show above the lesson text. Pick from results, search yourself, fill a whole course or every course at once, or let new AI and library courses get photos automatically. Google Images isn't used: its results are mostly copyrighted | Coursera, Udemy course catalogs |
+| **Event templates** | 6 editable starter templates (festival, conference, gala/wedding, stadium, indoor concert, corporate party) with shifts, run sheet, briefing, contacts and training. "New event" starts from any template. You can create your own, save any event as a template, duplicate, delete, or restore a built-in. Editing a template never changes events already created from it | Rosterfy, Liveforce event templates |
 | **Event-specific training** | Extra courses added to one event on top of role training | Rosterfy event credentials |
 | **Event briefing** | Call time, map link, dress code, parking, run sheet, tap-to-call contacts | Rosterfy, Liveforce, Connecteam |
 | **Shift marketplace** | Crew claim open shifts that match their roles, then confirm or release them | Instawork, Deputy, Sling |
@@ -81,6 +83,25 @@ The server also repairs broken JSON and fixes formatting quirks (such as bullets
 Free models change often. To change the order without touching code, set `OPENROUTER_MODELS` in `.env.local`. The free tier allows 1,000 requests per day on this account.
 
 **Production.** In dev and `vite preview`, the AI routes run inside the Vite server (`server/vitePlugin.ts`). When you deploy, run `handleAI()` from `server/ai.ts` in a serverless function (Vercel, Netlify or Cloudflare) at `/api/ai/course` and `/api/ai/lesson`, and set `OPENROUTER_API_KEY` as a secret there. Also add manager authentication and per-user rate limits so the endpoint can't be misused.
+
+## Email (invites & reminders)
+
+Email is sent from the server (`server/email.ts`), never from the browser. Set up **one** provider in `.env.local` (see `.env.example`) and restart:
+
+- **Resend:** `RESEND_API_KEY` + `EMAIL_FROM`
+- **SMTP:** `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` + `EMAIL_FROM`. This works with Google Workspace (use an App Password), Microsoft 365, SendGrid and others.
+
+The **From** address must be on a domain the provider has verified (for example `crew@onlocalai.com`), or messages will bounce or go to spam.
+
+**Safeguards:**
+- The server writes each message from a fixed template.
+- Links must point to this app's `/join` page.
+- Names can't inject email headers.
+- There's a cap of 300 emails per hour.
+
+**Without email set up,** invites still add the person, and the page offers "Copy invite" and "Open in email app" instead. The app never says an email was sent unless the provider accepted it.
+
+**Limitation:** crew data is still stored in each browser (see Path to production). An invitee who opens their link on their own phone gets the email and the sign-up page, but their sign-up only reaches the manager's crew list once there's a shared backend.
 
 ## Company profile
 

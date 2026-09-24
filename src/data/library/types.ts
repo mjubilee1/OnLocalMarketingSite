@@ -1,6 +1,7 @@
 import type { Course, DocTemplate } from '../../types';
 
-export type Region = 'Global' | 'US' | 'UK' | 'AU';
+/** The library currently targets US event companies only. */
+export type Region = 'US';
 export type TemplateKind = 'legal' | 'safety' | 'welfare' | 'service' | 'operations';
 
 /** Seed role ids a template is recommended for, or 'all' crew. */
@@ -48,8 +49,6 @@ export const KIND_LABEL: Record<TemplateKind, string> = {
   operations: 'Operations',
 };
 
-export const REGION_LABEL: Record<Region, string> = { Global: 'All regions', US: 'United States', UK: 'United Kingdom', AU: 'Australia' };
-export const REGION_FLAG: Record<Region, string> = { Global: '🌐', US: '🇺🇸', UK: '🇬🇧', AU: '🇦🇺' };
 
 /** When the research behind the library was last checked. Shown in the UI so managers know its age. */
 export const RESEARCHED = '2026-09-23';

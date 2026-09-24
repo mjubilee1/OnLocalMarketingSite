@@ -1,4 +1,4 @@
-import { useEffect, type Ref, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { useEffect, type ComponentType, type Ref, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { Star, X } from 'lucide-react';
 import { cn, color, initials } from '../lib/utils';
 import { useStore } from '../store';
@@ -102,22 +102,11 @@ export function Ring({ value, size = 120, stroke = 10, children }: { value: numb
 }
 
 const AVATAR_COLORS = ['bg-indigo-500', 'bg-violet-500', 'bg-sky-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-orange-500'];
-export function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' | 'xl' }) {
+export function Avatar({ name, photo, size = 'md' }: { name: string; photo?: string; size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const idx = [...name].reduce((a, ch) => a + ch.charCodeAt(0), 0) % AVATAR_COLORS.length;
-  return (
-    <div
-      className={cn(
-        'flex shrink-0 items-center justify-center rounded-full font-semibold text-white',
-        AVATAR_COLORS[idx],
-        size === 'sm' && 'h-7 w-7 text-[11px]',
-        size === 'md' && 'h-9 w-9 text-sm',
-        size === 'lg' && 'h-12 w-12 text-base',
-        size === 'xl' && 'h-16 w-16 text-xl',
-      )}
-    >
-      {initials(name)}
-    </div>
-  );
+  const dims = cn(size === 'sm' && 'h-7 w-7 text-[11px]', size === 'md' && 'h-9 w-9 text-sm', size === 'lg' && 'h-12 w-12 text-base', size === 'xl' && 'h-16 w-16 text-xl');
+  if (photo) return <img src={photo} alt={name} className={cn('shrink-0 rounded-full bg-slate-100 object-cover', dims)} />;
+  return <div className={cn('flex shrink-0 items-center justify-center rounded-full font-semibold text-white', AVATAR_COLORS[idx], dims)}>{initials(name)}</div>;
 }
 
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: ReactNode; wide?: boolean }) {
@@ -157,6 +146,15 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 
 const inputCls = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100';
 export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={cn(inputCls, p.className)} />;
+/** Input with a leading icon. `!` overrides are needed because cn() doesn't merge conflicting classes. */
+export function IconInput({ icon: I, invalid, className, ...props }: InputHTMLAttributes<HTMLInputElement> & { icon: ComponentType<{ size?: number; className?: string }>; invalid?: boolean }) {
+  return (
+    <div className="relative">
+      <I size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <input {...props} className={cn(inputCls, 'h-10 pl-9!', invalid && 'border-rose-300! focus:border-rose-500! focus:ring-rose-100!', className)} />
+    </div>
+  );
+}
 export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement> & { ref?: Ref<HTMLTextAreaElement> }) => <textarea {...p} className={cn(inputCls, p.className)} />;
 export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => <select {...p} className={cn(inputCls, p.className)} />;
 

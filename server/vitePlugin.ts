@@ -2,6 +2,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { loadEnv, type Plugin } from 'vite';
 import { handleAI, resolveModels } from './ai';
 import { oembedEndpoint, parseVideo, type VideoMeta } from '../src/lib/video';
+import { emailStatus, sendCrewEmails, type EmailEnv } from './email';
+import { findCovers, findLessonImages, imageProvider, trackCover, type ImageEnv } from './images';
 
 async function videoInfo(url: string): Promise<VideoMeta | null> {
   const v = parseVideo(url);
@@ -53,9 +55,55 @@ function readBody(req: IncomingMessage): Promise<any> {
  */
 export function aiApi(): Plugin {
   let env = { key: '', models: '' };
+  let mail: EmailEnv = {};
+  let images: ImageEnv = {};
+  let reload = () => {};
 
   const middleware = async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     const url = req.url?.split('?')[0] ?? '';
+    if (!url.startsWith('/api/')) return next();
+    // Re-read .env.local on every API call so edits apply without restarting the server.
+    reload();
+    if (url === '/api/email/status' && req.method === 'GET') {
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify(emailStatus(mail)));
+    }
+    if (url === '/api/email/send' && req.method === 'POST') {
+      let body: any;
+      try {
+        body = await readBody(req);
+      } catch (e) {
+        res.statusCode = 400;
+        return res.end((e as Error).message);
+      }
+      const proto = String(req.headers['x-forwarded-proto'] ?? 'http').split(',')[0];
+      // Invite links must point back at this same server (see safeLink in email.ts).
+      const out = await sendCrewEmails(mail, body, `${proto}://${req.headers.host}`);
+      res.statusCode = out.status;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify(out));
+    }
+    if (url === '/api/images/status' && req.method === 'GET') {
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ provider: imageProvider(images), ai: !!images.OPENROUTER_API_KEY }));
+    }
+    if ((url === '/api/images/cover' || url === '/api/images/lessons' || url === '/api/images/track') && req.method === 'POST') {
+      let body: any;
+      try {
+        body = await readBody(req);
+      } catch (e) {
+        res.statusCode = 400;
+        return res.end((e as Error).message);
+      }
+      res.setHeader('Content-Type', 'application/json');
+      if (url === '/api/images/track') {
+        await trackCover(images, body);
+        return res.end('{}');
+      }
+      const out = url === '/api/images/lessons' ? await findLessonImages(images, body) : await findCovers(images, body);
+      res.statusCode = out.status;
+      return res.end(JSON.stringify(out));
+    }
     if (url === '/api/video/info' && req.method === 'GET') {
       const target = new URL(req.url!, 'http://local').searchParams.get('url') ?? '';
       const info = await videoInfo(target.slice(0, 2000));
@@ -96,8 +144,27 @@ export function aiApi(): Plugin {
   return {
     name: 'onlocalai-ai-api',
     configResolved(cfg) {
-      const all = loadEnv(cfg.mode, typeof cfg.envDir === 'string' ? cfg.envDir : cfg.root, '');
-      env = { key: all.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY || '', models: all.OPENROUTER_MODELS || process.env.OPENROUTER_MODELS || '' };
+      reload = () => {
+        const all = loadEnv(cfg.mode, typeof cfg.envDir === 'string' ? cfg.envDir : cfg.root, '');
+        const pick = (k: string) => all[k]?.trim() || process.env[k]?.trim() || undefined;
+        env = { key: pick('OPENROUTER_API_KEY') || '', models: pick('OPENROUTER_MODELS') || '' };
+        mail = {
+          RESEND_API_KEY: pick('RESEND_API_KEY'),
+          SMTP_HOST: pick('SMTP_HOST'),
+          SMTP_PORT: pick('SMTP_PORT'),
+          SMTP_USER: pick('SMTP_USER'),
+          SMTP_PASS: pick('SMTP_PASS'),
+          SMTP_SECURE: pick('SMTP_SECURE'),
+          EMAIL_FROM: pick('EMAIL_FROM'),
+        };
+        images = {
+          PEXELS_API_KEY: pick('PEXELS_API_KEY'),
+          UNSPLASH_ACCESS_KEY: pick('UNSPLASH_ACCESS_KEY'),
+          OPENROUTER_API_KEY: env.key || undefined,
+          OPENROUTER_MODELS: env.models || undefined,
+        };
+      };
+      reload();
     },
     configureServer(server) {
       server.middlewares.use(middleware);

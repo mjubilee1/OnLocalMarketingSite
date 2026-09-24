@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
-import { Check, CircleCheck, Clock, FileSignature, GraduationCap, Plus, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
+import { Check, CircleCheck, Clock, FileSignature, GraduationCap, Plus, RotateCcw, ShieldCheck } from 'lucide-react';
+import { OnlocalMark } from './brand';
 import { Button, Field, Input, Modal, Pill, Textarea } from './ui';
 import { ErrorBox, NotConfigured, Progress, useAIJob, useAIStatus } from './ai';
 import { generateRole, type RoleSuggestion } from '../lib/ai';
@@ -145,19 +146,15 @@ export function CreateRoleModal({
   };
 
   return (
-    <Modal open={open} onClose={close} title={saved ? `✅ ${saved.name} is ready` : '✨ Create a role with AI'} wide>
+    <Modal open={open} onClose={close} title={saved ? `✅ ${saved.name} is ready` : 'Create a role with onlocalAI'} wide>
       {status && !status.configured ? (
         <NotConfigured />
       ) : saved ? (
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">
-            The role is live in your onboarding flows. New crew can pick it when they sign up, and its checklist appears in their app straight away.
-          </p>
           {draft && draft.newCourses.length > 0 && (
             <div className="rounded-xl ring-1 ring-slate-200">
               <div className="border-b border-slate-100 px-4 py-3">
-                <div className="text-sm font-semibold">Training gaps the AI found</div>
-                <div className="text-xs text-slate-500">Nothing in your library covers these yet. Draft each one with AI and it's added to this role automatically.</div>
+                <div className="text-sm font-semibold">Training gaps onlocalAI found</div>
               </div>
               <div className="divide-y divide-slate-100">
                 {draft.newCourses.map((c) => {
@@ -175,7 +172,7 @@ export function CreateRoleModal({
                         </Pill>
                       ) : (
                         <Button size="sm" onClick={() => onDraftCourse(`${c.title}. For the ${saved.name} role: ${saved.description} ${c.why}`, saved.id, c.title)}>
-                          <Sparkles size={14} /> Draft with AI
+                          <OnlocalMark size={14} /> Draft with onlocalAI
                         </Button>
                       )}
                     </div>
@@ -271,7 +268,7 @@ export function CreateRoleModal({
 
           {draft.newCourses.length > 0 && (
             <div className="rounded-lg bg-violet-50 p-3 text-sm text-violet-900">
-              <div className="font-medium">Training gaps found. You can draft these with AI next:</div>
+              <div className="font-medium">Training gaps found. You can draft these with onlocalAI next:</div>
               <ul className="mt-1 list-disc pl-5 text-xs">
                 {draft.newCourses.map((c) => (
                   <li key={c.title}>
@@ -288,7 +285,7 @@ export function CreateRoleModal({
             </Button>
             <span className="flex items-center gap-2">
               <Pill className="bg-violet-50 text-violet-700">
-                <Sparkles size={10} /> {label}
+                <OnlocalMark size={10} /> {label}
               </Pill>
               <Button onClick={save} disabled={!draft.name.trim()}>
                 Create role
@@ -307,7 +304,6 @@ export function CreateRoleModal({
           {job.error && <ErrorBox message={job.error} />}
           <Field
             label="Describe the role"
-            hint="What they do, where, and anything special (alcohol, food, cash, children, heights, licences). The AI picks paperwork, training and certificates from your library."
           >
             <Textarea
               autoFocus
@@ -326,7 +322,7 @@ export function CreateRoleModal({
           </div>
           <div className="flex justify-end border-t border-slate-100 pt-4">
             <Button type="submit" disabled={description.trim().length < 3}>
-              <Sparkles size={16} /> Design role
+              <OnlocalMark size={16} /> Design role
             </Button>
           </div>
         </form>

@@ -10,6 +10,8 @@ import Join from './pages/Join';
 import Dashboard from './pages/admin/Dashboard';
 import Events from './pages/admin/Events';
 import EventForm from './pages/admin/EventForm';
+import EventTemplates from './pages/admin/EventTemplates';
+import EventTemplateEditor from './pages/admin/EventTemplateEditor';
 import EventDetail from './pages/admin/EventDetail';
 import Crew from './pages/admin/Crew';
 import Person from './pages/admin/Person';
@@ -51,6 +53,8 @@ createRoot(document.getElementById('root')!).render(
           <Route index element={<Dashboard />} />
           <Route path="events" element={<Events />} />
           <Route path="events/new" element={<EventForm />} />
+          <Route path="events/templates" element={<EventTemplates />} />
+          <Route path="events/templates/:id" element={<EventTemplateEditor />} />
           <Route path="events/:id" element={<EventDetail />} />
           <Route path="events/:id/edit" element={<EventForm />} />
           <Route path="crew" element={<Crew />} />

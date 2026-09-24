@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowUp, CircleHelp, Eye, FileText, Plus, Sparkles, Trash2, Video } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUp, CircleHelp, Eye, FileText, Image as ImageIcon, Loader2, Plus, Trash2, Video } from 'lucide-react';
+import { OnlocalMark } from '../../components/brand';
 import { Button, Card, Empty, Field, Input, PageHeader, RichText, Textarea } from '../../components/ui';
 import { AILessonModal } from '../../components/ai';
+import { CourseCover, LessonPhoto } from '../../components/courseCard';
+import { CoverPicker } from '../../components/coverPicker';
+import { courseSubject, findLessonImages, lessonSubject, needsImage } from '../../lib/images';
 import { VideoEmbed, VideoLinkInput } from '../../components/video';
 import { cn, uid } from '../../lib/utils';
 import { useStore } from '../../store';
@@ -26,12 +30,36 @@ export default function CourseBuilder() {
   const [c, setC] = useState<Course | undefined>(() => original && structuredClone(original));
   const [activeId, setActiveId] = useState<string | undefined>(original?.lessons[0]?.id);
   const [ai, setAi] = useState<'new' | 'rewrite' | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [cardPicking, setCardPicking] = useState(false);
+  const [filling, setFilling] = useState(false);
 
   if (!c) return <Empty title="Course not found" />;
   const set = (patch: Partial<Course>) => setC({ ...c, ...patch });
   const setLesson = (lid: string, patch: Partial<Lesson>) => set({ lessons: c.lessons.map((l) => (l.id === lid ? { ...l, ...patch } : l)) });
   const active = c.lessons.find((l) => l.id === activeId);
   const dirty = JSON.stringify(c) !== JSON.stringify(original);
+
+  /** Photos save straight away (like the cover) without saving other unsaved edits. */
+  const applyPhotos = (images: Record<string, Lesson['image'] | undefined>) => {
+    const apply = (ls: Lesson[]) => ls.map((l) => (l.id in images ? { ...l, image: images[l.id] } : l));
+    if (original) upsert({ ...original, lessons: apply(original.lessons) });
+    set({ lessons: apply(c.lessons) });
+  };
+  const missingPhotos = c.lessons.filter(needsImage);
+  const fillPhotos = async () => {
+    setFilling(true);
+    try {
+      const { images, error } = await findLessonImages(c, missingPhotos);
+      const n = Object.keys(images).length;
+      if (n) applyPhotos(images);
+      toast(n ? `Added ${n} photo${n === 1 ? '' : 's'} to your cards${error ? ` (stopped early: ${error})` : ''}` : `No photos added${error ? `: ${error}` : ''}`, n ? '🖼️' : '⚠️');
+    } catch (e) {
+      toast(`Couldn't add photos: ${(e as Error).message}`, '⚠️');
+    } finally {
+      setFilling(false);
+    }
+  };
 
   const addLesson = (kind: LessonKind) => {
     const l: Lesson = {
@@ -107,6 +135,31 @@ export default function CourseBuilder() {
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         <div className="space-y-4">
+          <Card className="overflow-hidden">
+            <div className="group relative">
+              <CourseCover c={c} />
+              <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
+                <Button size="sm" onClick={() => setPicking(true)} className="bg-white! text-slate-900! shadow-lg">
+                  <OnlocalMark size={14} /> {c.cover ? 'Change photo' : 'Find a photo with onlocalAI'}
+                </Button>
+              </div>
+            </div>
+            <button onClick={() => setPicking(true)} className="flex w-full cursor-pointer items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">
+              <OnlocalMark size={12} /> {c.cover ? 'Change cover photo' : 'Add a cover photo with onlocalAI'}
+            </button>
+          </Card>
+          <CoverPicker
+            open={picking}
+            subject={courseSubject(c)}
+            current={c.cover}
+            onClose={() => setPicking(false)}
+            onPick={(cover) => {
+              // Saved straight away, without saving other unsaved edits.
+              if (original) upsert({ ...original, cover });
+              set({ cover });
+              toast(cover ? 'Cover photo added' : 'Cover photo removed', '🖼️');
+            }}
+          />
           <Card className="space-y-3 p-4">
             <div className="grid grid-cols-[64px_1fr] gap-2">
               <Field label="Icon">
@@ -136,7 +189,19 @@ export default function CourseBuilder() {
           </Card>
 
           <Card className="p-2">
-            <div className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Cards</div>
+            <div className="flex items-center justify-between px-2 py-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cards</span>
+              {(missingPhotos.length > 0 || filling) && (
+                <button
+                  onClick={fillPhotos}
+                  disabled={filling}
+                  className="flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-violet-700 hover:bg-violet-50 disabled:cursor-default disabled:opacity-70"
+                  title="Add a relevant photo to every text card that doesn't have one"
+                >
+                  {filling ? <Loader2 size={12} className="animate-spin" /> : <OnlocalMark size={12} />} {filling ? 'Finding photos…' : `onlocalAI photos (${missingPhotos.length})`}
+                </button>
+              )}
+            </div>
             {c.lessons.map((l, i) => {
               const K = KIND[l.kind];
               return (
@@ -150,6 +215,7 @@ export default function CourseBuilder() {
                     <K.icon size={14} />
                   </span>
                   <span className="flex-1 truncate">{l.title}</span>
+                  {l.image && <ImageIcon size={12} className="shrink-0 text-slate-300" aria-label="Has a photo" />}
                   <span className="hidden gap-0.5 group-hover:flex">
                     <button disabled={i === 0} onClick={(e) => (e.stopPropagation(), move(i, -1))} className="rounded p-0.5 text-slate-400 hover:text-slate-700 disabled:opacity-30">
                       <ArrowUp size={14} />
@@ -185,8 +251,8 @@ export default function CourseBuilder() {
                 );
               })}
               <button onClick={() => setAi('new')} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-violet-700 hover:bg-violet-50 cursor-pointer">
-                <Sparkles size={14} />
-                AI
+                <OnlocalMark size={14} />
+                onlocalAI
               </button>
             </div>
           </Card>
@@ -198,13 +264,51 @@ export default function CourseBuilder() {
               {active.kind !== 'video' && (
                 <div className="-mb-1 flex justify-end">
                   <Button size="sm" variant="ghost" className="text-violet-700 hover:bg-violet-50" onClick={() => setAi('rewrite')}>
-                    <Sparkles size={14} /> Rewrite with AI
+                    <OnlocalMark size={14} /> Rewrite with onlocalAI
                   </Button>
                 </div>
               )}
               <Field label="Card title">
                 <Input value={active.title} onChange={(e) => setLesson(active.id, { title: e.target.value })} />
               </Field>
+              {active.kind === 'card' && (
+                <div>
+                  <span className="mb-1 block text-sm font-medium text-slate-700">Photo</span>
+                  {active.image ? (
+                    <div className="flex items-center gap-3 rounded-lg p-2 ring-1 ring-slate-200">
+                      <img src={active.image.thumb} alt={active.image.alt ?? ''} className="h-16 w-28 shrink-0 rounded-md object-cover" />
+                      <div className="min-w-0 flex-1 text-xs text-slate-500">
+                        <div className="truncate font-medium text-slate-700">{active.image.alt || 'Photo'}</div>
+                        <div className="truncate">Photo: {active.image.credit}</div>
+                      </div>
+                      <Button size="sm" variant="secondary" onClick={() => setCardPicking(true)}>
+                        Change
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => applyPhotos({ [active.id]: undefined })} title="Remove photo">
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setCardPicking(true)}
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-200 py-4 text-sm font-medium text-slate-500 transition hover:border-violet-300 hover:bg-violet-50/50 hover:text-violet-700"
+                    >
+                      <OnlocalMark size={16} /> Add a photo with onlocalAI
+                    </button>
+                  )}
+                  <CoverPicker
+                    key={active.id}
+                    open={cardPicking}
+                    subject={lessonSubject(c, active)}
+                    current={active.image}
+                    onClose={() => setCardPicking(false)}
+                    onPick={(image) => {
+                      applyPhotos({ [active.id]: image });
+                      toast(image ? 'Photo added to card' : 'Photo removed', '🖼️');
+                    }}
+                  />
+                </div>
+              )}
               {active.kind === 'video' && (
                 <div>
                   <span className="mb-1 block text-sm font-medium text-slate-700">Video link</span>
@@ -217,7 +321,6 @@ export default function CourseBuilder() {
                       if (m.title && (!active.title.trim() || /^(watch:?\s*|new card|video)$/i.test(active.title.trim()))) setLesson(active.id, { title: `Watch: ${m.title}`.slice(0, 100) });
                     }}
                   />
-                  <p className="mt-1 text-xs text-slate-400">Tip: videos under 2 minutes get the best completion. Unlisted YouTube and private-link Vimeo videos work too.</p>
                 </div>
               )}
               {active.kind !== 'quiz' && (
@@ -283,6 +386,7 @@ export default function CourseBuilder() {
                   {active.kind === 'video' && (
                     <VideoEmbed url={active.videoUrl} title={active.title} className="mb-3" />
                   )}
+                  {active.kind === 'card' && active.image && <LessonPhoto image={active.image} className="mb-3" />}
                   {active.body && <RichText text={active.body} className="text-sm" />}
                   {active.kind === 'quiz' && active.questions?.[0] && (
                     <div>
@@ -299,7 +403,7 @@ export default function CourseBuilder() {
             </div>
           </div>
         ) : (
-          <Empty title="Add your first card">Cards, videos and quizzes — keep each one to a single idea.</Empty>
+          <Empty title="Add your first card" />
         )}
       </div>
       <AILessonModal
@@ -317,7 +421,7 @@ export default function CourseBuilder() {
             set({ lessons });
             setActiveId(l.id);
           }
-          toast(ai === 'rewrite' ? 'Card rewritten — remember to save' : 'AI card added — remember to save', '✨');
+          toast(ai === 'rewrite' ? 'Card rewritten — remember to save' : 'onlocalAI card added — remember to save', '✨');
         }}
       />
     </>

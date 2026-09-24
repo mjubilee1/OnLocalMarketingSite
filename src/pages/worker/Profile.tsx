@@ -3,11 +3,75 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronRight, CircleCheck, Clock, ScrollText, ShieldCheck, Upload } from 'lucide-react';
 import { ContractStagePill } from '../../components/contract';
 import { Avatar, Button, Card, Field, Input, Modal, Pill, RolePill, Select, Stars } from '../../components/ui';
+import { PhotoInput } from '../../components/photoInput';
+import { phoneOk, profileComplete } from '../../lib/profile';
 import { BADGES, level } from '../../lib/badges';
 import { avgRating, certValid, requirements } from '../../lib/readiness';
 import { addMonths, cn, daysUntil, fmtDate, todayISO, LANGUAGES } from '../../lib/utils';
 import { useCatalog, useCurrentStaff, useStore } from '../../store';
 
+
+/** Photo and mobile number are required before crew can work, so this card is highlighted until both are set. */
+function PhotoAndPhone() {
+  const me = useCurrentStaff();
+  const updateStaff = useStore((s) => s.updateStaff);
+  const toast = useStore((s) => s.toast);
+  const [params] = useSearchParams();
+  const [phone, setPhone] = useState(me.phone);
+  const complete = profileComplete(me);
+  const focus = params.get('setup') === '1' && !complete;
+  const phoneChanged = phone.trim() !== me.phone;
+
+  return (
+    <Card className={cn('mt-4 space-y-4 p-4', !complete && 'ring-2 ring-amber-300', focus && 'anim-pop')}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold">Photo & mobile</h2>
+        {complete ? (
+          <Pill className="bg-emerald-50 text-emerald-700">
+            <CircleCheck size={11} /> Done
+          </Pill>
+        ) : (
+          <Pill className="bg-amber-50 text-amber-700">Required</Pill>
+        )}
+      </div>
+      <PhotoInput
+        value={me.photo}
+        name={me.name}
+        invalid={!me.photo}
+        onChange={(photo) => {
+          updateStaff(me.id, { photo });
+          toast('Photo saved', '📸');
+        }}
+      />
+      <form
+        className="flex items-end gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!phoneOk(phone)) return;
+          updateStaff(me.id, { phone: phone.trim() });
+          toast('Mobile number saved', '📱');
+        }}
+      >
+        <label className="block flex-1">
+          <span className="mb-1 block text-sm font-medium text-slate-700">
+            Mobile <span className="text-rose-500">*</span>
+          </span>
+          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 000 0000" autoComplete="tel" className={phone && !phoneOk(phone) ? 'border-rose-300!' : undefined} />
+          {phone && !phoneOk(phone) ? (
+            <span className="mt-1 block text-xs text-rose-600">Enter a valid mobile number.</span>
+          ) : (
+            !phone && <span className="mt-1 block text-xs text-rose-600">A mobile number is required.</span>
+          )}
+        </label>
+        {(phoneChanged || !phoneOk(me.phone)) && (
+          <Button type="submit" disabled={!phoneOk(phone)}>
+            Save
+          </Button>
+        )}
+      </form>
+    </Card>
+  );
+}
 
 export default function Profile() {
   const me = useCurrentStaff();
@@ -29,7 +93,7 @@ export default function Profile() {
   return (
     <div className="px-4 py-6">
       <div className="flex items-center gap-4">
-        <Avatar name={me.name} size="xl" />
+        <Avatar name={me.name} photo={me.photo} size="xl" />
         <div>
           <h1 className="text-xl font-bold">{me.name}</h1>
           <div className="mt-1 flex flex-wrap gap-1">
@@ -55,6 +119,8 @@ export default function Profile() {
         </Card>
       </div>
 
+      <PhotoAndPhone key={me.id} />
+
       <Card className="mt-4 p-4">
         <div className="flex items-center justify-between text-sm">
           <span className="font-semibold">Level: {lvl.name}</span>
@@ -63,7 +129,6 @@ export default function Profile() {
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" style={{ width: `${lvl.progress * 100}%` }} />
         </div>
-        <p className="mt-2 text-xs text-slate-500">Higher levels get early access to shifts and lead roles.</p>
       </Card>
 
       <section className="mt-6">
@@ -141,15 +206,12 @@ export default function Profile() {
       <section className="mt-6">
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Settings</h2>
         <Card className="space-y-3 p-4">
-          <Field label="Preferred language" hint="Training and notifications use this language where available.">
+          <Field label="Preferred language">
             <Select value={me.language} onChange={(e) => updateStaff(me.id, { language: e.target.value })}>
               {LANGUAGES.map((l) => (
                 <option key={l}>{l}</option>
               ))}
             </Select>
-          </Field>
-          <Field label="Mobile">
-            <Input defaultValue={me.phone} onBlur={(e) => updateStaff(me.id, { phone: e.target.value })} />
           </Field>
         </Card>
       </section>

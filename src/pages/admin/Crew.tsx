@@ -4,6 +4,7 @@ import { Megaphone, Search, ShieldAlert, UserPlus } from 'lucide-react';
 import { Avatar, Button, Card, Input, PageHeader, Progress, RolePill, Select, StatusPill, Stars, Tabs } from '../../components/ui';
 import { avgRating, expiringCerts, readiness } from '../../lib/readiness';
 import { relTime } from '../../lib/utils';
+import { useCrewEmail } from '../../lib/email';
 import { useCatalog, useStore } from '../../store';
 import type { StaffStatus } from '../../types';
 
@@ -11,8 +12,7 @@ type Filter = 'all' | StaffStatus | 'pool';
 
 export default function Crew() {
   const staff = useStore((s) => s.staff);
-  const nudge = useStore((s) => s.nudge);
-  const toast = useStore((s) => s.toast);
+  const { send: sendEmail } = useCrewEmail();
   const cat = useCatalog();
   const nav = useNavigate();
   const [tab, setTab] = useState<Filter>('all');
@@ -40,7 +40,6 @@ export default function Crew() {
     <>
       <PageHeader
         title="Crew"
-        sub="Everyone who works your events, and exactly how ready they are."
         actions={
           <Link to="/admin/invite">
             <Button>
@@ -81,8 +80,7 @@ export default function Crew() {
           <Button
             variant="secondary"
             onClick={() => {
-              nudge(sel);
-              toast(`Reminders sent to ${sel.length} crew`, '📣');
+              void sendEmail('reminder', sel);
               setSel([]);
             }}
           >
@@ -90,11 +88,6 @@ export default function Crew() {
           </Button>
         )}
       </div>
-      {tab === 'pool' && (
-        <p className="mb-4 rounded-lg bg-violet-50 p-3 text-sm text-violet-800">
-          Your proven performers (4.5★+ over 3+ events). Re-engaging alumni is the fastest way to staff up — their training history is kept, so they only need to renew anything that's expired.
-        </p>
-      )}
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">
           <thead>
@@ -112,7 +105,7 @@ export default function Crew() {
               <th className="w-44 px-2 py-3">Onboarding</th>
               <th className="px-2 py-3">Rating</th>
               <th className="px-2 py-3">Events</th>
-              <th className="px-2 py-3">Last reminder</th>
+              <th className="px-2 py-3">Last email</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -125,7 +118,7 @@ export default function Crew() {
                   </td>
                   <td className="px-2 py-3">
                     <div className="flex items-center gap-3">
-                      <Avatar name={s.name} size="sm" />
+                      <Avatar name={s.name} photo={s.photo} size="sm" />
                       <div>
                         <div className="flex items-center gap-1 font-medium text-slate-900">
                           {s.name}
@@ -153,7 +146,21 @@ export default function Crew() {
                   </td>
                   <td className="px-2 py-3">{s.ratings.length ? <Stars value={avgRating(s)} size={13} /> : <span className="text-xs text-slate-400">—</span>}</td>
                   <td className="px-2 py-3 text-slate-600">{s.eventsWorked}</td>
-                  <td className="px-2 py-3 text-xs text-slate-500">{s.lastNudgedAt ? relTime(s.lastNudgedAt) : '—'}</td>
+                  <td className="px-2 py-3 text-xs">
+                    {s.lastEmail ? (
+                      s.lastEmail.ok ? (
+                        <span className="text-slate-500">
+                          {s.lastEmail.kind} emailed {relTime(s.lastEmail.at)}
+                        </span>
+                      ) : (
+                        <span className="text-rose-600" title={s.lastEmail.error}>
+                          email failed
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
                 </tr>
               );
             })}

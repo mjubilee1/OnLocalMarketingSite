@@ -21,7 +21,7 @@ export const LIBRARY_DOCS: LibraryDoc[] = [
 
 By signing, I confirm that I have received and read the {{company}} Anti-Harassment Policy, and that I know how to report a concern.`,
     ),
-    regions: ['Global'],
+    regions: ['US'],
     roles: ['all'],
     why: 'New York requires employers to give workers the written policy. Illinois bars and restaurants need one, and it underpins harassment training everywhere.',
     sources: [
@@ -46,9 +46,9 @@ By signing, I confirm that I have received and read the {{company}} Anti-Harassm
 
 I understand that breaking this policy may lead to removal from shifts, and that serving illegally can carry personal legal penalties.`,
     ),
-    regions: ['Global'],
+    regions: ['US'],
     roles: ['r-bar', 'r-server'],
-    why: 'In Texas, a signed alcohol policy is one of the conditions for "safe harbor" protection. Everywhere else, it supports the venue’s defence.',
+    why: 'In Texas, a signed alcohol policy is one of the conditions for "safe harbor" protection. Everywhere else, it supports the venue’s defense.',
     sources: [{ label: 'Texas TABC: certification & safe harbor FAQ', url: 'https://tabc.texas.gov/faqs/tabc-certification-faqs/' }],
   },
   {
@@ -97,23 +97,23 @@ By signing, I confirm I understand when and how to report illness.`,
     doc: doc(
       'libdoc-emergency',
       'Emergency & Evacuation Procedures Acknowledgment',
-      'Confirms crew know their part in evacuation, invacuation, lockdown and show stops.',
+      'Confirms crew know their part in evacuation, shelter-in-place, lockdown and show stops.',
       `Before every event, {{company}} briefs crew on the site's emergency procedures. I agree to:
 
 • Read the event briefing, including the exits, assembly points, shelter locations and radio codes.
 • Keep every exit, fire lane and piece of fire equipment clear at all times.
-• Report hazards, crowd pressure, suspicious items or behaviour straight away, with my exact location.
-• Follow instructions to evacuate, move people inside (invacuation), lock down or stop the show, and help guests to safety.
+• Report hazards, crowd pressure, suspicious items or behavior straight away, with my exact location.
+• Follow instructions to evacuate, shelter in place, lock down or stop the show, and help guests to safety.
 • Never leave my post in an emergency without telling my supervisor, and check in at the assembly point.
 
 By signing, I confirm I understand my role in an emergency.`,
     ),
-    regions: ['Global'],
+    regions: ['US'],
     roles: ['all'],
-    why: 'Fire codes require crowd managers to know emergency procedures. UK Martyn’s Law expects staff to know their part in evacuation, invacuation and lockdown.',
+    why: 'NFPA 101 and the International Fire Code require crowd managers who know evacuation and shelter-in-place procedures. A signed acknowledgment records that every crew member was briefed.',
     sources: [
-      { label: "ProtectUK: Martyn's Law overview", url: 'https://www.protectuk.police.uk/martyns-law/martyns-law-overview-and-what-you-need-know' },
       { label: 'Mass.gov: crowd managers', url: 'https://www.mass.gov/info-details/crowd-managers' },
+      { label: 'ICC: IFC crowd manager requirements', url: 'http://media.iccsafe.org/news/icc-enews/2017v14n41/17-14770.pdf' },
     ],
   },
   {
@@ -126,12 +126,12 @@ By signing, I confirm I understand my role in an emergency.`,
 • Never write down, photograph or store card numbers, security codes (CVV) or PINs.
 • Check my card terminal for signs of tampering at the start of each shift, and report anything unusual.
 • Ask for ID, and check with my manager, before letting anyone service or swap a terminal.
-• Count my float and cash-up with a supervisor, and follow the refund approval process.
+• Count my starting cash and closing cash with a supervisor, and follow the refund approval process.
 • Keep any suspected counterfeit note and report it, rather than handing it back.
 
 By signing, I confirm I understand these payment security rules.`,
     ),
-    regions: ['Global'],
+    regions: ['US'],
     roles: ['r-bar', 'r-server', 'r-ticket'],
     why: 'PCI DSS 4.x (mandatory since March 2025) requires training staff to spot tampered terminals. A signed policy records it.',
     sources: [
@@ -142,23 +142,23 @@ By signing, I confirm I understand these payment security rules.`,
   {
     doc: doc(
       'libdoc-equipment',
-      'Equipment Authorisation Agreement',
-      'Records that only trained, authorised crew operate lifts, forklifts and power.',
-      `{{company}} allows only trained and authorised people to operate powered access (MEWPs, boom and scissor lifts), forklifts, and temporary electrical systems.
+      'Equipment Authorization Agreement',
+      'Records that only trained, authorized crew operate lifts, forklifts and power.',
+      `{{company}} allows only trained and authorized people to operate powered access (MEWPs, boom and scissor lifts), forklifts, and temporary electrical systems.
 
-• I will operate only the equipment my supervisor has authorised me to use, and only after I've been trained on it.
+• I will operate only the equipment my supervisor has authorized me to use, and only after I've been trained on it.
 • I will do pre-use checks, wear the required PPE (including a harness in boom lifts), and never go over rated loads.
-• I will not connect, disconnect or alter temporary power unless I am qualified and authorised to.
+• I will not connect, disconnect or alter temporary power unless I am qualified and authorized to.
 • I will stop work and report any defect or unsafe condition.
 
 By signing, I confirm I understand these rules.`,
     ),
-    regions: ['Global'],
+    regions: ['US'],
     roles: ['r-setup'],
-    why: 'OSHA allows only trained, authorised people to run aerial lifts. The UK Work at Height Regulations require competent operators. This records who is allowed.',
+    why: 'OSHA allows only trained, authorized people to run aerial lifts, and treats scissor lifts as scaffolds. This records who is allowed.',
     sources: [
       { label: '29 CFR 1910.67: aerial lifts', url: 'https://www.law.cornell.edu/cfr/text/29/1910.67' },
-      { label: 'HSE: work at height at events', url: 'https://www.hse.gov.uk/event-safety/common-work-at-height-tasks.htm' },
+      { label: 'OSHA eTool: scissor lifts', url: 'https://www.osha.gov/etools/scaffolding/scissor-lifts' },
     ],
   },
   {
@@ -176,11 +176,11 @@ By signing, I confirm I understand these rules.`,
 
 By signing, I agree to these data protection rules.`,
     ),
-    regions: ['Global'],
+    regions: ['US'],
     roles: ['r-ticket', 'r-usher'],
-    why: 'Under UK/EU GDPR, the organisation must report breaches within 72 hours, which is only possible if crew report straight away. California’s CCPA gives guests rights over their data.',
+    why: 'Every US state has a data breach notification law with deadlines the company can only meet if crew report straight away. California’s CCPA gives guests rights over their data.',
     sources: [
-      { label: 'ICO: personal data breaches', url: 'https://ico.org.uk/for-organisations/report-a-breach/personal-data-breach/' },
+      { label: 'NCSL: security breach notification laws', url: 'https://www.ncsl.org/technology-and-communication/security-breach-notification-laws' },
       { label: 'California AG: CCPA', url: 'https://oag.ca.gov/privacy/ccpa' },
     ],
   },
@@ -207,8 +207,8 @@ export const BUNDLES: Bundle[] = [
     id: 'pack-bar',
     name: 'Bar & hospitality',
     emoji: '🍸',
-    description: 'Serving safely and securely: spiking, cash and card fraud, conflict, access and noise.',
-    courseIds: ['lib-spiking', 'lib-cash-fraud', 'lib-deescalation', 'lib-access-live', 'lib-noise-power', 'lib-vip'],
+    description: 'Serving safely and securely: spiking, cash and card fraud, conflict, ADA access and noise.',
+    courseIds: ['lib-spiking', 'lib-cash-fraud', 'lib-deescalation', 'lib-us-ada', 'lib-noise-power', 'lib-vip'],
     docIds: ['libdoc-alcohol', 'libdoc-cash'],
   },
   {
@@ -216,7 +216,7 @@ export const BUNDLES: Bundle[] = [
     name: 'Front of house & box office',
     emoji: '🎟️',
     description: 'Accessibility, guest data, payments and calm conflict handling at the gate.',
-    courseIds: ['lib-access-live', 'lib-privacy', 'lib-cash-fraud', 'lib-deescalation', 'lib-lost-child'],
+    courseIds: ['lib-us-ada', 'lib-privacy', 'lib-cash-fraud', 'lib-deescalation', 'lib-lost-child'],
     docIds: ['libdoc-privacy', 'libdoc-cash'],
   },
   {
@@ -234,13 +234,5 @@ export const BUNDLES: Bundle[] = [
     description: 'State alcohol and food handler rules, heat illness, crowd managers, harassment, ADA and OSHA.',
     courseIds: ['lib-us-alcohol-law', 'lib-us-food', 'lib-us-heat', 'lib-us-crowd-manager', 'lib-us-harassment', 'lib-us-ada', 'lib-us-osha-production'],
     docIds: ['libdoc-harassment', 'libdoc-alcohol', 'libdoc-heat', 'libdoc-illness'],
-  },
-  {
-    id: 'pack-uk',
-    name: 'UK readiness pack',
-    emoji: '🇬🇧',
-    description: "Martyn's Law and counter-terrorism awareness, spiking, noise, work at height and data protection.",
-    courseIds: ['lib-uk-martyns-law', 'lib-spiking', 'lib-noise-power', 'lib-work-height', 'lib-privacy'],
-    docIds: ['libdoc-emergency', 'libdoc-privacy'],
   },
 ];

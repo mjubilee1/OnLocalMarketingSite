@@ -61,9 +61,7 @@ export default function ContractSign() {
         ) : c.status === 'void' ? (
           <div className="rounded-xl bg-rose-50 p-4 text-sm text-rose-800">This contract was cancelled and is no longer valid.</div>
         ) : (
-          <p className="text-sm text-slate-600">
-            {c.employer.name} has sent you a contract. Check the key terms below, read the full contract, then sign.
-          </p>
+          null
         )}
 
         <Card className="px-4 py-2">
@@ -74,7 +72,6 @@ export default function ContractSign() {
           {reading ? <Loader2 size={20} className="animate-spin text-indigo-600" /> : <FileText size={20} className="text-indigo-600" />}
           <div className="flex-1">
             <div className="text-sm font-medium">Read the full contract (5 pages)</div>
-            <div className="text-xs text-slate-500">Includes the standard clauses: confidentiality, safety, taxes, independent contractor status and more.</div>
           </div>
         </button>
 
@@ -88,7 +85,6 @@ export default function ContractSign() {
               placeholder="Street, city, state, ZIP"
               autoComplete="street-address"
             />
-            <span className="mt-1 block text-xs text-slate-500">Printed in section 1 of the contract.</span>
           </label>
         )}
 

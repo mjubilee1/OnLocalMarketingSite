@@ -1,28 +1,29 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, ChevronRight, CircleCheck, Clock, FileSignature, GraduationCap, MapPin, ScrollText, ShieldCheck, Sparkles } from 'lucide-react';
+import { CalendarDays, Camera, ChevronRight, CircleCheck, Clock, FileSignature, GraduationCap, MapPin, ScrollText, ShieldCheck, Sparkles } from 'lucide-react';
 import { Card, Pill, Progress, Ring } from '../../components/ui';
-import { eventReadiness, readiness, type ReqItem } from '../../lib/readiness';
+import { eventReadiness, readiness, type ReqItem, type ReqKind } from '../../lib/readiness';
 import { badge, level } from '../../lib/badges';
 import { cn, color, countdown, daysUntil, fmtDay } from '../../lib/utils';
 import { useCatalog, useCurrentStaff, useStore } from '../../store';
 
-const ICON = { doc: FileSignature, course: GraduationCap, cert: ShieldCheck };
-const LABEL = { doc: 'Sign', course: 'Learn', cert: 'Upload' };
+const ICON: Record<ReqKind, typeof FileSignature> = { profile: Camera, doc: FileSignature, course: GraduationCap, cert: ShieldCheck };
+const LABEL: Record<ReqKind, string> = { profile: 'Profile', doc: 'Sign', course: 'Learn', cert: 'Upload' };
 
-export const itemLink = (i: ReqItem) => (i.kind === 'doc' ? `/app/docs/${i.id}` : i.kind === 'course' ? `/app/learn/${i.id}` : `/app/profile?upload=${i.id}`);
+export const itemLink = (i: ReqItem) =>
+  i.kind === 'profile' ? '/app/profile?setup=1' : i.kind === 'doc' ? `/app/docs/${i.id}` : i.kind === 'course' ? `/app/learn/${i.id}` : `/app/profile?upload=${i.id}`;
 
 export function TodoRow({ item }: { item: ReqItem }) {
   const Icon = ICON[item.kind];
   return (
     <Link to={itemLink(item)} className="flex items-center gap-3 px-4 py-3 active:bg-slate-50">
-      <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', item.kind === 'doc' ? 'bg-sky-50 text-sky-600' : item.kind === 'course' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600')}>
+      <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', item.kind === 'profile' ? 'bg-amber-50 text-amber-600' : item.kind === 'doc' ? 'bg-sky-50 text-sky-600' : item.kind === 'course' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600')}>
         <Icon size={20} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-slate-900">{item.label}</div>
         <div className="text-xs text-slate-500">
           {LABEL[item.kind]} • {item.kind === 'course' && item.progress > 0 ? `${Math.round(item.progress * 100)}% done • ` : ''}
-          {item.kind === 'cert' ? item.detail : `~${item.minutes} min`}
+          {item.kind === 'cert' || item.kind === 'profile' ? item.detail : `~${item.minutes} min`}
         </div>
         {item.kind === 'course' && item.progress > 0 && <Progress value={item.progress * 100} className="mt-1.5 h-1" />}
       </div>
@@ -47,7 +48,7 @@ export default function Home() {
   // Event-specific training for shifts I'm rostered on counts toward my readiness too
   const r = readiness(me, cat, me.roleIds, mine.flatMap((e) => e.courseIds));
   const lvl = level(me.points);
-  const todo = r.items.filter((i) => !i.done).sort((a, b) => ['doc', 'course', 'cert'].indexOf(a.kind) - ['doc', 'course', 'cert'].indexOf(b.kind));
+  const todo = r.items.filter((i) => !i.done).sort((a, b) => ['profile', 'doc', 'course', 'cert'].indexOf(a.kind) - ['profile', 'doc', 'course', 'cert'].indexOf(b.kind));
   const next = mine[0];
   const nextA = next?.assignments.find((a) => a.staffId === me.id);
   const nextShift = next?.shifts.find((s) => s.id === nextA?.shiftId);

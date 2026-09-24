@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Check, Clock, FileSignature, GraduationCap } from 'lucide-react';
 import { Button, Card, Field, Input, Select } from '../components/ui';
+import { PhotoInput } from '../components/photoInput';
+import { phoneOk } from '../lib/profile';
 import { Logo } from '../layouts/AdminLayout';
 import { roleTimeToReady } from '../lib/readiness';
 import { cn, color, LANGUAGES } from '../lib/utils';
@@ -17,11 +19,23 @@ export default function Join() {
   const toast = useStore((s) => s.toast);
   const cat = useCatalog();
   const nav = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', phone: '', language: 'English' });
-  const [roleIds, setRoleIds] = useState<string[]>([]);
+  const acceptInvite = useStore((s) => s.acceptInvite);
+  // A personal invite link (?invite=token) pre-fills the form and completes the existing invited record.
+  const [params] = useSearchParams();
+  const token = params.get('invite');
+  const invited = useStore((s) => (token ? s.staff.find((x) => x.inviteToken === token) : undefined));
+  const [form, setForm] = useState(() => ({
+    name: invited?.name ?? '',
+    email: invited?.email ?? '',
+    phone: invited?.phone ?? '',
+    photo: invited?.photo ?? '',
+    language: invited?.language ?? 'English',
+  }));
+  const [tried, setTried] = useState(false);
+  const [roleIds, setRoleIds] = useState<string[]>(() => invited?.roleIds ?? []);
 
   const valid = code?.toUpperCase() === inviteCode;
-  const canSubmit = form.name.trim() && form.email.includes('@') && roleIds.length > 0;
+  const canSubmit = !!form.name.trim() && form.email.includes('@') && phoneOk(form.phone) && !!form.photo && roleIds.length > 0;
 
   if (!valid)
     return (
@@ -34,6 +48,28 @@ export default function Join() {
       </div>
     );
 
+  // Already signed up (e.g. they tapped the link in a reminder email): take them straight to their app.
+  if (invited && invited.status !== 'invited')
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-indigo-600 to-indigo-800 p-6">
+        <Card className="max-w-sm p-8 text-center">
+          <div className="text-4xl">👋</div>
+          <h1 className="mt-3 text-lg font-semibold">Welcome back, {invited.name.split(' ')[0]}</h1>
+          <p className="mt-1 text-sm text-slate-500">You've already joined the {orgName} crew. Pick up where you left off.</p>
+          <Button
+            size="lg"
+            className="mt-5 w-full"
+            onClick={() => {
+              setCurrent(invited.id);
+              nav('/app');
+            }}
+          >
+            Continue onboarding
+          </Button>
+        </Card>
+      </div>
+    );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-600 to-indigo-800 px-4 py-8">
       <div className="mx-auto max-w-md">
@@ -41,8 +77,7 @@ export default function Join() {
           <Logo />
         </div>
         <Card className="p-6">
-          <h1 className="text-xl font-bold text-slate-900">Join the {orgName} crew</h1>
-          <p className="mt-1 text-sm text-slate-500">Takes about a minute. You'll finish paperwork and training on your phone afterwards.</p>
+          <h1 className="text-xl font-bold text-slate-900">{invited ? `${invited.name.split(' ')[0]}, you're invited to the ${orgName} crew` : `Join the ${orgName} crew`}</h1>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] text-slate-600">
             {[
               { icon: FileSignature, t: 'E-sign docs' },
@@ -59,13 +94,25 @@ export default function Join() {
             className="mt-6 space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
+              setTried(true);
               if (!canSubmit) return;
-              const id = createStaff({ ...form, name: form.name.trim(), roleIds });
+              const details = { ...form, name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), roleIds };
+              let id: string;
+              if (invited) {
+                acceptInvite(invited.id, details);
+                id = invited.id;
+              } else id = createStaff(details);
               setCurrent(id);
               toast(`Welcome to the crew, ${form.name.split(' ')[0]}!`, '🎉');
               nav('/app');
             }}
           >
+            <div>
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Your photo <span className="text-rose-500">*</span>
+              </span>
+              <PhotoInput value={form.photo} onChange={(photo) => setForm({ ...form, photo })} invalid={tried} name={form.name} />
+            </div>
             <Field label="Full name">
               <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Jamie Smith" autoComplete="name" />
             </Field>
@@ -73,9 +120,21 @@ export default function Join() {
               <Field label="Email">
                 <Input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@mail.com" autoComplete="email" />
               </Field>
-              <Field label="Mobile">
-                <Input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+1 555…" autoComplete="tel" />
-              </Field>
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-slate-700">
+                  Mobile <span className="text-rose-500">*</span>
+                </span>
+                <Input
+                  required
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="+1 555 000 0000"
+                  autoComplete="tel"
+                  className={tried && !phoneOk(form.phone) ? 'border-rose-300!' : undefined}
+                />
+                {tried && !phoneOk(form.phone) && <span className="mt-1 block text-xs text-rose-600">Enter a valid mobile number.</span>}
+              </label>
             </div>
             <Field label="Preferred language">
               <Select value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })}>
@@ -111,10 +170,11 @@ export default function Join() {
                 })}
               </div>
             </div>
-            <Button type="submit" size="lg" className="w-full" disabled={!canSubmit}>
+            {tried && !roleIds.length && <p className="text-xs text-rose-600">Pick at least one role.</p>}
+            <Button type="submit" size="lg" className="w-full">
               Create my crew profile
             </Button>
-            <p className="text-center text-xs text-slate-400">By continuing you agree to receive shift notifications by SMS and email.</p>
+            <p className="text-center text-xs text-slate-400">By continuing you agree to receive shift and onboarding emails. You can opt out any time.</p>
           </form>
         </Card>
       </div>

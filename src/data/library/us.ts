@@ -21,7 +21,7 @@ export const US_COURSES: LibraryCourse[] = [
           `Serving a minor or someone who is **obviously intoxicated** can bring:
 
 - **Criminal** charges against you
-- **Administrative** penalties against the venue's licence
+- **Administrative** penalties against the venue's license
 - **Civil** ("dram-shop") lawsuits if that guest goes on to hurt someone
 
 That's why many states require a **state-approved server card**, and why events take it so seriously.`,
@@ -48,13 +48,13 @@ In states where training is **voluntary**, programs like TIPS or ServSafe Alcoho
         ),
         card(
           'Events have stricter rules',
-          `In **California**, an event on a **one-day licence** must have **at least one RBS-certified person on duty the whole time**, and the 60-day grace period doesn't apply. Caterers' staff must be certified **before** they serve.
+          `In **California**, an event on a **one-day license** must have **at least one RBS-certified person on duty the whole time**, and the 60-day grace period doesn't apply. Caterers' staff must be certified **before** they serve.
 
 **Upload your card** in the app under Profile → Certificates as soon as you have it.`,
         ),
         quiz('Alcohol law check', [
           q('In California, how long do you have to get your RBS certification after starting?', ['7 days', '60 days', '1 year'], 1),
-          q('What is "dram-shop" liability?', ['A licence for bars', 'Being sued if a guest you over-served injures someone', 'A type of drink'], 1),
+          q('What is "dram-shop" liability?', ['A license for bars', 'Being sued if a guest you over-served injures someone', 'A type of drink'], 1),
           q('In Oregon, since March 2025, when can a new server start pouring?', ['On day one with a pending permit', 'Only after passing the course and test', 'After 30 days'], 1),
         ]),
       ],
@@ -66,7 +66,7 @@ In states where training is **voluntary**, programs like TIPS or ServSafe Alcoho
       legal: 'Server/seller training is mandatory in CA, WA, OR, UT, NM, IL and NV (counties over 100k), with deadlines from before the first shift to 120 days. Texas requires it for safe-harbor protection. Crew still need the state-approved course: this template explains the rules.',
       sources: [
         { label: 'California ABC: RBS training', url: 'https://www.abc.ca.gov/education/rbs/' },
-        { label: 'California ABC: RBS FAQ (events, one-day licences)', url: 'https://www.abc.ca.gov/education/rbs/frequently-asked-questions/' },
+        { label: 'California ABC: RBS FAQ (events, one-day licenses)', url: 'https://www.abc.ca.gov/education/rbs/frequently-asked-questions/' },
         { label: 'Washington LCB: MAST FAQ', url: 'https://lcb.wa.gov/mastrvp/mast_faqs' },
         { label: 'Oregon OLCC: alcohol service permits', url: 'https://www.oregon.gov/olcc/pages/alcohol-service-permits.aspx' },
         { label: 'Utah DABS: training', url: 'https://abs.utah.gov/licenses-permits/training/' },
@@ -269,7 +269,7 @@ Your local fire authority decides which code applies and which training is appro
     {
       id: 'lib-us-harassment',
       title: 'Preventing Harassment at Work (US)',
-      description: 'Recognise harassment (including by guests), report it, stop retaliation, and step in as a bystander.',
+      description: 'Recognize harassment (including by guests), report it, stop retaliation, and step in as a bystander.',
       category: 'Compliance',
       emoji: '🤚',
       estMinutes: 8,
@@ -406,7 +406,7 @@ Even then, the guest may stay without the dog. Always involve your supervisor.`,
       lessons: [
         card(
           'Your right to a safe workplace',
-          `OSHA's **General Duty Clause** requires employers to keep the workplace free of recognised serious hazards.
+          `OSHA's **General Duty Clause** requires employers to keep the workplace free of recognized serious hazards.
 
 If something looks unsafe, **stop and report it**. You won't be penalised for raising a safety concern.`,
         ),
@@ -420,7 +420,7 @@ If something looks unsafe, **stop and report it**. You won't be penalised for ra
         ),
         card(
           'Aerial and scissor lifts',
-          `- **Only trained and authorised people** may operate aerial lifts
+          `- **Only trained and authorized people** may operate aerial lifts
 - Test the controls **every day** before use
 - In a boom lift: stand on the basket floor and **tie off** to the boom or basket
 - OSHA treats **scissor lifts as scaffolds**: guardrails must be in place, and don't climb on them
@@ -428,12 +428,12 @@ If something looks unsafe, **stop and report it**. You won't be penalised for ra
         ),
         card(
           'Electrical and lifting',
-          `- **Don't touch** live or temporary power unless you're qualified and authorised
+          `- **Don't touch** live or temporary power unless you're qualified and authorized
 - Run cables so they don't create **trip hazards**, and report any damage
 - For lifting, the NIOSH guideline limit is **51 lb**, and that's under ideal conditions. Heavy, awkward or repeated lifts need a **team lift** or a trolley.`,
         ),
         quiz('OSHA check', [
-          q('Who may operate an aerial lift?', ['Anyone on the crew', 'Only trained and authorised people', 'Whoever is closest'], 1),
+          q('Who may operate an aerial lift?', ['Anyone on the crew', 'Only trained and authorized people', 'Whoever is closest'], 1),
           q('How does OSHA treat scissor lifts?', ['As scaffolds, needing guardrails', 'As ladders', 'As vehicles'], 0),
           q('Where do you find the hazards of a haze fluid?', ['Its Safety Data Sheet (SDS) and label', 'The event poster', 'Nowhere'], 0),
         ]),

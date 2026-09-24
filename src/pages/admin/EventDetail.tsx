@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Clock, Megaphone, Pencil, ScanLine, Shirt, Sparkles, 
 import { Avatar, Button, Card, DateBadge, Empty, Input, Modal, PageHeader, Pill, Progress, RolePill, Stars, Tabs } from '../../components/ui';
 import { avgRating, eventReadiness } from '../../lib/readiness';
 import { cn, countdown, fmtDate, fmtTime, pct } from '../../lib/utils';
+import { useCrewEmail } from '../../lib/email';
 import { useCatalog, useStore } from '../../store';
 import type { AssignmentStatus, EventItem, Shift, Staff } from '../../types';
 
@@ -26,6 +27,7 @@ export default function EventDetail() {
   const [tab, setTab] = useState<Tab>('roster');
   const [adding, setAdding] = useState<Shift | null>(null);
   const [scan, setScan] = useState('');
+  const { send: sendEmail } = useCrewEmail();
 
   if (!ev) return <Empty title="Event not found" />;
 
@@ -158,8 +160,7 @@ export default function EventDetail() {
                 onClick={() => {
                   const ids = ev.assignments.filter((a) => !eventReadiness(person(a.staffId)!, cat, ev).ready).map((a) => a.staffId);
                   if (!ids.length) return store.toast('Everyone is ready 🎉');
-                  store.nudge(ids);
-                  store.toast(`Reminded ${ids.length} crew to finish onboarding`, '📣');
+                  void sendEmail('reminder', ids);
                 }}
               >
                 <Megaphone size={16} /> Nudge not-ready crew
@@ -195,7 +196,7 @@ export default function EventDetail() {
                       const missing = r.items.filter((i) => !i.done);
                       return (
                         <div key={a.staffId} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                          <Avatar name={s.name} size="sm" />
+                          <Avatar name={s.name} photo={s.photo} size="sm" />
                           <div className="min-w-40 flex-1">
                             <Link to={`/admin/crew/${s.id}`} className="text-sm font-medium text-slate-900 hover:underline">
                               {s.name}
@@ -227,7 +228,7 @@ export default function EventDetail() {
                 </Card>
               );
             })}
-            {ev.shifts.length === 0 && <Empty title="No shifts yet">Edit the event to add shifts.</Empty>}
+            {ev.shifts.length === 0 && <Empty title="No shifts yet" />}
           </div>
         )}
 
@@ -237,7 +238,6 @@ export default function EventDetail() {
               <h3 className="flex items-center gap-2 font-semibold">
                 <ScanLine size={18} /> Scan crew pass
               </h3>
-              <p className="mt-1 text-sm text-slate-500">Scan the QR on a crew member's phone, or type their pass code / name.</p>
               <form
                 className="mt-4 flex gap-2"
                 onSubmit={(e) => {
@@ -257,7 +257,7 @@ export default function EventDetail() {
                   const role = cat.roles.find((r) => r.id === ev.shifts.find((x) => x.id === a.shiftId)?.roleId);
                   return (
                     <div key={a.staffId} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                      <Avatar name={s.name} size="sm" />
+                      <Avatar name={s.name} photo={s.photo} size="sm" />
                       <div className="flex-1">
                         <div className="text-sm font-medium">{s.name}</div>
                         <div className="text-xs text-slate-500">
@@ -332,7 +332,6 @@ export default function EventDetail() {
                   {c.name} <span className="text-slate-500">— {c.title}, {c.phone}</span>
                 </div>
               ))}
-              <p className="mt-6 rounded-lg bg-slate-50 p-3 text-slate-500">This is exactly what rostered crew see in their app under “Shifts”.</p>
             </Card>
           </div>
         )}
@@ -363,7 +362,7 @@ export default function EventDetail() {
 function CandidateRow({ s, pctReady, onAdd }: { s: Staff; pctReady: number; onAdd: () => void }) {
   return (
     <div className="flex flex-wrap items-center gap-3 py-3">
-      <Avatar name={s.name} size="sm" />
+      <Avatar name={s.name} photo={s.photo} size="sm" />
       <div className="min-w-40 flex-1">
         <div className="text-sm font-medium">
           {s.name} {s.status === 'inactive' && <Pill className="ml-1 bg-violet-50 text-violet-700">Alumni — re-engage</Pill>}
@@ -394,7 +393,6 @@ function WrapUp({ ev }: { ev: EventItem }) {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div>
           <h3 className="font-semibold">Rate your crew</h3>
-          <p className="text-sm text-slate-500">Ratings build each person's reliability score, so your best people get first pick of future shifts.</p>
         </div>
         {ev.status !== 'completed' ? (
           <Button
@@ -416,7 +414,7 @@ function WrapUp({ ev }: { ev: EventItem }) {
           if (!s) return null;
           return (
             <div key={a.staffId} className="flex items-center gap-3 px-5 py-3">
-              <Avatar name={s.name} size="sm" />
+              <Avatar name={s.name} photo={s.photo} size="sm" />
               <div className="flex-1 text-sm font-medium">{s.name}</div>
               <Stars value={a.rating ?? 0} onChange={ev.status === 'completed' ? undefined : (v) => rate(ev.id, s.id, v)} size={20} />
             </div>

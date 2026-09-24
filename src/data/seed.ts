@@ -2,6 +2,8 @@ import type { Activity, CertType, Contract, DocTemplate, EventItem, Role, Staff,
 import { COURSES } from './courses';
 import { addDays, addMonths, toDateISO, uid } from '../lib/utils';
 import { draftContract } from '../lib/contracts';
+import { demoPhone, demoPhoto } from '../lib/profile';
+import { BUILT_IN_EVENT_TEMPLATES } from './eventTemplates';
 
 export const DOCS: DocTemplate[] = [
   {
@@ -183,7 +185,7 @@ function buildStaff(): Staff[] {
       id,
       name: p.name,
       email: p.name.toLowerCase().replace(/[^a-z]+/g, '.').replace(/\.$/, '') + '@mail.com',
-      phone: `+1 555 01${String(10 + idx).padStart(2, '0')}`,
+      phone: demoPhone(idx),
       language: p.lang ?? 'English',
       roleIds: p.roles,
       status: 'onboarding' as StaffStatus,
@@ -253,6 +255,8 @@ function buildStaff(): Staff[] {
     } else {
       s.status = 'invited';
     }
+    // Everyone who has signed up has a photo. The demo crew are fictional, so they get illustrations.
+    if (s.status !== 'invited') s.photo = demoPhoto(p.name);
     return s;
   });
 }
@@ -450,6 +454,7 @@ export function buildSeed() {
     events,
     activity: buildActivity(),
     contracts: buildContracts(staff, events),
+    eventTemplates: structuredClone(BUILT_IN_EVENT_TEMPLATES),
     inviteCode: 'CREW2026',
     // The crew manager's company profile: printed on every document and contract.
     orgName: ORG_NAME,

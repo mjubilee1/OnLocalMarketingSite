@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Download, FilePlus2, FileSignature } from 'lucide-react';
 import { Avatar, Button, Card, Empty, Field, Modal, PageHeader, Select, Tabs } from '../../components/ui';
 import { ContractStagePill } from '../../components/contract';
-import { draftContract, stage, TEMPLATE_NAME } from '../../lib/contracts';
+import { draftContract, stage } from '../../lib/contracts';
 import { fmtDate, relTime } from '../../lib/utils';
 import { useCatalog, useCompany, useStore } from '../../store';
 
@@ -37,9 +37,6 @@ export function NewContractModal({ open, onClose, staffId: presetStaff }: { open
   return (
     <Modal open={open} onClose={onClose} title="New contract">
       <div className="space-y-4">
-        <p className="text-sm text-slate-500">
-          Uses your <strong>{TEMPLATE_NAME}</strong> template. Pick who it's for and we'll pre-fill the dates, services and pay. You can change everything before sending.
-        </p>
         {!presetStaff && (
           <Field label="Crew member (Service Provider)">
             <Select value={staffId} onChange={(e) => setStaffId(e.target.value)}>
@@ -54,7 +51,7 @@ export function NewContractModal({ open, onClose, staffId: presetStaff }: { open
             </Select>
           </Field>
         )}
-        <Field label="For an event (optional)" hint={person && !theirEvents.length ? `${person.name} isn't rostered on any upcoming events.` : 'Pre-fills the dates and services from the event and their shift.'}>
+        <Field label="For an event (optional)" hint={person && !theirEvents.length ? `${person.name} isn't rostered on any upcoming events.` : undefined}>
           <Select value={eventId} onChange={(e) => setEventId(e.target.value)} disabled={!person}>
             <option value="">General services agreement</option>
             {theirEvents.map((e) => (
@@ -102,12 +99,7 @@ export default function Contracts() {
     <>
       <PageHeader
         title="Contracts"
-        sub={
-          <>
-            {TEMPLATE_NAME}: fill in the details, both parties sign online, and either side can download the PDF.
-            {needsMe > 0 && <span className="ml-1 font-medium text-violet-700">{needsMe} waiting for your signature.</span>}
-          </>
-        }
+        sub={needsMe > 0 && <span className="font-medium text-violet-700">{needsMe} waiting for your signature.</span>}
         actions={
           <>
             <Button
@@ -160,7 +152,7 @@ export default function Contracts() {
                     </td>
                     <td className="px-2 py-3">
                       <div className="flex items-center gap-2">
-                        <Avatar name={c.staff.name} size="sm" /> {s?.name ?? c.staff.name}
+                        <Avatar name={c.staff.name} photo={s?.photo} size="sm" /> {s?.name ?? c.staff.name}
                       </div>
                     </td>
                     <td className="px-2 py-3 text-slate-600">{e ? e.name : '—'}</td>
@@ -175,9 +167,7 @@ export default function Contracts() {
           </table>
         ) : (
           <div className="p-6">
-            <Empty icon={<FileSignature size={28} />} title="No contracts here">
-              Create one from here or from a crew member's profile.
-            </Empty>
+            <Empty icon={<FileSignature size={28} />} title="No contracts here" />
           </div>
         )}
       </Card>

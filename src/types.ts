@@ -19,6 +19,8 @@ export interface Lesson {
   body?: string;
   videoUrl?: string;
   questions?: Question[];
+  /** Stock photo shown above a card's text. */
+  image?: CoverImage;
 }
 
 export interface Course {
@@ -34,6 +36,19 @@ export interface Course {
   lessons: Lesson[];
   /** Set when the course was added from the template library. */
   templateId?: string;
+  /** Course cover photo from a licensed stock library, with the credit its license requires. */
+  cover?: CoverImage;
+}
+
+export interface CoverImage {
+  url: string;
+  thumb: string;
+  alt?: string;
+  credit: string;
+  creditUrl?: string;
+  sourceUrl?: string;
+  provider: 'pexels' | 'unsplash' | 'openverse';
+  license?: string;
 }
 
 // ---------- Paperwork & compliance ----------
@@ -97,6 +112,8 @@ export interface Staff {
   name: string;
   email: string;
   phone: string;
+  /** Small square JPEG data URL; required before they can work (see lib/profile.ts). */
+  photo?: string;
   language: string;
   roleIds: ID[];
   status: StaffStatus;
@@ -111,6 +128,10 @@ export interface Staff {
   eventsWorked: number;
   lastNudgedAt?: string;
   notes?: string;
+  /** Random token in their personal invite link (not a secret: it only pre-fills the sign-up form). */
+  inviteToken?: string;
+  /** Outcome of the last invite or reminder email, so managers see what actually happened. */
+  lastEmail?: { kind: 'invite' | 'reminder'; at: string; ok: boolean; error?: string };
 }
 
 // ---------- Events ----------
@@ -162,6 +183,23 @@ export interface EventItem {
   schedule: ScheduleItem[];
   shifts: Shift[];
   assignments: Assignment[];
+}
+
+/** The reusable part of an event: everything except its name, date, status and roster. */
+export type EventBody = Pick<EventItem, 'venue' | 'address' | 'callTime' | 'description' | 'dressCode' | 'parking' | 'color' | 'courseIds' | 'contacts' | 'schedule' | 'shifts'>;
+
+export interface EventTemplate {
+  id: ID;
+  name: string;
+  /** For managers: when to use this template. */
+  summary: string;
+  emoji: string;
+  body: EventBody;
+  /** Shipped with the app (editable, and restorable to the original). */
+  builtIn: boolean;
+  createdAt: string;
+  updatedAt: string;
+  timesUsed: number;
 }
 
 export interface Activity {

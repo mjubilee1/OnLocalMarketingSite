@@ -4,6 +4,7 @@ import { Avatar, Button, Card, DateBadge, PageHeader, Progress, Stat } from '../
 import { avgRating, eventReadiness, expiringCerts, readiness } from '../../lib/readiness';
 import { level } from '../../lib/badges';
 import { countdown, daysUntil, pct, relTime } from '../../lib/utils';
+import { useCrewEmail } from '../../lib/email';
 import { useCatalog, useStore } from '../../store';
 import type { Activity } from '../../types';
 import { stage } from '../../lib/contracts';
@@ -26,8 +27,7 @@ export default function Dashboard() {
   const orgConfigured = useStore((s) => s.orgConfigured);
   const orgName = useStore((s) => s.orgName);
   const managerName = useStore((s) => s.managerName);
-  const nudge = useStore((s) => s.nudge);
-  const toast = useStore((s) => s.toast);
+  const { send: sendEmail } = useCrewEmail();
   const cat = useCatalog();
 
   const current = staff.filter((s) => s.status !== 'inactive');
@@ -68,7 +68,6 @@ export default function Dashboard() {
     <>
       <PageHeader
         title={'Good morning, ' + managerName.split(' ')[0] + ' 👋'}
-        sub="Here's how your crew is tracking for upcoming events."
         actions={
           <>
             <Link to="/admin/invite">
@@ -76,7 +75,7 @@ export default function Dashboard() {
                 <UserPlus size={16} /> Invite crew
               </Button>
             </Link>
-            <Link to="/admin/events/new">
+            <Link to="/admin/events?new=1">
               <Button>
                 <CalendarDays size={16} /> New event
               </Button>
@@ -168,8 +167,7 @@ export default function Dashboard() {
                   variant="secondary"
                   onClick={() => {
                     const ids = Array.from(new Set(atRisk.map((x) => x.s.id)));
-                    nudge(ids);
-                    toast(`Reminders sent to ${ids.length} crew`, '📣');
+                    void sendEmail('reminder', ids);
                   }}
                 >
                   <Megaphone size={14} /> Nudge all at-risk
@@ -181,7 +179,7 @@ export default function Dashboard() {
                 const r = eventReadiness(s, cat, e);
                 return (
                   <div key={e.id + s.id} className="flex items-center gap-3 px-5 py-3">
-                    <Avatar name={s.name} size="sm" />
+                    <Avatar name={s.name} photo={s.photo} size="sm" />
                     <div className="flex-1">
                       <Link to={`/admin/crew/${s.id}`} className="font-medium text-slate-900 hover:underline">
                         {s.name}
@@ -261,7 +259,7 @@ export default function Dashboard() {
               {leaders.map((s, i) => (
                 <li key={s.id} className="flex items-center gap-3 px-5 py-3">
                   <span className="w-5 text-center text-sm font-bold text-slate-400">{['🥇', '🥈', '🥉'][i] ?? i + 1}</span>
-                  <Avatar name={s.name} size="sm" />
+                  <Avatar name={s.name} photo={s.photo} size="sm" />
                   <div className="flex-1">
                     <div className="text-sm font-medium text-slate-900">{s.name}</div>
                     <div className="text-xs text-slate-500">

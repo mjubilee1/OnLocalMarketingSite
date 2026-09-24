@@ -1,3 +1,4 @@
+import { demoPhone, demoPhoto, phoneOk } from './lib/profile';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
@@ -8,12 +9,14 @@ import type {
   Course,
   DocTemplate,
   EventItem,
+  EventTemplate,
   HeldCert,
   ID,
   Role,
   Staff,
 } from './types';
 import { buildSeed } from './data/seed';
+import { BUILT_IN_EVENT_TEMPLATES } from './data/eventTemplates';
 import { readiness, requirements } from './lib/readiness';
 import { badge } from './lib/badges';
 import { uid } from './lib/utils';
@@ -44,9 +47,13 @@ interface Actions {
   removeCert: (staffId: ID, certId: ID) => void;
 
   // people
-  createStaff: (p: Pick<Staff, 'name' | 'email' | 'phone' | 'roleIds' | 'language'> & { status?: Staff['status'] }) => ID;
+  createStaff: (p: Pick<Staff, 'name' | 'email' | 'phone' | 'photo' | 'roleIds' | 'language'> & { status?: Staff['status'] }) => ID;
   updateStaff: (id: ID, patch: Partial<Staff>) => void;
   nudge: (ids: ID[]) => void;
+  /** Records real email outcomes (from /api/email/send) on each person and in the activity feed. */
+  logEmails: (kind: 'invite' | 'reminder', results: { id: ID; ok: boolean; error?: string }[]) => void;
+  /** A person accepts their personal invite: fill in their details and start onboarding. */
+  acceptInvite: (id: ID, p: Pick<Staff, 'name' | 'email' | 'phone' | 'photo' | 'roleIds' | 'language'>) => void;
 
   // content
   upsertCourse: (c: Course) => void;
@@ -66,6 +73,13 @@ interface Actions {
   setAssignmentStatus: (eventId: ID, staffId: ID, status: AssignmentStatus) => void;
   rate: (eventId: ID, staffId: ID, rating: number) => void;
   completeEvent: (eventId: ID) => void;
+
+  // event templates
+  upsertEventTemplate: (t: EventTemplate) => void;
+  deleteEventTemplate: (id: ID) => void;
+  /** Reset a built-in template to the version shipped with the app. */
+  restoreEventTemplate: (id: ID) => void;
+  noteTemplateUsed: (id: ID) => void;
 
   // company
   /** Saves the company profile and refreshes every contract nobody has signed yet. Returns how many changed. */
@@ -216,6 +230,7 @@ export const useStore = create<State>()(
             id,
             ...p,
             status: p.status ?? 'onboarding',
+            inviteToken: uid('inv-') + uid(),
             createdAt: new Date().toISOString(),
             points: 0,
             badges: [],
@@ -232,15 +247,30 @@ export const useStore = create<State>()(
           return id;
         },
         updateStaff: (id, patch) => patchStaff(id, (s) => Object.assign(s, patch)),
+        // Marks a reminder as attempted. Whether an email actually went out is recorded by logEmails.
         nudge: (ids) => {
           const now = new Date().toISOString();
+          set((st) => ({ staff: st.staff.map((s) => (ids.includes(s.id) ? { ...s, lastNudgedAt: now } : s)) }));
+        },
+        logEmails: (kind, results) => {
+          const at = new Date().toISOString();
+          const byId = new Map(results.map((r) => [r.id, r]));
+          const ok = results.filter((r) => r.ok);
+          const failed = results.filter((r) => !r.ok);
+          const noun = kind === 'invite' ? 'Invite' : 'Reminder';
+          const acts: Activity[] = [];
+          if (ok.length) acts.push(act(kind === 'invite' ? 'staff' : 'nudge', ok.length === 1 ? `${noun} emailed to ${nameOf(ok[0]!.id)}` : `${noun}s emailed to ${ok.length} crew`));
+          if (failed.length) acts.push(act('nudge', `${noun} email failed for ${failed.length === 1 ? nameOf(failed[0]!.id) : `${failed.length} crew`}`));
           set((st) => ({
-            staff: st.staff.map((s) => (ids.includes(s.id) ? { ...s, lastNudgedAt: now } : s)),
-            activity: [
-              act('nudge', ids.length === 1 ? `Reminder sent to ${nameOf(ids[0]!)} (SMS + email)` : `Reminders sent to ${ids.length} crew (SMS + email)`),
-              ...st.activity,
-            ],
+            staff: st.staff.map((s) => {
+              const r = byId.get(s.id);
+              return r ? { ...s, lastEmail: { kind, at, ok: r.ok, error: r.error } } : s;
+            }),
+            activity: [...acts, ...st.activity].slice(0, 80),
           }));
+        },
+        acceptInvite: (id, p) => {
+          patchStaff(id, (s) => Object.assign(s, p, { status: 'onboarding' }), [act('staff', `${p.name} accepted their invite and joined`)]);
         },
 
         upsertCourse: (c) => set((st) => ({ courses: st.courses.some((x) => x.id === c.id) ? st.courses.map((x) => (x.id === c.id ? c : x)) : [...st.courses, c] })),
@@ -310,6 +340,22 @@ export const useStore = create<State>()(
           }
           set((st) => ({ activity: [act('event', `${ev.name} wrapped — ratings saved to crew profiles`), ...st.activity] }));
         },
+
+        upsertEventTemplate: (t) =>
+          set((st) => {
+            const next = { ...t, updatedAt: new Date().toISOString() };
+            return { eventTemplates: st.eventTemplates.some((x) => x.id === t.id) ? st.eventTemplates.map((x) => (x.id === t.id ? next : x)) : [next, ...st.eventTemplates] };
+          }),
+        deleteEventTemplate: (id) => set((st) => ({ eventTemplates: st.eventTemplates.filter((t) => t.id !== id) })),
+        restoreEventTemplate: (id) =>
+          set((st) => {
+            const original = BUILT_IN_EVENT_TEMPLATES.find((t) => t.id === id);
+            if (!original) return {};
+            const current = st.eventTemplates.find((t) => t.id === id);
+            const restored = { ...structuredClone(original), timesUsed: current?.timesUsed ?? 0 };
+            return { eventTemplates: current ? st.eventTemplates.map((t) => (t.id === id ? restored : t)) : [...st.eventTemplates, restored] };
+          }),
+        noteTemplateUsed: (id) => set((st) => ({ eventTemplates: st.eventTemplates.map((t) => (t.id === id ? { ...t, timesUsed: t.timesUsed + 1 } : t)) })),
 
         updateCompany: (p) => {
           const at = new Date().toISOString();
@@ -386,12 +432,22 @@ export const useStore = create<State>()(
     },
     {
       name: 'onlocalai-v1',
-      version: 2,
-      // v1 stored document text with the demo company name baked in; switch it to the placeholder.
+      version: 3,
       migrate: (persisted: any, version) => {
+        // v1 stored document text with the demo company name baked in; switch it to the placeholder.
         if (version < 2 && persisted?.docs) {
           const old = persisted.orgName || 'onlocalAI Events';
           persisted.docs = persisted.docs.map((d: DocTemplate) => ({ ...d, body: d.body.split(old).join('{{company}}') }));
+        }
+        // v3 made a photo and a valid mobile required. Fix up the fictional demo crew (ids s-1, s-2, …);
+        // real crew added since are left alone, so the app asks them for what's missing.
+        if (version < 3 && Array.isArray(persisted?.staff)) {
+          persisted.staff = persisted.staff.map((s: Staff) => {
+            const m = /^s-(\d{1,3})$/.exec(s.id);
+            if (!m) return s;
+            const n = Number(m[1]) - 1;
+            return { ...s, phone: phoneOk(s.phone) ? s.phone : demoPhone(n), photo: s.photo ?? (s.status !== 'invited' ? demoPhoto(s.name) : undefined) };
+          });
         }
         return persisted;
       },

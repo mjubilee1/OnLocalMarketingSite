@@ -2,6 +2,7 @@ import type { Course, DocTemplate, Role } from '../types';
 import type { LibraryCourse, LibraryDoc, RoleTag } from '../data/library/types';
 import { useStore } from '../store';
 import { uid } from './utils';
+import { queueAutoCover } from './images';
 
 /** Map a template's recommended role tags onto the roles this company actually has. */
 export function recommendedRoleIds(tags: RoleTag[], roles: Role[]): string[] {
@@ -29,7 +30,10 @@ export function addCourseTemplate(t: LibraryCourse, roleIds: string[], published
   const st = useStore.getState();
   const existing = installedCourse(t.course.id);
   const course = existing ?? cloneTemplateCourse(t, published);
-  if (!existing) st.upsertCourse(course);
+  if (!existing) {
+    st.upsertCourse(course);
+    queueAutoCover(course.id);
+  }
   for (const r of useStore.getState().roles.filter((x) => roleIds.includes(x.id) && !x.courseIds.includes(course.id))) {
     useStore.getState().upsertRole({ ...r, courseIds: [...r.courseIds, course.id] });
   }

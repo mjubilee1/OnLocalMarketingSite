@@ -175,7 +175,6 @@ export default function Briefing() {
             {role?.name} • {ev.name}
           </div>
           <div className="mt-3 inline-block rounded-lg bg-slate-100 px-3 py-1 font-mono text-sm">Pass code: {me.id.toUpperCase()}</div>
-          <p className="mt-4 text-xs text-slate-400">Show this at the crew entrance. Your supervisor scans it to check you in.</p>
         </div>
       </Modal>
     </div>

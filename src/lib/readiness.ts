@@ -1,5 +1,6 @@
 import type { CertType, Course, DocTemplate, EventItem, HeldCert, ID, Role, Staff } from '../types';
 import { daysUntil } from './utils';
+import { profileMissing } from './profile';
 
 export interface Catalog {
   roles: Role[];
@@ -8,7 +9,7 @@ export interface Catalog {
   certTypes: CertType[];
 }
 
-export type ReqKind = 'doc' | 'course' | 'cert';
+export type ReqKind = 'profile' | 'doc' | 'course' | 'cert';
 
 export interface ReqItem {
   kind: ReqKind;
@@ -56,6 +57,18 @@ export function requirements(s: Staff, cat: Catalog, roleIds: ID[] = s.roleIds, 
 export function readiness(s: Staff, cat: Catalog, roleIds?: ID[], extraCourseIds: ID[] = []): Readiness {
   const req = requirements(s, cat, roleIds, extraCourseIds);
   const items: ReqItem[] = [];
+
+  // Everyone needs a photo and mobile number, whatever their roles.
+  const missing = profileMissing(s);
+  items.push({
+    kind: 'profile',
+    id: 'profile',
+    label: 'Add your photo and mobile number',
+    done: !missing.length,
+    progress: missing.length ? (2 - missing.length) / 2 : 1,
+    detail: missing.length ? `Missing: ${missing.join(' and ')}` : undefined,
+    minutes: 1,
+  });
 
   for (const id of req.docIds) {
     const d = cat.docs.find((x) => x.id === id);
