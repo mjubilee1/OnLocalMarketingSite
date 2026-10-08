@@ -13,6 +13,7 @@ export function SceneBoard({
   flashId,
   wrongIds,
   dragIds,
+  slotIds,
   onDrop,
   className,
 }: {
@@ -24,6 +25,7 @@ export function SceneBoard({
   flashId?: string;
   wrongIds?: string[];
   dragIds?: string[];
+  slotIds?: string[];
   onDrop?: (id: string, pose: Pose) => void;
   className?: string;
 }) {
@@ -31,6 +33,7 @@ export function SceneBoard({
   const hi = new Set(highlightIds ?? []);
   const drag = new Set(dragIds ?? []);
   const wrong = new Set(wrongIds ?? []);
+  const slots = slotIds ?? [];
 
   return (
     <div
@@ -48,6 +51,26 @@ export function SceneBoard({
           </>
         )}
       </svg>
+      {slots.map((id) => {
+        const it = scene.items.find((x) => x.id === id);
+        if (!it) return null;
+        const st = styleOf(it.kind);
+        return (
+          <div
+            key={`slot-${id}`}
+            aria-hidden
+            className="pointer-events-none absolute rounded-full border-2 border-dashed border-indigo-400 bg-indigo-50/50"
+            style={{
+              left: `${it.x}%`,
+              top: `${it.y}%`,
+              width: `${Math.max(st.w, 10)}%`,
+              height: `${Math.max(st.w, 10)}%`,
+              transform: 'translate(-50%, -50%)',
+              zIndex: 5,
+            }}
+          />
+        );
+      })}
       {scene.items
         .slice()
         .sort((a, b) => (a.z ?? 0) - (b.z ?? 0))
@@ -93,22 +116,9 @@ function Glyph({
 
   return (
     <motion.div
-      key={dragGen}
-      drag={draggable}
-      dragMomentum={false}
-      dragElastic={0.12}
-      whileDrag={{ scale: scale * 1.12, zIndex: 40, cursor: 'grabbing' }}
-      onDragEnd={(_e, info) => {
-        if (!onDrop) return;
-        const parent = (_e.target as HTMLElement).closest('[data-scene-board]');
-        if (!parent) return;
-        const r = parent.getBoundingClientRect();
-        const x = ((info.point.x - r.left) / r.width) * 100;
-        const y = ((info.point.y - r.top) / r.height) * 100;
-        onDrop(item.id, { x, y, rotation: item.rotation, scale: item.scale });
-        setDragGen((n) => n + 1);
-      }}
-      initial={{ left, top, rotate: item.rotation ?? 0, scale, opacity: 1 }}
+      className={cn('absolute z-10 flex flex-col items-center', wrong && 'anim-shake')}
+      style={{ left, top, width: `${st.w}%`, x: '-50%', y: '-50%', zIndex: highlight ? 20 : item.z ?? 1 }}
+      initial={false}
       animate={{
         left,
         top,
@@ -117,27 +127,40 @@ function Glyph({
         opacity: dim ? 0.28 : 1,
       }}
       transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-      role={draggable ? 'button' : 'img'}
-      aria-label={item.label}
-      className={cn(
-        'absolute z-10 flex -translate-x-1/2 -translate-y-1/2 touch-none flex-col items-center',
-        draggable && 'cursor-grab active:cursor-grabbing',
-        wrong && 'anim-shake',
-      )}
-      style={{ width: `${st.w}%` }}
     >
-      <svg viewBox={`0 0 ${st.w} ${st.h}`} className="h-auto w-full drop-shadow-sm" overflow="visible">
-        {st.shape === 'circle' && (
-          <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
-        )}
-        {st.shape === 'ellipse' && (
-          <ellipse cx={st.w / 2} cy={st.h / 2} rx={st.w / 2 - 0.5} ry={st.h / 2 - 0.5} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
-        )}
-        {st.shape === 'rect' && (
-          <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
-        )}
-      </svg>
-      <span className="mt-0.5 max-w-[4.5rem] truncate text-[9px] font-semibold text-slate-600">{item.label}</span>
+      <motion.div
+        key={dragGen}
+        drag={draggable}
+        dragMomentum={false}
+        dragElastic={0.12}
+        whileDrag={{ scale: 1.12, cursor: 'grabbing', zIndex: 40 }}
+        onDragEnd={(_e, info) => {
+          if (!onDrop) return;
+          const parent = (_e.target as HTMLElement).closest('[data-scene-board]');
+          if (!parent) return;
+          const r = parent.getBoundingClientRect();
+          const x = ((info.point.x - r.left) / r.width) * 100;
+          const y = ((info.point.y - r.top) / r.height) * 100;
+          onDrop(item.id, { x, y, rotation: item.rotation, scale: item.scale });
+          setDragGen((n) => n + 1);
+        }}
+        role={draggable ? 'button' : 'img'}
+        aria-label={item.label}
+        className={cn('flex touch-none flex-col items-center', draggable && 'cursor-grab active:cursor-grabbing')}
+      >
+        <svg viewBox={`0 0 ${st.w} ${st.h}`} className="h-auto w-full drop-shadow-sm" overflow="visible">
+          {st.shape === 'circle' && (
+            <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
+          )}
+          {st.shape === 'ellipse' && (
+            <ellipse cx={st.w / 2} cy={st.h / 2} rx={st.w / 2 - 0.5} ry={st.h / 2 - 0.5} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+          )}
+          {st.shape === 'rect' && (
+            <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+          )}
+        </svg>
+        <span className="mt-0.5 max-w-[4.5rem] truncate text-[9px] font-semibold text-slate-600">{item.label}</span>
+      </motion.div>
     </motion.div>
   );
 }

@@ -308,6 +308,7 @@ function PlaceCheck({
         scene={spec.scene}
         poses={poses}
         dragIds={check.itemIds.filter((id) => !locked.has(id))}
+        slotIds={check.itemIds.filter((id) => !locked.has(id))}
         highlightIds={[...locked]}
         wrongIds={wrong}
         onDrop={(id, pose) => {
