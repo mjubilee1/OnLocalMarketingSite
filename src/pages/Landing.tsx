@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CalendarDays, FileSignature, GraduationCap, QrCode, ShieldCheck, Smartphone, Trophy, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, FileSignature, GraduationCap, Play, QrCode, ShieldCheck, Smartphone, Trophy, Users } from 'lucide-react';
 import { Logo } from '../layouts/AdminLayout';
 import { useStore } from '../store';
 
@@ -38,6 +38,9 @@ export default function Landing() {
           </Link>
           <Link to="/app" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-slate-800 ring-1 ring-slate-200 hover:bg-slate-50">
             <Smartphone size={18} /> Open crew app
+          </Link>
+          <Link to="/demo" className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-indigo-700 hover:bg-indigo-50">
+            <Play size={18} /> Watch the demo
           </Link>
           <Link to={`/join/${code}`} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold text-indigo-700 hover:bg-indigo-50">
             <QrCode size={18} /> Try the sign-up flow

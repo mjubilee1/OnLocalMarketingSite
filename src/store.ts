@@ -21,6 +21,8 @@ import { readiness, requirements } from './lib/readiness';
 import { badge } from './lib/badges';
 import { uid } from './lib/utils';
 import type { CompanyProfile } from './lib/company';
+import type { TrainingAttempt, TrainingSpec } from './training/types';
+import { TRAINING_SPECS } from './data/training';
 
 type Data = ReturnType<typeof buildSeed>;
 
@@ -91,6 +93,9 @@ interface Actions {
   signContract: (id: ID, party: 'employer' | 'staff', signature: string, typed: boolean, termsHash: string, signatory?: string) => void;
   voidContract: (id: ID) => void;
   deleteContract: (id: ID) => void;
+
+  saveTrainingSpec: (draft: TrainingSpec, changeSummary: string) => void;
+  recordTrainingAttempt: (a: Omit<TrainingAttempt, 'id'>) => void;
 }
 
 export type State = Data & Actions;
@@ -169,6 +174,32 @@ export const useStore = create<State>()(
         },
         dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
         resetDemo: () => set({ ...buildSeed(), currentStaffId: 's-1', toasts: [] }),
+
+        saveTrainingSpec: (draft, changeSummary) => {
+          const current = get().trainingEdits[draft.id] ?? TRAINING_SPECS.find((s) => s.id === draft.id);
+          const version = (current?.version ?? draft.version) + (current ? 1 : 0);
+          const updatedAt = new Date().toISOString().slice(0, 10);
+          const moved = current
+            ? current.scene.items.filter((it) => {
+                const n = draft.scene.items.find((x) => x.id === it.id);
+                return n && (Math.abs(n.x - it.x) > 1 || Math.abs(n.y - it.y) > 1);
+              }).map((it) => it.id)
+            : [];
+          const saved: TrainingSpec = {
+            ...draft,
+            version: current ? version : draft.version,
+            updatedAt,
+            previousScene: current?.scene,
+            changeNotes: current
+              ? [...current.changeNotes, { version, date: updatedAt, summary: changeSummary, itemIds: moved }]
+              : draft.changeNotes,
+          };
+          set((st) => ({ trainingEdits: { ...st.trainingEdits, [saved.id]: saved } }));
+        },
+        recordTrainingAttempt: (a) =>
+          set((st) => ({
+            trainingAttempts: [{ ...a, id: uid('ta-') }, ...st.trainingAttempts].slice(0, 200),
+          })),
 
         completeLesson: (staffId, courseId, lessonId, quizScore) => {
           const course = get().courses.find((c) => c.id === courseId);
@@ -432,7 +463,7 @@ export const useStore = create<State>()(
     },
     {
       name: 'onlocalai-v1',
-      version: 3,
+      version: 4,
       migrate: (persisted: any, version) => {
         // v1 stored document text with the demo company name baked in; switch it to the placeholder.
         if (version < 2 && persisted?.docs) {
@@ -448,6 +479,10 @@ export const useStore = create<State>()(
             const n = Number(m[1]) - 1;
             return { ...s, phone: phoneOk(s.phone) ? s.phone : demoPhone(n), photo: s.photo ?? (s.status !== 'invited' ? demoPhoto(s.name) : undefined) };
           });
+        }
+        if (version < 4) {
+          persisted.trainingEdits = persisted.trainingEdits ?? {};
+          persisted.trainingAttempts = persisted.trainingAttempts ?? [];
         }
         return persisted;
       },
@@ -479,3 +514,11 @@ export const useCurrentStaff = () => {
   const staff = useStore((s) => s.staff);
   return staff.find((s) => s.id === id) ?? staff[0]!;
 };
+
+export const useTrainingModules = (): TrainingSpec[] => {
+  const edits = useStore((s) => s.trainingEdits);
+  const extra = Object.values(edits).filter((e) => !TRAINING_SPECS.some((s) => s.id === e.id));
+  return [...TRAINING_SPECS.map((s) => edits[s.id] ?? s), ...extra];
+};
+
+export const useTrainingModule = (id: string | undefined) => useTrainingModules().find((s) => s.id === id);

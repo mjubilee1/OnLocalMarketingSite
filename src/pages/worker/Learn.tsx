@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { CircleCheck, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CircleCheck, Play, Star } from 'lucide-react';
 import { CourseCard, CoverBadge } from '../../components/courseCard';
 import { courseProgress, requirements } from '../../lib/readiness';
-import { useCatalog, useCurrentStaff, useStore } from '../../store';
+import { useCatalog, useCurrentStaff, useStore, useTrainingModules } from '../../store';
 import type { Course } from '../../types';
 
 function Card({ c, prog, required, provider, compact }: { c: Course; prog: number; required?: boolean; provider: string; compact?: boolean }) {
@@ -59,10 +60,33 @@ export default function Learn() {
   const done = required.filter((c) => courseProgress(me, c) === 1);
   const extra = cat.courses.filter((c) => c.published && !reqIds.includes(c.id));
   const provider = (c: Course) => (c.templateId ? 'onlocalAI Library' : orgName);
+  const setups = useTrainingModules();
 
   return (
     <div className="px-4 py-6">
       <h1 className="text-2xl font-bold">Learn</h1>
+
+      {setups.length > 0 && (
+        <section className="mt-6">
+          <h2 className="text-base font-semibold text-slate-900">Tonight’s setup</h2>
+          <p className="mt-0.5 text-xs text-slate-500">Watch the standard, then rebuild it. You can’t skip the check.</p>
+          <div className="mt-3 space-y-2">
+            {setups.map((m) => (
+              <Link key={m.id} to={`/app/setup/${m.id}`} className="flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200">
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">{m.title}</div>
+                  <div className="text-xs text-slate-500">
+                    {m.department} · v{m.version}
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1 text-sm font-medium text-indigo-700">
+                  <Play size={14} /> Train
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {todo.length > 0 && (
         <section className="mt-6">

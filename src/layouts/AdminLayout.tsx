@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
-import { Building2, CalendarDays, FileSignature, GraduationCap, LayoutDashboard, ListChecks, Menu, QrCode, RotateCcw, ScrollText, Smartphone, Users, X } from 'lucide-react';
+import { Building2, CalendarDays, FileSignature, GraduationCap, LayoutDashboard, ListChecks, Menu, QrCode, RotateCcw, ScrollText, Smartphone, UtensilsCrossed, Users, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useCompany, useStore } from '../store';
 import { initialsOf } from '../lib/company';
@@ -10,6 +10,7 @@ const NAV = [
   { to: '/admin/events', label: 'Events', icon: CalendarDays },
   { to: '/admin/crew', label: 'Crew', icon: Users },
   { to: '/admin/training', label: 'Training', icon: GraduationCap },
+  { to: '/admin/setup', label: 'Setup standards', icon: UtensilsCrossed },
   { to: '/admin/flows', label: 'Onboarding flows', icon: ListChecks },
   { to: '/admin/paperwork', label: 'Paperwork & certs', icon: FileSignature },
   { to: '/admin/contracts', label: 'Contracts', icon: ScrollText },

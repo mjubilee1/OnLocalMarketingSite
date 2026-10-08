@@ -1,4 +1,5 @@
 import type { Activity, CertType, Contract, DocTemplate, EventItem, Role, Staff, StaffStatus } from '../types';
+import type { TrainingAttempt } from '../training/types';
 import { COURSES } from './courses';
 import { addDays, addMonths, toDateISO, uid } from '../lib/utils';
 import { draftContract } from '../lib/contracts';
@@ -465,5 +466,49 @@ export function buildSeed() {
     managerTitle: 'Crew Manager',
     /** False until the manager saves their own company details. */
     orgConfigured: false,
+    trainingEdits: {} as Record<string, import('../training/types').TrainingSpec>,
+    trainingAttempts: seedTrainingAttempts(),
   };
+}
+
+function seedTrainingAttempts(): TrainingAttempt[] {
+  const at = (hoursAgo: number) => new Date(Date.now() - hoursAgo * 3600_000).toISOString();
+  return [
+    {
+      id: 'ta-jordan',
+      moduleId: 'banquet-plated-dinner',
+      staffId: 's-2',
+      version: 2,
+      startedAt: at(26),
+      completedAt: at(26),
+      durationMs: 94000,
+      firstTryAccuracy: 80,
+      mistakes: [{ checkId: 'place-protein', itemId: 'chicken' }],
+      passed: true,
+    },
+    {
+      id: 'ta-priya',
+      moduleId: 'banquet-plated-dinner',
+      staffId: 's-3',
+      version: 2,
+      startedAt: at(8),
+      completedAt: at(8),
+      durationMs: 61000,
+      firstTryAccuracy: 100,
+      mistakes: [],
+      passed: true,
+    },
+    {
+      id: 'ta-sofia',
+      moduleId: 'banquet-round-table',
+      staffId: 's-5',
+      version: 1,
+      startedAt: at(5),
+      completedAt: at(5),
+      durationMs: 72000,
+      firstTryAccuracy: 67,
+      mistakes: [{ checkId: 'spot-center', itemId: 'p0' }],
+      passed: true,
+    },
+  ];
 }
