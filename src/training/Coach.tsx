@@ -204,7 +204,13 @@ export function CoachFigure({ className }: { className?: string }) {
   const think = mood === 'think';
 
   return (
-    <div className={cn('flex w-[6.5rem] shrink-0 flex-col items-center sm:w-32', className)}>
+    <div className={cn('flex w-[7.25rem] shrink-0 flex-col items-center sm:w-36', className)}>
+      {line && (
+        <div className="relative mb-2 w-full rounded-2xl bg-indigo-50 px-2.5 py-2 text-[11px] leading-snug text-slate-700 ring-1 ring-indigo-100">
+          {think ? 'Let me check the standard…' : line}
+          <span className="absolute -bottom-1 right-7 h-2.5 w-2.5 rotate-45 bg-indigo-50 ring-1 ring-indigo-100" />
+        </div>
+      )}
       <motion.div
         className="relative"
         animate={{ y: talking ? [0, -3, 0] : listen ? [0, -1, 0] : [0, 4, 0] }}
@@ -219,15 +225,10 @@ export function CoachFigure({ className }: { className?: string }) {
           <rect x="30" y="80" width="28" height="18" rx="4" fill="#f8fafc" />
           <path d="M44 80 v22" stroke="#4f46e5" strokeWidth="3.2" strokeLinecap="round" />
           <circle cx="44" cy="86" r="2.2" fill="#4f46e5" />
-          <rect x="18" y="84" width="12" height="28" rx="6" fill="#1e293b" />
-          <rect x="58" y="84" width="12" height="28" rx="6" fill="#1e293b" />
-          <motion.g
-            animate={{ rotate: talking ? [0, 8, 0, -6, 0] : 0 }}
-            transition={{ duration: 0.7, repeat: talking ? Infinity : 0 }}
-            style={{ originX: 0.78, originY: 0.6 }}
-          >
-            <rect x="62" y="84" width="11" height="27" rx="6" fill="#0f172a" />
-            <rect x="63" y="108" width="9" height="8" rx="3" fill="#e8b894" />
+          <rect x="16" y="84" width="12" height="28" rx="6" fill="#1e293b" />
+          <motion.g animate={{ rotate: talking ? [0, 10, 0, -8, 0] : 0 }} transition={{ duration: 0.65, repeat: talking ? Infinity : 0 }} style={{ originX: 0.8, originY: 0.58 }}>
+            <rect x="60" y="84" width="12" height="28" rx="6" fill="#1e293b" />
+            <rect x="61" y="108" width="10" height="8" rx="3" fill="#e8b894" />
           </motion.g>
           <rect x="32" y="122" width="10" height="22" rx="4" fill="#0f172a" />
           <rect x="46" y="122" width="10" height="22" rx="4" fill="#0f172a" />
@@ -247,8 +248,7 @@ export function CoachFigure({ className }: { className?: string }) {
           <rect x="26" y="34" width="36" height="8" rx="3" fill="#111827" />
         </svg>
       </motion.div>
-      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-600">Alex</p>
-      <p className="mt-0.5 min-h-10 text-center text-[11px] leading-snug text-slate-600">{think ? '…' : line}</p>
+      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-600">Alex · captain</p>
     </div>
   );
 }
@@ -308,7 +308,7 @@ export function SceneRow({ lookingAt, children }: { lookingAt: LookingAt; childr
     setLookingAt(lookingAt);
   }, [lookingAt.phase, lookingAt.caption, lookingAt.highlights.join('|'), setLookingAt]);
   return (
-    <div className="flex items-end gap-2 sm:gap-4">
+    <div className="flex items-center gap-2 sm:gap-4">
       <div className="min-w-0 flex-1">{children}</div>
       <CoachFigure />
     </div>
