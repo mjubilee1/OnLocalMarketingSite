@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { Button } from '../components/ui';
-import { cn } from '../lib/utils';
+import { CoachBar, CoachProvider, SceneRow } from './Coach';
 import { SceneBoard, dist } from './SceneBoard';
+import { unlockAudio } from './voice';
 import type { Check as CheckSpec, Pose, SceneItem, TrainingSpec } from './types';
 
 type Phase = 'changed' | 'walk' | 'check' | 'done';
@@ -48,70 +49,70 @@ export function Player({
   };
 
   const [result, setResult] = useState<{ firstTryAccuracy: number; durationMs: number; passed: boolean } | null>(null);
-
-  if (phase === 'changed' && spec.previousScene) {
-    return (
-      <WhatChanged
-        spec={spec}
-        onDone={() => {
-          setStepI(0);
-          setPhase('walk');
-        }}
-      />
-    );
-  }
-
-  if (phase === 'walk') {
-    return (
-      <Walkthrough
-        spec={spec}
-        index={stepI}
-        setIndex={setStepI}
-        onDone={() => {
-          setCheckI(0);
-          setPhase('check');
-        }}
-      />
-    );
-  }
-
-  if (phase === 'check') {
-    const check = spec.checks[checkI];
-    if (!check) return null;
-    return (
-      <CheckPlay
-        key={check.id}
-        spec={spec}
-        check={check}
-        onFirstMiss={(itemId) => {
-          const k = check.kind === 'place' && itemId ? `${check.id}:${itemId}` : check.id;
-          if (!firstWrong.current.has(k)) {
-            firstWrong.current.add(k);
-            mistakes.current.push({ checkId: check.id, itemId });
-          }
-        }}
-        onPass={() => {
-          if (checkI + 1 >= spec.checks.length) finish(true);
-          else setCheckI((n) => n + 1);
-        }}
-      />
-    );
-  }
-
   const acc = result?.firstTryAccuracy ?? 100;
   const secs = Math.max(1, Math.round((result?.durationMs ?? 0) / 1000));
 
   return (
-    <div className="anim-pop px-1 py-4 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-        <Check size={28} />
-      </div>
-      <h2 className="mt-4 text-xl font-bold text-slate-900">First-try accuracy {acc}%</h2>
-      <p className="mt-1 text-sm text-slate-500">Finished in {secs}s. Wrong drops snap back — you can’t skip the standard.</p>
-      <Button className="mt-6 w-full" onClick={() => onExit?.()}>
-        Done
-      </Button>
-    </div>
+    <CoachProvider spec={spec}>
+      {phase === 'changed' && spec.previousScene && (
+        <WhatChanged
+          spec={spec}
+          onDone={() => {
+            unlockAudio();
+            setStepI(0);
+            setPhase('walk');
+          }}
+        />
+      )}
+      {phase === 'walk' && (
+        <Walkthrough
+          spec={spec}
+          index={stepI}
+          setIndex={setStepI}
+          onDone={() => {
+            unlockAudio();
+            setCheckI(0);
+            setPhase('check');
+          }}
+        />
+      )}
+      {phase === 'check' && spec.checks[checkI] && (
+        <CheckPlay
+          key={spec.checks[checkI]!.id}
+          spec={spec}
+          check={spec.checks[checkI]!}
+          onFirstMiss={(itemId) => {
+            const check = spec.checks[checkI]!;
+            const k = check.kind === 'place' && itemId ? `${check.id}:${itemId}` : check.id;
+            if (!firstWrong.current.has(k)) {
+              firstWrong.current.add(k);
+              mistakes.current.push({ checkId: check.id, itemId });
+            }
+          }}
+          onPass={() => {
+            if (checkI + 1 >= spec.checks.length) finish(true);
+            else setCheckI((n) => n + 1);
+          }}
+        />
+      )}
+      {phase === 'done' && (
+        <div className="anim-pop px-1 py-4 text-center">
+          <SceneRow lookingAt={{ phase: 'done', caption: `First-try accuracy ${acc} percent. That’s the standard.`, highlights: [] }}>
+            <div className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl bg-emerald-50 ring-1 ring-emerald-100">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <Check size={28} />
+              </div>
+              <h2 className="mt-4 text-xl font-bold text-slate-900">First-try accuracy {acc}%</h2>
+              <p className="mt-1 px-4 text-sm text-slate-500">Finished in {secs}s. Wrong drops snap back — you can’t skip the standard.</p>
+            </div>
+          </SceneRow>
+          <Button className="mt-6 w-full" onClick={() => onExit?.()}>
+            Done
+          </Button>
+        </div>
+      )}
+      <CoachBar />
+    </CoachProvider>
   );
 }
 
@@ -145,16 +146,23 @@ function Walkthrough({
     Object.assign(poses, step.to);
   }
 
+  const hi = step?.itemIds ?? [];
+
   return (
     <div>
-      <SceneBoard scene={spec.scene} visibleIds={visible} highlightIds={step?.itemIds} dimOthers={step?.anim === 'highlight'} poses={poses} />
+      <SceneRow lookingAt={{ phase: 'walk', caption: step?.caption ?? '', highlights: hi.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
+        <SceneBoard scene={spec.scene} visibleIds={visible} highlightIds={step?.itemIds} dimOthers={step?.anim === 'highlight'} poses={poses} />
+      </SceneRow>
       <p className="mt-4 min-h-16 text-sm font-medium leading-relaxed text-slate-800">{step?.caption}</p>
       <div className="mt-3 flex items-center justify-between gap-2">
         <button
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-30"
           disabled={index === 0}
-          onClick={() => setIndex((n) => Math.max(0, n - 1))}
+          onClick={() => {
+            unlockAudio();
+            setIndex((n) => Math.max(0, n - 1));
+          }}
           aria-label="Back"
         >
           <ChevronLeft size={20} />
@@ -165,12 +173,24 @@ function Walkthrough({
         {index + 1 >= spec.steps.length ? (
           <Button onClick={onDone}>Start check</Button>
         ) : (
-          <Button onClick={() => setIndex((n) => n + 1)}>
+          <Button
+            onClick={() => {
+              unlockAudio();
+              setIndex((n) => n + 1);
+            }}
+          >
             Next <ChevronRight size={16} />
           </Button>
         )}
       </div>
-      <button type="button" className="mt-3 flex w-full items-center justify-center gap-1 text-xs text-slate-500 hover:text-slate-800" onClick={() => setIndex(0)}>
+      <button
+        type="button"
+        className="mt-3 flex w-full items-center justify-center gap-1 text-xs text-slate-500 hover:text-slate-800"
+        onClick={() => {
+          unlockAudio();
+          setIndex(0);
+        }}
+      >
         <RotateCcw size={12} /> Replay
       </button>
     </div>
@@ -194,7 +214,9 @@ function WhatChanged({ spec, onDone }: { spec: TrainingSpec; onDone: () => void 
   return (
     <div>
       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-600">What changed · v{spec.version}</p>
-      <SceneBoard scene={spec.scene} poses={poses} highlightIds={note?.itemIds} dimOthers />
+      <SceneRow lookingAt={{ phase: 'changed', caption: note?.summary ?? '', highlights: note?.itemIds.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) ?? [] }}>
+        <SceneBoard scene={spec.scene} poses={poses} highlightIds={note?.itemIds} dimOthers />
+      </SceneRow>
       <p className="mt-4 text-sm font-medium leading-relaxed text-slate-800">{note?.summary}</p>
       <Button className="mt-5 w-full" onClick={onDone}>
         Show me the full standard
@@ -238,6 +260,7 @@ function SpotCheck({
   return (
     <div>
       <p className="mb-3 text-sm font-semibold text-slate-900">{check.prompt}</p>
+      <SceneRow lookingAt={{ phase: 'check', caption: check.prompt, highlights: check.itemIds.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
       <div className="relative">
         <SceneBoard scene={{ ...spec.scene, items: targets.length ? targets : spec.scene.items }} highlightIds={ok ? [check.correctId!] : undefined} wrongIds={wrong} />
         {targets.map((it) => (
@@ -259,6 +282,7 @@ function SpotCheck({
           />
         ))}
       </div>
+      </SceneRow>
       {ok ? (
         <Button className="mt-4 w-full" onClick={onPass}>
           Correct — continue
@@ -304,6 +328,7 @@ function PlaceCheck({
   return (
     <div>
       <p className="mb-3 text-sm font-semibold text-slate-900">{check.prompt}</p>
+      <SceneRow lookingAt={{ phase: 'check', caption: check.prompt, highlights: check.itemIds.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
       <SceneBoard
         scene={spec.scene}
         poses={poses}
@@ -326,6 +351,7 @@ function PlaceCheck({
           }
         }}
       />
+      </SceneRow>
       <p className="mt-2 text-center text-xs text-slate-500">
         {placed ? 'That’s the standard.' : `${locked.size} of ${check.itemIds.length} in place. Misses snap back.`}
       </p>

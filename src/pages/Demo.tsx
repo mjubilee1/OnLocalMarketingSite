@@ -16,7 +16,7 @@ export default function Demo() {
   if (moduleId && spec) {
     return (
       <div className="min-h-screen bg-slate-100">
-        <header className="mx-auto flex max-w-md items-center justify-between px-4 py-3">
+        <header className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <button type="button" className="inline-flex items-center gap-1 text-sm text-slate-600" onClick={() => nav('/demo')}>
             <ArrowLeft size={16} /> Modules
           </button>
@@ -25,7 +25,7 @@ export default function Demo() {
             Edit
           </Link>
         </header>
-        <div className="mx-auto max-w-md px-4 pb-10">
+        <div className="mx-auto max-w-2xl px-4 pb-10">
           <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
             {spec.department} · v{spec.version}
           </p>
