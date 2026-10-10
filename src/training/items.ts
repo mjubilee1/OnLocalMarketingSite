@@ -5,6 +5,8 @@ export interface ItemStyle {
   h: number;
   shape: 'circle' | 'ellipse' | 'rect' | 'diamond';
   rx?: number;
+  /** Optional photo. When set, the board shows this instead of a flat shape. */
+  image?: string;
 }
 
 /** Visuals for scene items. Add a kind here when a department needs a new object. */
@@ -88,6 +90,13 @@ export const lookFromColor = (fill: string, shape: ItemStyle['shape']): ItemStyl
   if (shape === 'ellipse') return { fill, stroke, w: 14, h: 10, shape };
   if (shape === 'rect') return { fill, stroke, w: 11, h: 11, shape, rx: 2 };
   return { fill, stroke, w: 11, h: 11, shape: 'circle' };
+};
+
+/** A photo piece. Shape decides how the picture is cropped on the board. */
+export const lookFromImage = (image: string, shape: ItemStyle['shape']): ItemStyle => {
+  if (shape === 'ellipse') return { fill: '#ffffff', w: 18, h: 12, shape, image };
+  if (shape === 'rect') return { fill: '#ffffff', w: 16, h: 16, shape, rx: 2, image };
+  return { fill: '#ffffff', w: 16, h: 16, shape: 'circle', image };
 };
 
 export const TEMPLATE_STARTERS: Record<string, { kind: string; label: string }[]> = {

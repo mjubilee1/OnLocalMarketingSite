@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { Button } from '../components/ui';
+import { cn } from '../lib/utils';
 import { CoachBar, CoachProvider, SceneRow } from './Coach';
+import { ItemSwatch } from './ItemSwatch';
 import { SceneBoard, dist } from './SceneBoard';
 import { unlockAudio } from './voice';
 import type { Check as CheckSpec, Pose, SceneItem, TrainingSpec } from './types';
@@ -313,44 +315,130 @@ function PlaceCheck({
   const [poses, setPoses] = useState<Record<string, Pose>>(() => {
     const p: Record<string, Pose> = {};
     spec.scene.items.forEach((it) => {
-      p[it.id] = check.itemIds.includes(it.id) && check.start?.[it.id] ? check.start[it.id] : it;
+      p[it.id] = it;
     });
     return p;
   });
   const [locked, setLocked] = useState<Set<string>>(new Set());
   const [wrong, setWrong] = useState<string[]>([]);
+  const [ghost, setGhost] = useState<{ id: string; x: number; y: number; hot: boolean } | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef(ghost);
+  ghostRef.current = ghost;
 
-  const placed = check.itemIds.every((id) => locked.has(id));
+  const loose = check.itemIds.filter((id) => !locked.has(id));
+  const visible = spec.scene.items.filter((it) => !loose.includes(it.id)).map((it) => it.id);
+  const placed = loose.length === 0;
+
+  const dropAt = (id: string, pose: Pose) => {
+    if (locked.has(id)) return;
+    const t = targets[id];
+    if (!t) return;
+    if (dist(pose, t) <= SNAP) {
+      setPoses((prev) => ({ ...prev, [id]: { x: t.x, y: t.y, rotation: t.rotation } }));
+      setLocked((prev) => new Set(prev).add(id));
+    } else {
+      onFirstMiss(id);
+      setWrong([id]);
+      window.setTimeout(() => setWrong([]), 450);
+    }
+  };
+
+  const pointerOnBoard = (clientX: number, clientY: number): Pose | null => {
+    const board = boardRef.current;
+    if (!board) return null;
+    const r = board.getBoundingClientRect();
+    const x = ((clientX - r.left) / r.width) * 100;
+    const y = ((clientY - r.top) / r.height) * 100;
+    if (x < -4 || x > 104 || y < -4 || y > 104) return null;
+    return { x, y };
+  };
+
+  const track = (id: string, clientX: number, clientY: number) => {
+    const pose = pointerOnBoard(clientX, clientY);
+    const t = targets[id];
+    const next = { id, x: clientX, y: clientY, hot: !!(pose && t && dist(pose, t) <= SNAP) };
+    ghostRef.current = next;
+    setGhost(next);
+  };
 
   return (
     <div>
       <p className="mb-3 text-sm font-semibold text-slate-900">{check.prompt}</p>
-      <SceneRow lookingAt={{ phase: 'check', caption: check.prompt, highlights: check.itemIds.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
-      <SceneBoard
-        scene={spec.scene}
-        poses={poses}
-        dragIds={check.itemIds.filter((id) => !locked.has(id))}
-        slotIds={check.itemIds.filter((id) => !locked.has(id))}
-        highlightIds={[...locked]}
-        wrongIds={wrong}
-        onDrop={(id, pose) => {
-          if (locked.has(id)) return;
-          const t = targets[id];
-          if (!t) return;
-          if (dist(pose, t) <= SNAP) {
-            setPoses((prev) => ({ ...prev, [id]: { x: t.x, y: t.y, rotation: t.rotation } }));
-            setLocked((prev) => new Set(prev).add(id));
-          } else {
-            onFirstMiss(id);
-            setWrong([id]);
-            setPoses((prev) => ({ ...prev, [id]: check.start?.[id] ?? prev[id] }));
-            window.setTimeout(() => setWrong([]), 400);
-          }
-        }}
-      />
+      <SceneRow bare lookingAt={{ phase: 'check', caption: check.prompt, highlights: check.itemIds.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
+        <SceneBoard
+          boardRef={boardRef}
+          className="mx-auto w-full max-w-md"
+          scene={spec.scene}
+          poses={poses}
+          visibleIds={visible}
+          slotIds={loose}
+          hotId={ghost?.hot ? ghost.id : undefined}
+          highlightIds={[...locked]}
+          wrongIds={wrong}
+        />
       </SceneRow>
-      <p className="mt-2 text-center text-xs text-slate-500">
-        {placed ? 'That’s the standard.' : `${locked.size} of ${check.itemIds.length} in place. Misses snap back.`}
+      {loose.length > 0 && (
+        <div className="mt-3">
+          <p className="text-xs font-medium text-slate-500">Drag a piece onto its dashed spot.</p>
+          <ul className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-5">
+            {loose.map((id) => {
+              const it = targets[id];
+              if (!it) return null;
+              const missed = wrong.includes(id);
+              const held = ghost?.id === id;
+              return (
+                <li key={id}>
+                  <button
+                    type="button"
+                    aria-label={`Drag ${it.label}`}
+                    className={cn(
+                      'flex w-full touch-none flex-col items-center rounded-2xl bg-white px-1 py-2 ring-1 select-none',
+                      missed ? 'anim-shake ring-rose-300' : 'ring-slate-200',
+                      held ? 'cursor-grabbing opacity-40' : 'cursor-grab active:cursor-grabbing',
+                    )}
+                    onPointerDown={(e) => {
+                      if (e.button !== 0) return;
+                      try {
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                      } catch {
+                        /* Pointer capture needs a real pointer. The drag still tracks from this event. */
+                      }
+                      track(id, e.clientX, e.clientY);
+                    }}
+                    onPointerMove={(e) => {
+                      if (ghostRef.current?.id !== id) return;
+                      track(id, e.clientX, e.clientY);
+                    }}
+                    onPointerUp={(e) => {
+                      if (ghostRef.current?.id !== id) return;
+                      const pose = pointerOnBoard(e.clientX, e.clientY);
+                      ghostRef.current = null;
+                      setGhost(null);
+                      if (pose) dropAt(id, pose);
+                    }}
+                    onPointerCancel={() => {
+                      if (ghostRef.current?.id !== id) return;
+                      ghostRef.current = null;
+                      setGhost(null);
+                    }}
+                  >
+                    <ItemSwatch kind={it.kind} look={it.look} className="h-10 w-10" />
+                    <span className="mt-1 w-full truncate text-center text-[11px] font-semibold text-slate-700">{it.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {ghost && targets[ghost.id] && (
+        <div className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2" style={{ left: ghost.x, top: ghost.y }}>
+          <ItemSwatch kind={targets[ghost.id]!.kind} look={targets[ghost.id]!.look} className="h-14 w-14 drop-shadow-lg" />
+        </div>
+      )}
+      <p className="mt-3 text-center text-xs text-slate-500">
+        {placed ? 'That’s the standard.' : `${locked.size} of ${check.itemIds.length} in place. A miss stays in the tray.`}
       </p>
       <Button className="mt-4 w-full" disabled={!placed} onClick={onPass}>
         {placed ? 'Continue' : 'Place every item to continue'}
@@ -358,3 +446,4 @@ function PlaceCheck({
     </div>
   );
 }
+

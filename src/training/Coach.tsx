@@ -302,11 +302,12 @@ export function CoachBar() {
   );
 }
 
-export function SceneRow({ lookingAt, children }: { lookingAt: LookingAt; children: ReactNode }) {
+export function SceneRow({ lookingAt, children, bare }: { lookingAt: LookingAt; children: ReactNode; bare?: boolean }) {
   const { setLookingAt } = useCoach();
   useEffect(() => {
     setLookingAt(lookingAt);
   }, [lookingAt.phase, lookingAt.caption, lookingAt.highlights.join('|'), setLookingAt]);
+  if (bare) return <div>{children}</div>;
   return (
     <div className="flex items-center gap-2 sm:gap-4">
       <div className="min-w-0 flex-1">{children}</div>

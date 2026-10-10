@@ -24,6 +24,7 @@ export interface SceneItem extends Pose {
     h: number;
     shape: 'circle' | 'ellipse' | 'rect' | 'diamond';
     rx?: number;
+    image?: string;
   };
 }
 

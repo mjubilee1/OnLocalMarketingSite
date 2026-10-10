@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2 } from 'lucide-react';
+import { ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Button, Field, Input, PageHeader } from '../../components/ui';
+import { resizePhoto } from '../../lib/profile';
 import { useCompany, useStore } from '../../store';
 import { uid } from '../../lib/utils';
 import { ItemSwatch } from '../../training/ItemSwatch';
-import { lookFromColor, type ItemStyle } from '../../training/items';
+import { lookFromColor, lookFromImage, type ItemStyle } from '../../training/items';
 import type { CustomLibraryItem } from '../../training/types';
 
 const SHAPES: { id: ItemStyle['shape']; label: string }[] = [
@@ -35,15 +36,51 @@ export default function SetupLibrary() {
   const [group, setGroup] = useState<CustomLibraryItem['group']>('plate');
   const [shape, setShape] = useState<ItemStyle['shape']>('circle');
   const [color, setColor] = useState(brand);
+  const [image, setImage] = useState('');
+  const [imageError, setImageError] = useState('');
+  const [editing, setEditing] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const look = lookFromColor(color, shape);
+  const look = image ? lookFromImage(image, shape) : lookFromColor(color, shape);
+
+  const reset = () => {
+    setLabel('');
+    setGroup('plate');
+    setShape('circle');
+    setColor(brand);
+    setImage('');
+    setImageError('');
+    setEditing(null);
+  };
 
   const add = () => {
     const name = label.trim();
     if (name.length < 2) return;
-    save({ id: uid('lib-'), label: name, group, look });
-    toast(`Added ${name} to your library`, '📦');
-    setLabel('');
+    save({ id: editing ?? uid('lib-'), label: name, group, look });
+    toast(editing ? `Updated ${name}` : `Added ${name} to your library`, '📦');
+    reset();
+  };
+
+  const edit = (it: CustomLibraryItem) => {
+    setEditing(it.id);
+    setLabel(it.label);
+    setGroup(it.group);
+    setShape(it.look.shape === 'diamond' ? 'rect' : it.look.shape);
+    setColor(it.look.fill);
+    setImage(it.look.image ?? '');
+    setImageError('');
+  };
+
+  const pickImage = async (file: File | undefined) => {
+    if (!file) return;
+    setImageError('');
+    try {
+      setImage(await resizePhoto(file));
+    } catch (e) {
+      setImageError((e as Error).message);
+    } finally {
+      if (fileRef.current) fileRef.current.value = '';
+    }
   };
 
   const colors = [brand, ...PRESETS.filter((c) => c.toLowerCase() !== brand.toLowerCase())];
@@ -52,7 +89,7 @@ export default function SetupLibrary() {
     <div>
       <PageHeader
         title={`${company.name} library`}
-        sub="Your pieces. Name, color, shape — no designer and no photos of people."
+        sub="Name a piece, pick a color, or drop in your own photo. It shows up on every setup card under Yours."
         actions={
           <Link to="/admin/setup/new" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white">
             Use on a card
@@ -81,8 +118,8 @@ export default function SetupLibrary() {
       </section>
 
       <section className="mt-6 rounded-2xl bg-white p-5 ring-1 ring-slate-200">
-        <h2 className="font-semibold text-slate-900">Add a piece</h2>
-        <p className="mt-1 text-sm text-slate-500">“House vinaigrette.” “Gaylord napkin.” “DND sign.” Then it shows up in every setup card.</p>
+        <h2 className="font-semibold text-slate-900">{editing ? 'Edit piece' : 'Add a piece'}</h2>
+        <p className="mt-1 text-sm text-slate-500">“House vinaigrette.” “Gaylord napkin.” “DND sign.” A photo is optional — a logo, a place setting, a branded item.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="What do you call it?">
             <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="House salad" />
@@ -121,18 +158,59 @@ export default function SetupLibrary() {
             <div className="mb-1 text-sm font-medium text-slate-700">Color</div>
             <div className="flex flex-wrap gap-2">
               {colors.map((c) => (
-                <button key={c} type="button" onClick={() => setColor(c)} className="h-8 w-8 rounded-full ring-1 ring-slate-200" style={{ background: c }} aria-label={c} />
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setColor(c);
+                    setImage('');
+                  }}
+                  className="h-8 w-8 rounded-full ring-1 ring-slate-200"
+                  style={{ background: c }}
+                  aria-label={c}
+                />
               ))}
             </div>
+            <p className="mt-1.5 text-xs text-slate-500">{image ? 'A photo replaces the color. Pick a color to go back to a shape.' : 'Used when you don’t add a photo.'}</p>
           </div>
+        </div>
+        <div className="mt-4">
+          <div className="mb-1 text-sm font-medium text-slate-700">Photo</div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-200 hover:ring-slate-300"
+            >
+              {image ? <img src={image} alt="" className="h-full w-full object-cover" /> : <ImagePlus size={18} className="text-slate-400" />}
+            </button>
+            <div>
+              <Button type="button" variant="secondary" onClick={() => fileRef.current?.click()}>
+                {image ? 'Replace photo' : 'Upload photo'}
+              </Button>
+              {image && (
+                <button type="button" className="ml-2 cursor-pointer text-sm text-slate-500 hover:text-slate-800" onClick={() => setImage('')}>
+                  <X size={14} className="mr-0.5 inline" /> Use a shape instead
+                </button>
+              )}
+              <p className="mt-1.5 text-xs text-slate-500">PNG or JPG. Cropped square so it sits on the board.</p>
+              {imageError && <p className="mt-1 text-xs text-rose-600">{imageError}</p>}
+            </div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/heic" className="hidden" onChange={(e) => pickImage(e.target.files?.[0])} />
         </div>
         <div className="mt-5 flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
             <ItemSwatch kind="custom" look={look} className="h-10 w-10" />
           </div>
           <Button onClick={add} disabled={label.trim().length < 2}>
-            <Plus size={16} /> Add to my library
+            <Plus size={16} /> {editing ? 'Save changes' : 'Add to my library'}
           </Button>
+          {editing && (
+            <button type="button" className="cursor-pointer text-sm text-slate-500 hover:text-slate-800" onClick={reset}>
+              Cancel
+            </button>
+          )}
         </div>
       </section>
 
@@ -149,6 +227,9 @@ export default function SetupLibrary() {
                   <div className="truncate font-medium text-slate-900">{it.label}</div>
                   <div className="text-xs capitalize text-slate-500">{it.group}</div>
                 </div>
+                <button type="button" onClick={() => edit(it)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label={`Edit ${it.label}`}>
+                  <Pencil size={16} />
+                </button>
                 <button type="button" onClick={() => remove(it.id)} className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600" aria-label={`Remove ${it.label}`}>
                   <Trash2 size={16} />
                 </button>

@@ -14,8 +14,10 @@ export function SceneBoard({
   wrongIds,
   dragIds,
   slotIds,
+  hotId,
   onDrop,
   onSelect,
+  boardRef: boardRefProp,
   className,
 }: {
   scene: Scene;
@@ -27,8 +29,11 @@ export function SceneBoard({
   wrongIds?: string[];
   dragIds?: string[];
   slotIds?: string[];
+  /** Slot the trainee is currently hovering with the right piece. */
+  hotId?: string;
   onDrop?: (id: string, pose: Pose) => void;
   onSelect?: (id: string) => void;
+  boardRef?: RefObject<HTMLDivElement | null>;
   className?: string;
 }) {
   const vis = visibleIds ? new Set(visibleIds) : null;
@@ -36,7 +41,8 @@ export function SceneBoard({
   const drag = new Set(dragIds ?? []);
   const wrong = new Set(wrongIds ?? []);
   const slots = slotIds ?? [];
-  const boardRef = useRef<HTMLDivElement>(null);
+  const localRef = useRef<HTMLDivElement>(null);
+  const boardRef = boardRefProp ?? localRef;
 
   return (
     <div
@@ -58,17 +64,22 @@ export function SceneBoard({
       {slots.map((id) => {
         const it = scene.items.find((x) => x.id === id);
         if (!it) return null;
-        const st = styleOf(it.kind);
+        const st = styleOf(it.kind, it.look);
+        const size = Math.min(14, Math.max(st.w, 8));
+        const hot = hotId === id;
         return (
           <div
             key={`slot-${id}`}
             aria-hidden
-            className="pointer-events-none absolute rounded-full border-2 border-dashed border-indigo-400 bg-indigo-50/50"
+            className={cn(
+              'pointer-events-none absolute rounded-full border-2 border-dashed transition',
+              hot ? 'border-indigo-600 bg-indigo-100/80' : 'border-indigo-300 bg-white/50',
+            )}
             style={{
               left: `${it.x}%`,
               top: `${it.y}%`,
-              width: `${Math.max(st.w, 10)}%`,
-              height: `${Math.max(st.w, 10)}%`,
+              width: `${size}%`,
+              height: `${size}%`,
               transform: 'translate(-50%, -50%)',
               zIndex: 5,
             }}
@@ -169,6 +180,14 @@ function Glyph({
         aria-label={item.label}
         className={cn('flex touch-none flex-col items-center', draggable && 'cursor-grab active:cursor-grabbing')}
       >
+        {st.image ? (
+          <img
+            src={st.image}
+            alt=""
+            className={cn('h-auto w-full object-cover drop-shadow-sm', highlight && 'ring-2 ring-indigo-600')}
+            style={{ borderRadius: st.shape === 'rect' ? 6 : '50%', aspectRatio: st.shape === 'ellipse' ? '3 / 2' : '1' }}
+          />
+        ) : (
         <svg viewBox={`0 0 ${st.w} ${st.h}`} className={cn('h-auto w-full drop-shadow-sm', highlight && 'text-indigo-600')} overflow="visible">
           {st.shape === 'circle' && (
             <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
@@ -180,6 +199,7 @@ function Glyph({
             <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
           )}
         </svg>
+        )}
         <span className="mt-0.5 max-w-[4.5rem] truncate text-[9px] font-semibold text-slate-600">{item.label}</span>
       </motion.div>
     </motion.div>

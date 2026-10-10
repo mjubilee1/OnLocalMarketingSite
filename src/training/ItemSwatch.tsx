@@ -2,6 +2,17 @@ import { styleOf, type ItemStyle } from './items';
 
 export function ItemSwatch({ kind, look, className }: { kind: string; look?: ItemStyle; className?: string }) {
   const st = styleOf(kind, look);
+  if (st.image) {
+    const round = st.shape === 'circle' || st.shape === 'ellipse';
+    return (
+      <img
+        src={st.image}
+        alt=""
+        className={className ?? 'h-8 w-8'}
+        style={{ objectFit: 'cover', borderRadius: round ? '50%' : 6, aspectRatio: st.shape === 'ellipse' ? '3 / 2' : '1' }}
+      />
+    );
+  }
   return (
     <svg viewBox={`0 0 ${st.w} ${st.h}`} className={className ?? 'h-8 w-8'} overflow="visible" aria-hidden>
       {st.shape === 'circle' && (
