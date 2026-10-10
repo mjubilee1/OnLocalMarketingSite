@@ -464,10 +464,19 @@ export function buildSeed() {
     orgPhone: '+1 555 0100',
     managerName: MANAGER,
     managerTitle: 'Crew Manager',
+    teamName: ORG_NAME,
+    primaryColor: '#4f46e5',
+    accentColor: '#7c3aed',
+    logo: '',
     /** False until the manager saves their own company details. */
     orgConfigured: false,
     trainingEdits: {} as Record<string, import('../training/types').TrainingSpec>,
+    trainingDrafts: {} as Record<string, import('../training/types').TrainingSpec>,
+    /** Built-in cards stay in the app; this hides the ones a manager deleted. */
+    deletedTrainingIds: [] as string[],
     trainingAttempts: seedTrainingAttempts(),
+    customLibrary: [] as import('../training/types').CustomLibraryItem[],
+    libraryBrand: '#4f46e5',
   };
 }
 

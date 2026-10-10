@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState, type RefObject } from 'react';
 import { motion } from 'framer-motion';
 import { styleOf } from './items';
 import type { Pose, Scene, SceneItem } from './types';
@@ -15,6 +15,7 @@ export function SceneBoard({
   dragIds,
   slotIds,
   onDrop,
+  onSelect,
   className,
 }: {
   scene: Scene;
@@ -27,6 +28,7 @@ export function SceneBoard({
   dragIds?: string[];
   slotIds?: string[];
   onDrop?: (id: string, pose: Pose) => void;
+  onSelect?: (id: string) => void;
   className?: string;
 }) {
   const vis = visibleIds ? new Set(visibleIds) : null;
@@ -34,9 +36,11 @@ export function SceneBoard({
   const drag = new Set(dragIds ?? []);
   const wrong = new Set(wrongIds ?? []);
   const slots = slotIds ?? [];
+  const boardRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
+      ref={boardRef}
       data-scene-board
       className={cn('relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200', className)}
     >
@@ -85,7 +89,9 @@ export function SceneBoard({
               dim={dimOthers && hi.size > 0 && !hi.has(item.id)}
               wrong={wrong.has(item.id)}
               draggable={drag.has(item.id)}
+              boardRef={boardRef}
               onDrop={onDrop}
+              onSelect={onSelect}
             />
           );
         })}
@@ -99,48 +105,63 @@ function Glyph({
   dim,
   wrong,
   draggable,
+  boardRef,
   onDrop,
+  onSelect,
 }: {
   item: SceneItem;
   highlight?: boolean;
   dim?: boolean;
   wrong?: boolean;
   draggable?: boolean;
+  boardRef: RefObject<HTMLDivElement | null>;
   onDrop?: (id: string, pose: Pose) => void;
+  onSelect?: (id: string) => void;
 }) {
-  const st = styleOf(item.kind);
+  const st = styleOf(item.kind, item.look);
   const scale = item.scale ?? 1;
   const left = `${item.x}%`;
   const top = `${item.y}%`;
   const [dragGen, setDragGen] = useState(0);
+  const [pin, setPin] = useState(false);
 
   return (
     <motion.div
       className={cn('absolute z-10 flex flex-col items-center', wrong && 'anim-shake')}
-      style={{ left, top, width: `${st.w}%`, x: '-50%', y: '-50%', zIndex: highlight ? 20 : item.z ?? 1 }}
+      style={{ left, top, width: `${st.w}%`, zIndex: highlight ? 20 : item.z ?? 1 }}
       initial={false}
       animate={{
         left,
         top,
+        x: '-50%',
+        y: '-50%',
         rotate: item.rotation ?? 0,
         scale: highlight ? scale * 1.08 : scale,
         opacity: dim ? 0.28 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+      transition={pin ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 26 }}
     >
       <motion.div
         key={dragGen}
         drag={draggable}
         dragMomentum={false}
-        dragElastic={0.12}
+        dragElastic={0}
         whileDrag={{ scale: 1.12, cursor: 'grabbing', zIndex: 40 }}
+        onPointerUp={() => onSelect?.(item.id)}
         onDragEnd={(_e, info) => {
+          const moved = Math.hypot(info.offset.x, info.offset.y);
+          if (moved < 8) {
+            onSelect?.(item.id);
+            setDragGen((n) => n + 1);
+            return;
+          }
           if (!onDrop) return;
-          const parent = (_e.target as HTMLElement).closest('[data-scene-board]');
-          if (!parent) return;
-          const r = parent.getBoundingClientRect();
-          const x = ((info.point.x - r.left) / r.width) * 100;
-          const y = ((info.point.y - r.top) / r.height) * 100;
+          const board = boardRef.current;
+          if (!board) return;
+          const r = board.getBoundingClientRect();
+          const x = Math.min(94, Math.max(6, item.x + (info.offset.x / r.width) * 100));
+          const y = Math.min(94, Math.max(6, item.y + (info.offset.y / r.height) * 100));
+          setPin(true);
           onDrop(item.id, { x, y, rotation: item.rotation, scale: item.scale });
           setDragGen((n) => n + 1);
         }}
@@ -148,15 +169,15 @@ function Glyph({
         aria-label={item.label}
         className={cn('flex touch-none flex-col items-center', draggable && 'cursor-grab active:cursor-grabbing')}
       >
-        <svg viewBox={`0 0 ${st.w} ${st.h}`} className="h-auto w-full drop-shadow-sm" overflow="visible">
+        <svg viewBox={`0 0 ${st.w} ${st.h}`} className={cn('h-auto w-full drop-shadow-sm', highlight && 'text-indigo-600')} overflow="visible">
           {st.shape === 'circle' && (
-            <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
+            <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
           )}
           {st.shape === 'ellipse' && (
-            <ellipse cx={st.w / 2} cy={st.h / 2} rx={st.w / 2 - 0.5} ry={st.h / 2 - 0.5} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+            <ellipse cx={st.w / 2} cy={st.h / 2} rx={st.w / 2 - 0.5} ry={st.h / 2 - 0.5} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
           )}
           {st.shape === 'rect' && (
-            <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? '#4f46e5' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+            <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
           )}
         </svg>
         <span className="mt-0.5 max-w-[4.5rem] truncate text-[9px] font-semibold text-slate-600">{item.label}</span>

@@ -153,7 +153,6 @@ function Walkthrough({
       <SceneRow lookingAt={{ phase: 'walk', caption: step?.caption ?? '', highlights: hi.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
         <SceneBoard scene={spec.scene} visibleIds={visible} highlightIds={step?.itemIds} dimOthers={step?.anim === 'highlight'} poses={poses} />
       </SceneRow>
-      <p className="mt-4 min-h-16 text-sm font-medium leading-relaxed text-slate-800">{step?.caption}</p>
       <div className="mt-3 flex items-center justify-between gap-2">
         <button
           type="button"
@@ -213,11 +212,9 @@ function WhatChanged({ spec, onDone }: { spec: TrainingSpec; onDone: () => void 
 
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-600">What changed · v{spec.version}</p>
       <SceneRow lookingAt={{ phase: 'changed', caption: note?.summary ?? '', highlights: note?.itemIds.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) ?? [] }}>
         <SceneBoard scene={spec.scene} poses={poses} highlightIds={note?.itemIds} dimOthers />
       </SceneRow>
-      <p className="mt-4 text-sm font-medium leading-relaxed text-slate-800">{note?.summary}</p>
       <Button className="mt-5 w-full" onClick={onDone}>
         Show me the full standard
       </Button>

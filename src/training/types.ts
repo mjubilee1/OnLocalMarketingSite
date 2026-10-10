@@ -16,6 +16,22 @@ export interface SceneItem extends Pose {
   kind: string;
   label: string;
   z?: number;
+  /** Custom look. Built-in kinds fall back to ITEM_STYLE. */
+  look?: {
+    fill: string;
+    stroke?: string;
+    w: number;
+    h: number;
+    shape: 'circle' | 'ellipse' | 'rect' | 'diamond';
+    rx?: number;
+  };
+}
+
+export interface CustomLibraryItem {
+  id: string;
+  label: string;
+  group: 'plate' | 'table' | 'station';
+  look: NonNullable<SceneItem['look']>;
 }
 
 export interface Scene {
@@ -54,6 +70,10 @@ export interface TrainingSpec {
   id: string;
   department: string;
   title: string;
+  /** Property or event this picture belongs to, e.g. Gaylord Hotel. */
+  venue?: string;
+  /** Drafts save while you edit. Published is what crew train on. */
+  status?: 'draft' | 'published';
   version: number;
   updatedAt: string;
   template: SceneKind;

@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CalendarDays, FileSignature, GraduationCap, Play, QrCode, ShieldCheck, Smartphone, Trophy, Users } from 'lucide-react';
+import { displayName } from '../lib/company';
 import { Logo } from '../layouts/AdminLayout';
-import { useStore } from '../store';
+import { useCompany, useStore } from '../store';
 
 const FEATURES = [
   { icon: QrCode, title: 'Hire from a QR code', text: 'Share one link or poster. New crew sign up on their phone in under a minute.' },
@@ -14,6 +15,8 @@ const FEATURES = [
 
 export default function Landing() {
   const code = useStore((s) => s.inviteCode);
+  const company = useCompany();
+  const name = displayName(company);
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-white">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -30,7 +33,7 @@ export default function Landing() {
           From sign-up to <span className="text-indigo-600">shift-ready</span> in under an hour.
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
-          onlocalAI onboards, trains and briefs the hundreds of short-term staff your events depend on — on their phones, with zero paperwork.
+          {name} onboards, trains and briefs the hundreds of short-term staff your events depend on — on their phones, with zero paperwork.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/admin" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700">
@@ -61,10 +64,7 @@ export default function Landing() {
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-sm text-slate-500">
           <Logo />
-          <a href="https://onlocalai.com" className="font-medium text-slate-700 hover:text-slate-900">
-            onlocalai.com
-          </a>
-          <span>© {new Date().getFullYear()} onlocalAI. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} {company.name}. All rights reserved.</span>
         </div>
       </footer>
     </div>

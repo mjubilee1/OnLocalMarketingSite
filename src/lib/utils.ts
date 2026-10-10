@@ -38,6 +38,40 @@ export const fmtDay = (iso: string) => fmtDate(iso, { weekday: 'short', month: '
 
 export const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 
+/** "Updated just now", "Updated yesterday", "Edited last week". */
+export const boardWhen = (iso: string) => {
+  const then = new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).getTime();
+  if (!Number.isFinite(then)) return '';
+  const diff = Date.now() - then;
+  const mins = Math.round(diff / 60000);
+  let phrase: string;
+  let recent = true;
+  if (mins < 1) phrase = 'just now';
+  else if (mins < 60) phrase = mins === 1 ? '1 minute ago' : `${mins} minutes ago`;
+  else if (mins < 60 * 24) {
+    const hrs = Math.round(mins / 60);
+    phrase = hrs === 1 ? '1 hour ago' : `${hrs} hours ago`;
+  } else {
+    const days = Math.floor(diff / 86_400_000);
+    if (days <= 1) phrase = 'yesterday';
+    else if (days < 7) {
+      phrase = `${days} days ago`;
+      recent = false;
+    } else if (days < 14) {
+      phrase = 'last week';
+      recent = false;
+    } else if (days < 30) {
+      const weeks = Math.floor(days / 7);
+      phrase = weeks <= 1 ? 'last week' : `${weeks} weeks ago`;
+      recent = false;
+    } else {
+      phrase = fmtDate(iso);
+      recent = false;
+    }
+  }
+  return `${recent ? 'Updated' : 'Edited'} ${phrase}`;
+};
+
 export const relTime = (iso: string) => {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.round(diff / 60000);

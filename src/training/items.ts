@@ -32,10 +32,63 @@ export const ITEM_STYLE: Record<string, ItemStyle> = {
   stirrers: { fill: '#fdba74', stroke: '#c2410c', w: 8, h: 4, shape: 'rect', rx: 1 },
   pastry: { fill: '#f59e0b', stroke: '#b45309', w: 10, h: 7, shape: 'ellipse' },
   drip: { fill: '#334155', stroke: '#0f172a', w: 22, h: 4, shape: 'rect', rx: 1 },
+  fish: { fill: '#38bdf8', stroke: '#0284c7', w: 16, h: 9, shape: 'ellipse' },
+  beef: { fill: '#991b1b', stroke: '#7f1d1d', w: 15, h: 11, shape: 'ellipse' },
+  rice: { fill: '#f8fafc', stroke: '#cbd5e1', w: 11, h: 11, shape: 'circle' },
+  bread: { fill: '#f4d03f', stroke: '#b45309', w: 12, h: 7, shape: 'ellipse' },
+  lemon: { fill: '#facc15', stroke: '#ca8a04', w: 6, h: 6, shape: 'circle' },
+  fork: { fill: '#cbd5e1', stroke: '#64748b', w: 3, h: 12, shape: 'rect', rx: 1 },
+  knife: { fill: '#e2e8f0', stroke: '#64748b', w: 3, h: 12, shape: 'rect', rx: 1 },
+  spoon: { fill: '#cbd5e1', stroke: '#64748b', w: 4, h: 11, shape: 'ellipse' },
+  tea: { fill: '#0f766e', stroke: '#115e59', w: 10, h: 14, shape: 'rect', rx: 2 },
+  water: { fill: '#e0f2fe', stroke: '#0284c7', w: 8, h: 14, shape: 'rect', rx: 2 },
+  tongs: { fill: '#94a3b8', stroke: '#475569', w: 14, h: 5, shape: 'rect', rx: 1 },
 };
 
-export const styleOf = (kind: string): ItemStyle =>
-  ITEM_STYLE[kind] ?? { fill: '#6366f1', stroke: '#4338ca', w: 10, h: 10, shape: 'circle' };
+export type ItemGroup = 'plate' | 'table' | 'station';
+
+export const ITEM_LIBRARY: { kind: string; label: string; group: ItemGroup }[] = [
+  { kind: 'chicken', label: 'Chicken', group: 'plate' },
+  { kind: 'fish', label: 'Fish', group: 'plate' },
+  { kind: 'beef', label: 'Beef', group: 'plate' },
+  { kind: 'starch', label: 'Potato', group: 'plate' },
+  { kind: 'rice', label: 'Rice', group: 'plate' },
+  { kind: 'veg', label: 'Vegetables', group: 'plate' },
+  { kind: 'sauce', label: 'Sauce', group: 'plate' },
+  { kind: 'garnish', label: 'Garnish', group: 'plate' },
+  { kind: 'bread', label: 'Bread', group: 'plate' },
+  { kind: 'lemon', label: 'Lemon', group: 'plate' },
+  { kind: 'setting', label: 'Place setting', group: 'table' },
+  { kind: 'charger', label: 'Charger', group: 'table' },
+  { kind: 'glass', label: 'Water glass', group: 'table' },
+  { kind: 'wine', label: 'Wine glass', group: 'table' },
+  { kind: 'napkin', label: 'Napkin', group: 'table' },
+  { kind: 'fork', label: 'Fork', group: 'table' },
+  { kind: 'knife', label: 'Knife', group: 'table' },
+  { kind: 'spoon', label: 'Spoon', group: 'table' },
+  { kind: 'centerpiece', label: 'Centerpiece', group: 'table' },
+  { kind: 'urn', label: 'Coffee urn', group: 'station' },
+  { kind: 'tea', label: 'Tea urn', group: 'station' },
+  { kind: 'cups', label: 'Cups', group: 'station' },
+  { kind: 'lids', label: 'Lids', group: 'station' },
+  { kind: 'milk', label: 'Milk', group: 'station' },
+  { kind: 'sugar', label: 'Sugar', group: 'station' },
+  { kind: 'stirrers', label: 'Stirrers', group: 'station' },
+  { kind: 'water', label: 'Water', group: 'station' },
+  { kind: 'pastry', label: 'Pastry', group: 'station' },
+  { kind: 'tongs', label: 'Tongs', group: 'station' },
+  { kind: 'napkin', label: 'Napkins', group: 'station' },
+];
+
+export const styleOf = (kind: string, look?: ItemStyle): ItemStyle =>
+  look ?? ITEM_STYLE[kind] ?? { fill: '#6366f1', stroke: '#4338ca', w: 10, h: 10, shape: 'circle' };
+
+export const lookFromColor = (fill: string, shape: ItemStyle['shape']): ItemStyle => {
+  const stroke = fill;
+  if (shape === 'ellipse') return { fill, stroke, w: 14, h: 10, shape };
+  if (shape === 'rect') return { fill, stroke, w: 11, h: 11, shape, rx: 2 };
+  return { fill, stroke, w: 11, h: 11, shape: 'circle' };
+};
 
 export const TEMPLATE_STARTERS: Record<string, { kind: string; label: string }[]> = {
   plate: [

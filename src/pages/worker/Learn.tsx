@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { CircleCheck, Play, Star } from 'lucide-react';
 import { CourseCard, CoverBadge } from '../../components/courseCard';
 import { courseProgress, requirements } from '../../lib/readiness';
-import { useCatalog, useCurrentStaff, useStore, useTrainingModules } from '../../store';
+import { displayName } from '../../lib/company';
+import { useCatalog, useCompany, useCurrentStaff, useStore, useTrainingModules } from '../../store';
 import type { Course } from '../../types';
 
 function Card({ c, prog, required, provider, compact }: { c: Course; prog: number; required?: boolean; provider: string; compact?: boolean }) {
@@ -51,7 +52,7 @@ function Shelf({ title, sub, children }: { title: string; sub?: string; children
 export default function Learn() {
   const me = useCurrentStaff();
   const events = useStore((s) => s.events);
-  const orgName = useStore((s) => s.orgName);
+  const team = displayName(useCompany());
   const cat = useCatalog();
   const eventCourseIds = events.filter((e) => e.status === 'published' && e.assignments.some((a) => a.staffId === me.id)).flatMap((e) => e.courseIds);
   const reqIds = Array.from(new Set([...requirements(me, cat).courseIds, ...eventCourseIds]));
@@ -59,7 +60,7 @@ export default function Learn() {
   const todo = required.filter((c) => courseProgress(me, c) < 1);
   const done = required.filter((c) => courseProgress(me, c) === 1);
   const extra = cat.courses.filter((c) => c.published && !reqIds.includes(c.id));
-  const provider = (c: Course) => (c.templateId ? 'onlocalAI Library' : orgName);
+  const provider = (c: Course) => (c.templateId ? 'onlocalAI Library' : team);
   const setups = useTrainingModules();
 
   return (

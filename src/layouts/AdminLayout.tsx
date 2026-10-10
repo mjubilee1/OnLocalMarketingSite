@@ -3,7 +3,8 @@ import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 import { Building2, CalendarDays, FileSignature, GraduationCap, LayoutDashboard, ListChecks, Menu, QrCode, RotateCcw, ScrollText, Smartphone, UtensilsCrossed, Users, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useCompany, useStore } from '../store';
-import { initialsOf } from '../lib/company';
+import { Wordmark } from '../components/brand';
+import { displayName, initialsOf } from '../lib/company';
 
 const NAV = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -15,15 +16,11 @@ const NAV = [
   { to: '/admin/paperwork', label: 'Paperwork & certs', icon: FileSignature },
   { to: '/admin/contracts', label: 'Contracts', icon: ScrollText },
   { to: '/admin/invite', label: 'Invite & hire', icon: QrCode },
-  { to: '/admin/settings', label: 'Company profile', icon: Building2 },
+  { to: '/admin/settings', label: 'Brand & company', icon: Building2 },
 ];
 
 export function Logo({ light }: { light?: boolean }) {
-  return (
-    <Link to="/" className="flex items-center" aria-label="onlocalAI home">
-      <img src={light ? '/brand/onlocalai-logo-white.svg' : '/brand/onlocalai-logo.svg'} alt="onlocalAI" className="h-7 w-auto" />
-    </Link>
-  );
+  return <Wordmark light />;
 }
 
 export default function AdminLayout() {
@@ -34,12 +31,14 @@ export default function AdminLayout() {
   const loc = useLocation();
 
   const sidebar = (
-    <div className="flex h-full flex-col bg-slate-900 px-3 py-5">
+    <div className="flex h-full flex-col bg-slate-900 px-3 py-5" style={{ backgroundColor: 'var(--brand-ink)' }}>
       <div className="px-2">
         <Logo light />
-        <Link to="/admin/settings" className="mt-1 block truncate text-xs text-slate-400 hover:text-white" title="Company profile">
-          {company.name}
-        </Link>
+        {company.name.trim() !== displayName(company) && (
+          <Link to="/admin/settings" className="mt-1 block truncate text-xs text-white/60 hover:text-white" title="Legal company name">
+            {company.name}
+          </Link>
+        )}
       </div>
       <nav className="mt-8 flex-1 space-y-1">
         {NAV.map((n) => (
@@ -73,7 +72,7 @@ export default function AdminLayout() {
           <RotateCcw size={18} /> Reset demo data
         </button>
         <div className="flex items-center gap-3 px-3 pt-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-xs font-semibold text-white">{initialsOf(company.managerName)}</div>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white" style={{ background: 'var(--brand)' }}>{initialsOf(company.managerName)}</div>
           <div className="text-xs">
             <div className="font-medium text-white">{company.managerName}</div>
             <div className="text-slate-400">{company.managerTitle}</div>

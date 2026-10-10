@@ -3,11 +3,12 @@ import { ArrowLeft, Pencil, Play } from 'lucide-react';
 import { Logo } from '../layouts/AdminLayout';
 import { Button, Card } from '../components/ui';
 import { Player } from '../training/Player';
-import { useCurrentStaff, useStore, useTrainingModule, useTrainingModules } from '../store';
+import { boardWhen } from '../lib/utils';
+import { useCurrentStaff, useStore, useTrainingBoard, useTrainingModules } from '../store';
 
 export default function Demo() {
   const { moduleId } = useParams();
-  const spec = useTrainingModule(moduleId);
+  const spec = useTrainingBoard(moduleId);
   const nav = useNavigate();
   const me = useCurrentStaff();
   const record = useStore((s) => s.recordTrainingAttempt);
@@ -27,7 +28,8 @@ export default function Demo() {
         </header>
         <div className="mx-auto max-w-2xl px-4 pb-10">
           <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
-            {spec.department} · v{spec.version}
+            {spec.venue ? `${spec.venue} · ` : ''}
+            {spec.department} · {spec.status === 'draft' ? 'Draft' : `v${spec.version}`}
           </p>
           <h1 className="mt-1 text-xl font-bold text-slate-900">{spec.title}</h1>
           <div className="mt-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -78,7 +80,8 @@ function DemoHub() {
                 <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{m.department}</div>
                 <h2 className="mt-1 font-semibold text-slate-900">{m.title}</h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  v{m.version} · {m.updatedAt}
+                  {m.venue ? `${m.venue} · ` : ''}
+                  v{m.version} · {boardWhen(m.updatedAt)}
                   {m.changeNotes.length ? ` · ${m.changeNotes[m.changeNotes.length - 1]!.summary}` : ''}
                 </p>
                 <p className="mt-2 text-xs text-slate-500">{n} completed</p>

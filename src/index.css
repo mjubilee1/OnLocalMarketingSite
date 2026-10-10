@@ -12,6 +12,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Filled in from the company brand. Defaults match the starting indigo theme. */
+:root {
+  --brand: #4f46e5;
+  --brand-accent: #7c3aed;
+  --brand-ink: #1e1b4b;
+}
+
 @keyframes pop {
   from { opacity: 0; transform: translateY(6px) scale(0.98); }
   to { opacity: 1; transform: none; }

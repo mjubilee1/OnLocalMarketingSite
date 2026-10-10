@@ -1,68 +1,64 @@
+import { useCallback, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Editor, blankFromTemplate } from '../../training/Editor';
-import { Button, PageHeader } from '../../components/ui';
+import { Editor } from '../../training/Editor';
+import { PageHeader } from '../../components/ui';
 import { useStore, useTrainingModule } from '../../store';
-import type { SceneKind } from '../../training/types';
-import { useState } from 'react';
+import type { TrainingSpec } from '../../training/types';
 
 export default function SetupEditor() {
   const { id } = useParams();
-  const spec = useTrainingModule(id);
+  const isNew = !id || id === 'new';
+  const published = useTrainingModule(isNew ? undefined : id);
+  const draft = useStore((s) => (isNew || !id ? undefined : s.trainingDrafts?.[id]));
+  const working = draft ?? published;
   const save = useStore((s) => s.saveTrainingSpec);
+  const saveDraft = useStore((s) => s.saveTrainingDraft);
   const toast = useStore((s) => s.toast);
   const nav = useNavigate();
-  const [kind, setKind] = useState<SceneKind>('plate');
+  const opened = useRef(false);
 
-  if (id === 'new') {
+  const keepDraft = useCallback(
+    (next: TrainingSpec) => {
+      saveDraft(next);
+      if (isNew && !opened.current) {
+        opened.current = true;
+        nav(`/admin/setup/${next.id}`, { replace: true });
+      }
+    },
+    [isNew, saveDraft, nav],
+  );
+
+  const publish = (next: TrainingSpec, summary: string) => {
+    const version = published ? published.version + 1 : 1;
+    save(next, summary);
+    toast(`Published v${version}`, '✅');
+    nav('/admin/setup');
+  };
+
+  if (isNew) {
     return (
       <div>
-        <PageHeader title="New setup module" sub="Pick a template. You’ll drag the standard after it’s created." />
-        <div className="flex flex-wrap gap-2">
-          {(['plate', 'round-table', 'station'] as SceneKind[]).map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setKind(k)}
-              className={`rounded-lg px-3 py-2 text-sm ring-1 ${kind === k ? 'bg-indigo-600 text-white ring-indigo-600' : 'ring-slate-200'}`}
-            >
-              {k}
-            </button>
-          ))}
-        </div>
-        <Button
-          className="mt-6"
-          onClick={() => {
-            const draft = blankFromTemplate(kind, 'banquets', 'Untitled setup');
-            save(draft, 'Created');
-            toast('Module created', '🍽️');
-            nav(`/admin/setup/${draft.id}`);
-          }}
-        >
-          Create
-        </Button>
+        <PageHeader title="New setup card" sub="Name the board, pick a start, and set the picture. It saves as a draft while you update it." />
+        <Editor onSave={publish} onDraft={keepDraft} />
       </div>
     );
   }
 
-  if (!spec) {
+  if (!working) {
     return (
       <p className="text-sm text-slate-500">
-        Unknown module. <Link to="/admin/setup">Back</Link>
+        Unknown card. <Link to="/admin/setup">Back</Link>
       </p>
     );
   }
 
   return (
     <div>
-      <PageHeader title={`Edit · ${spec.title}`} sub={`Saving bumps this to v${spec.version + 1} and records “what changed”.`} />
-      <Editor
-        spec={spec}
-        onSave={(next, summary) => {
-          save(next, summary);
-          toast(`Saved v${spec.version + 1}`, '✅');
-          nav('/admin/setup');
-        }}
+      <PageHeader
+        title={working.venue ? `${working.title} · ${working.venue}` : working.title}
+        sub="Add or remove pieces, drag the standard, and the draft saves as you go. Publish when crew should train on it."
       />
+      <Editor spec={working} revising={!!published} onSave={publish} onDraft={keepDraft} />
     </div>
   );
 }

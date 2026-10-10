@@ -223,8 +223,8 @@ export function CoachFigure({ className }: { className?: string }) {
           <ellipse cx="44" cy="144" rx="22" ry="5" fill="#c7d2fe" />
           <rect x="28" y="78" width="32" height="48" rx="10" fill="#1e293b" />
           <rect x="30" y="80" width="28" height="18" rx="4" fill="#f8fafc" />
-          <path d="M44 80 v22" stroke="#4f46e5" strokeWidth="3.2" strokeLinecap="round" />
-          <circle cx="44" cy="86" r="2.2" fill="#4f46e5" />
+          <path d="M44 80 v22" stroke="var(--brand, #4f46e5)" strokeWidth="3.2" strokeLinecap="round" />
+          <circle cx="44" cy="86" r="2.2" fill="var(--brand, #4f46e5)" />
           <rect x="16" y="84" width="12" height="28" rx="6" fill="#1e293b" />
           <motion.g animate={{ rotate: talking ? [0, 10, 0, -8, 0] : 0 }} transition={{ duration: 0.65, repeat: talking ? Infinity : 0 }} style={{ originX: 0.8, originY: 0.58 }}>
             <rect x="60" y="84" width="12" height="28" rx="6" fill="#1e293b" />

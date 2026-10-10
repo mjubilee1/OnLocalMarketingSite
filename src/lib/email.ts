@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { brandPalette } from './brand';
+import { displayName } from './company';
 import { readiness } from './readiness';
 import { uid } from './utils';
 import { useStore } from '../store';
@@ -49,13 +51,15 @@ export function inviteLink(staffId: string): string {
 /** Plain-text invite a manager can paste into their own email or messaging app. */
 export function inviteText(s: Pick<Staff, 'name' | 'id'>): string {
   const st = useStore.getState();
-  return `Hi ${s.name.split(' ')[0]}, you're invited to join the ${st.orgName} event crew! Sign up here (takes a minute): ${inviteLink(s.id)}`;
+  const team = displayName({ name: st.orgName, teamName: st.teamName });
+  return `Hi ${s.name.split(' ')[0]}, you're invited to join the ${team} event crew! Sign up here (takes a minute): ${inviteLink(s.id)}`;
 }
 
 /** mailto: fallback when no email provider is set up. Opens the manager's own email app. */
 export function mailtoInvite(s: Pick<Staff, 'name' | 'id' | 'email'>): string {
   const st = useStore.getState();
-  const subject = `You're invited to join the ${st.orgName} crew`;
+  const team = displayName({ name: st.orgName, teamName: st.teamName });
+  const subject = `You're invited to join the ${team} crew`;
   return `mailto:${encodeURIComponent(s.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(inviteText(s))}`;
 }
 
@@ -93,7 +97,18 @@ export function useCrewEmail() {
       const res = await fetch('/api/email/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind, company: { name: st.orgName, email: st.orgEmail, managerName: st.managerName }, recipients }),
+        body: JSON.stringify({
+          kind,
+          company: {
+            name: st.orgName,
+            teamName: displayName({ name: st.orgName, teamName: st.teamName }),
+            email: st.orgEmail,
+            managerName: st.managerName,
+            color: brandPalette(st.primaryColor, st.accentColor).primary,
+            ink: brandPalette(st.primaryColor, st.accentColor).ink,
+          },
+          recipients,
+        }),
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !Array.isArray(j.results)) {

@@ -1,25 +1,34 @@
 import { Link } from 'react-router-dom';
-import { Pencil, Play } from 'lucide-react';
+import { Pencil, Play, Trash2 } from 'lucide-react';
 import { PageHeader, Pill } from '../../components/ui';
-import { useStore, useTrainingModules } from '../../store';
+import { boardWhen } from '../../lib/utils';
+import { useStore, useTrainingBoards } from '../../store';
 
 export default function SetupTraining() {
-  const modules = useTrainingModules();
+  const modules = useTrainingBoards();
   const staff = useStore((s) => s.staff);
   const attempts = useStore((s) => s.trainingAttempts);
+  const remove = useStore((s) => s.deleteTrainingBoard);
+  const toast = useStore((s) => s.toast);
   const nameOf = (id: string) => staff.find((s) => s.id === id)?.name ?? 'Crew';
 
   return (
     <div>
       <PageHeader
-        title="Setup training"
-        sub="Animated standards. Same plate, every property. Drag to prove they learned it."
+        title="Setup cards"
+        sub="A picture the crew rebuilds. Alex talks. No SOP for them to click through."
         actions={
-          <Link to="/admin/setup/new" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white">
-            New module
-          </Link>
+          <div className="flex gap-2">
+            <Link to="/admin/setup/library" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200">
+              Your library
+            </Link>
+            <Link to="/admin/setup/new" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white">
+              New setup card
+            </Link>
+          </div>
         }
       />
+      {modules.length === 0 && <p className="text-sm text-slate-500">No setup cards yet. Create one and it stays a draft until you publish it.</p>}
       <div className="space-y-8">
         {modules.map((m) => {
           const rows = attempts.filter((a) => a.moduleId === m.id);
@@ -42,7 +51,7 @@ export default function SetupTraining() {
                   <div className="text-xs font-medium uppercase text-slate-500">{m.department}</div>
                   <h2 className="text-lg font-semibold text-slate-900">{m.title}</h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    v{m.version} · {m.updatedAt}
+                    {[m.venue, m.status === 'draft' ? 'Draft' : `v${m.version}`, boardWhen(m.updatedAt)].filter(Boolean).join(' · ')}
                     {m.changeNotes.length ? ` · ${m.changeNotes[m.changeNotes.length - 1]!.summary}` : ''}
                   </p>
                 </div>
@@ -53,9 +62,21 @@ export default function SetupTraining() {
                   <Link to={`/admin/setup/${m.id}`} className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-slate-200">
                     <Pencil size={14} /> Edit version
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!confirm(`Delete “${m.title}”? Crew will no longer see this card.`)) return;
+                      remove(m.id);
+                      toast(`Deleted ${m.title}`);
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-rose-700 ring-1 ring-rose-200 hover:bg-rose-50"
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
+                {m.status === 'draft' && <Pill className="bg-amber-50 text-amber-800">Draft</Pill>}
                 <Pill className="bg-indigo-50 text-indigo-700">{done.length} completed</Pill>
                 {avg !== null && <Pill className="bg-emerald-50 text-emerald-700">Avg first-try {avg}%</Pill>}
                 {topMiss && <Pill className="bg-amber-50 text-amber-800">Most missed: {itemLabel(topMiss[0])}</Pill>}

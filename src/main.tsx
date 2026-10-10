@@ -2,6 +2,7 @@ import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import './index.css';
+import { BrandTheme } from './components/brand';
 import { Toaster } from './components/ui';
 import AdminLayout from './layouts/AdminLayout';
 import WorkerLayout from './layouts/WorkerLayout';
@@ -10,6 +11,7 @@ import Demo from './pages/Demo';
 import Join from './pages/Join';
 import SetupTraining from './pages/admin/SetupTraining';
 import SetupEditor from './pages/admin/SetupEditor';
+import SetupLibrary from './pages/admin/SetupLibrary';
 import SetupPlayer from './pages/worker/SetupPlayer';
 import Dashboard from './pages/admin/Dashboard';
 import Events from './pages/admin/Events';
@@ -49,6 +51,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ScrollToTop />
+      <BrandTheme />
       <Toaster />
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -67,6 +70,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="crew/:id" element={<Person />} />
           <Route path="setup" element={<SetupTraining />} />
           <Route path="setup/new" element={<SetupEditor />} />
+          <Route path="setup/library" element={<SetupLibrary />} />
           <Route path="setup/:id" element={<SetupEditor />} />
           <Route path="training" element={<Training />} />
           <Route path="training/library" element={<TemplateLibrary />} />
