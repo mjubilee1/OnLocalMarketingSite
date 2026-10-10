@@ -90,8 +90,8 @@ export default function Dashboard() {
             <Building2 size={20} />
           </div>
           <div className="flex-1 text-sm">
-            <div className="font-semibold text-indigo-950">Add your company details</div>
-            <div className="text-indigo-800">Documents and contracts currently show “{orgName}”. Set your legal company name, address and signatory so they appear on everything your crew signs.</div>
+            <div className="font-semibold text-indigo-950">Make this yours</div>
+            <div className="text-indigo-800">Documents and contracts currently show “{orgName}”. Set your team name, colors, logo, and legal company details so the app and everything your crew signs look like you.</div>
           </div>
           <span className="text-sm font-medium text-indigo-700">Set up →</span>
         </Link>

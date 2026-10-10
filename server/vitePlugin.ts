@@ -117,7 +117,16 @@ export function aiApi(): Plugin {
       res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({ configured: !!env.key, models: resolveModels(env.models).map((m) => m.label) }));
     }
-    const route = url === '/api/ai/course' ? 'course' : url === '/api/ai/lesson' ? 'lesson' : url === '/api/ai/role' ? 'role' : null;
+    const route =
+      url === '/api/ai/course'
+        ? 'course'
+        : url === '/api/ai/lesson'
+          ? 'lesson'
+          : url === '/api/ai/role'
+            ? 'role'
+            : url === '/api/ai/coach'
+              ? 'coach'
+              : null;
     if (!route || req.method !== 'POST') {
       res.statusCode = 404;
       return res.end('Not found');

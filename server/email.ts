@@ -86,9 +86,16 @@ function takeQuota(n: number) {
 
 export interface Company {
   name: string;
+  teamName?: string;
   email?: string;
   managerName?: string;
+  color?: string;
+  ink?: string;
 }
+
+const HEX = /^#[0-9a-fA-F]{6}$/;
+const hexOr = (value: unknown, fallback: string) => (typeof value === 'string' && HEX.test(value.trim()) ? value.trim() : fallback);
+const crewLabel = (c: Company) => c.teamName?.trim() || c.name;
 
 interface Message {
   to: string;
@@ -99,16 +106,18 @@ interface Message {
 }
 
 function layout(company: Company, heading: string, paragraphs: string[], cta: { label: string; url: string }, footer: string) {
-  const c = esc(company.name);
+  const c = esc(crewLabel(company));
+  const ink = hexOr(company.ink, '#1e1b4b');
+  const color = hexOr(company.color, '#4f46e5');
   return `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0f172a">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden">
-<tr><td style="background:#01175E;padding:20px 28px;color:#ffffff;font-weight:700;font-size:18px">${c}</td></tr>
+<tr><td style="background:${ink};padding:20px 28px;color:#ffffff;font-weight:700;font-size:18px">${c}</td></tr>
 <tr><td style="padding:28px">
 <h1 style="margin:0 0 16px;font-size:22px">${esc(heading)}</h1>
 ${paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.55;color:#334155">${p}</p>`).join('')}
-<p style="margin:24px 0"><a href="${esc(cta.url)}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:10px">${esc(cta.label)}</a></p>
-<p style="margin:0;font-size:12px;color:#64748b">Or open this link: <a href="${esc(cta.url)}" style="color:#4f46e5;word-break:break-all">${esc(cta.url)}</a></p>
+<p style="margin:24px 0"><a href="${esc(cta.url)}" style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:10px">${esc(cta.label)}</a></p>
+<p style="margin:0;font-size:12px;color:#64748b">Or open this link: <a href="${esc(cta.url)}" style="color:${color};word-break:break-all">${esc(cta.url)}</a></p>
 </td></tr>
 <tr><td style="padding:16px 28px;border-top:1px solid #e2e8f0;font-size:12px;color:#94a3b8">${footer}</td></tr>
 </table></td></tr></table></body></html>`;
@@ -116,8 +125,9 @@ ${paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.
 
 function inviteMessage(to: string, name: string, link: string, company: Company): Message {
   const first = name.split(' ')[0] || 'there';
-  const from = company.managerName ? `${company.managerName} at ${company.name}` : company.name;
-  const subject = `You're invited to join the ${company.name} crew`;
+  const label = crewLabel(company);
+  const from = company.managerName ? `${company.managerName} at ${label}` : label;
+  const subject = `You're invited to join the ${label} crew`;
   const text = `Hi ${first},
 
 ${from} has invited you to join their event crew.
@@ -142,7 +152,7 @@ If you weren't expecting this, you can ignore this email.`;
 
 function reminderMessage(to: string, name: string, link: string, company: Company, pending: number): Message {
   const first = name.split(' ')[0] || 'there';
-  const subject = `Reminder: finish getting shift-ready with ${company.name}`;
+  const subject = `Reminder: finish getting shift-ready with ${crewLabel(company)}`;
   const left = pending > 0 ? `You have ${pending} step${pending === 1 ? '' : 's'} left before you're ready to work.` : 'You have a few steps left before you are ready to work.';
   const text = `Hi ${first},
 
@@ -218,7 +228,14 @@ export async function sendCrewEmails(
 ): Promise<{ status: number; results?: SendResult[]; error?: string }> {
   if (!provider(env)) return { status: 503, error: 'Email is not configured. Add RESEND_API_KEY or SMTP settings plus EMAIL_FROM to .env.local.' };
   const kind = body.kind === 'reminder' ? 'reminder' : 'invite';
-  const company: Company = { name: clean(body.company?.name, 120) || 'Your event company', email: isEmail(body.company?.email ?? '') ? body.company!.email : undefined, managerName: clean(body.company?.managerName, 80) };
+  const company: Company = {
+    name: clean(body.company?.name, 120) || 'Your event company',
+    teamName: clean(body.company?.teamName, 120),
+    email: isEmail(body.company?.email ?? '') ? body.company!.email : undefined,
+    managerName: clean(body.company?.managerName, 80),
+    color: hexOr(body.company?.color, '#4f46e5'),
+    ink: hexOr(body.company?.ink, '#1e1b4b'),
+  };
   const list = Array.isArray(body.recipients) ? body.recipients.slice(0, 100) : [];
   if (!list.length) return { status: 400, error: 'No recipients' };
   if (!takeQuota(list.length)) return { status: 429, error: `Hourly email limit (${HOURLY_CAP}) reached. Try again later.` };

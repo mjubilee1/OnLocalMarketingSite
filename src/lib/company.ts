@@ -1,4 +1,4 @@
-/** The crew manager's company, as it appears on documents and contracts. */
+/** The crew manager's company: legal details on documents, and the brand crew actually see. */
 export interface CompanyProfile {
   name: string;
   address: string;
@@ -6,6 +6,19 @@ export interface CompanyProfile {
   phone: string;
   managerName: string;
   managerTitle: string;
+  /** What the crew sees in the app, on invites, and on the sign-up page. */
+  teamName: string;
+  /** Button and link color, as #rrggbb. */
+  primaryColor: string;
+  /** Second color for headers and gradients, as #rrggbb. */
+  accentColor: string;
+  /** Optional logo as a data URL. Empty uses initials and the team name. */
+  logo: string;
+}
+
+/** Name printed in the product chrome. Falls back to the legal company name. */
+export function displayName(c: Pick<CompanyProfile, 'name' | 'teamName'>): string {
+  return (c.teamName ?? '').trim() || (c.name ?? '').trim() || 'Your team';
 }
 
 /** Tokens managers can put in document text; filled in with the current company profile. */

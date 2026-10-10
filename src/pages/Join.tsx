@@ -4,16 +4,17 @@ import { Check, Clock, FileSignature, GraduationCap } from 'lucide-react';
 import { Button, Card, Field, Input, Select } from '../components/ui';
 import { PhotoInput } from '../components/photoInput';
 import { phoneOk } from '../lib/profile';
+import { displayName } from '../lib/company';
 import { Logo } from '../layouts/AdminLayout';
 import { roleTimeToReady } from '../lib/readiness';
 import { cn, color, LANGUAGES } from '../lib/utils';
-import { useCatalog, useStore } from '../store';
+import { useCatalog, useCompany, useStore } from '../store';
 
 
 export default function Join() {
   const { code } = useParams();
   const inviteCode = useStore((s) => s.inviteCode);
-  const orgName = useStore((s) => s.orgName);
+  const team = displayName(useCompany());
   const createStaff = useStore((s) => s.createStaff);
   const setCurrent = useStore((s) => s.setCurrentStaff);
   const toast = useStore((s) => s.toast);
@@ -55,7 +56,7 @@ export default function Join() {
         <Card className="max-w-sm p-8 text-center">
           <div className="text-4xl">👋</div>
           <h1 className="mt-3 text-lg font-semibold">Welcome back, {invited.name.split(' ')[0]}</h1>
-          <p className="mt-1 text-sm text-slate-500">You've already joined the {orgName} crew. Pick up where you left off.</p>
+          <p className="mt-1 text-sm text-slate-500">You've already joined the {team} crew. Pick up where you left off.</p>
           <Button
             size="lg"
             className="mt-5 w-full"
@@ -77,7 +78,7 @@ export default function Join() {
           <Logo />
         </div>
         <Card className="p-6">
-          <h1 className="text-xl font-bold text-slate-900">{invited ? `${invited.name.split(' ')[0]}, you're invited to the ${orgName} crew` : `Join the ${orgName} crew`}</h1>
+          <h1 className="text-xl font-bold text-slate-900">{invited ? `${invited.name.split(' ')[0]}, you're invited to the ${team} crew` : `Join the ${team} crew`}</h1>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] text-slate-600">
             {[
               { icon: FileSignature, t: 'E-sign docs' },

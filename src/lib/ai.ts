@@ -102,3 +102,21 @@ export const generateRole = (req: RoleAIRequest, onEvent: (e: AIEvent) => void, 
 
 export const generateLesson =(req: LessonAIRequest, onEvent: (e: AIEvent) => void, signal?: AbortSignal) =>
   stream<Lesson>('/api/ai/lesson', req, onEvent, signal);
+
+export interface CoachAIRequest {
+  question: string;
+  history?: { role: 'staff' | 'coach'; text: string }[];
+  lookingAt?: { phase?: string; caption?: string; highlights?: string[] };
+  spec?: {
+    title?: string;
+    department?: string;
+    version?: number;
+    changeNotes?: { summary?: string }[];
+    items?: { label?: string; x?: number; y?: number }[];
+    steps?: { caption?: string }[];
+    checks?: { prompt?: string }[];
+  };
+}
+
+export const askCoach = (req: CoachAIRequest, onEvent: (e: AIEvent) => void, signal?: AbortSignal) =>
+  stream<{ reply: string }>('/api/ai/coach', req, onEvent, signal);
