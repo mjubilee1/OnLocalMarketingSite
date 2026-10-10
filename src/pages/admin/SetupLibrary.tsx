@@ -1,12 +1,13 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Eraser, Images, ImagePlus, Loader2, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Button, Field, Input, PageHeader } from '../../components/ui';
-import { resizePhoto } from '../../lib/profile';
+import { cutoutBoardDataUrl, fitBoardPhoto } from '../../lib/profile';
 import { useCompany, useStore } from '../../store';
 import { uid } from '../../lib/utils';
+import { cleanStoredPhotos } from '../../training/cleanStoredPhotos';
 import { ItemSwatch } from '../../training/ItemSwatch';
-import { lookFromColor, lookFromImage, type ItemStyle } from '../../training/items';
+import { lookFromColor, lookFromCutout, lookFromImage, type ItemStyle } from '../../training/items';
 import type { CustomLibraryItem } from '../../training/types';
 
 const SHAPES: { id: ItemStyle['shape']; label: string }[] = [
@@ -23,6 +24,13 @@ const SHELVES = [
 
 const PRESETS = ['#4f46e5', '#d97706', '#16a34a', '#dc2626', '#0284c7', '#7c3aed', '#0f766e', '#1e293b', '#f8fafc'];
 
+/** Filename → readable label: "house-vinaigrette.JPG" → "House vinaigrette" */
+const labelFromFile = (name: string) => {
+  const base = name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const cleaned = base || 'Untitled';
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+};
+
 export default function SetupLibrary() {
   const company = useCompany();
   const mine = useStore((s) => s.customLibrary);
@@ -31,7 +39,6 @@ export default function SetupLibrary() {
   const remove = useStore((s) => s.removeLibraryItem);
   const setBrand = useStore((s) => s.setLibraryBrand);
   const toast = useStore((s) => s.toast);
-
   const [label, setLabel] = useState('');
   const [group, setGroup] = useState<CustomLibraryItem['group']>('plate');
   const [shape, setShape] = useState<ItemStyle['shape']>('circle');
@@ -39,7 +46,12 @@ export default function SetupLibrary() {
   const [image, setImage] = useState('');
   const [imageError, setImageError] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkError, setBulkError] = useState('');
+  const [cleanBusy, setCleanBusy] = useState(false);
+  const [cleanAllBusy, setCleanAllBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const bulkRef = useRef<HTMLInputElement>(null);
 
   const look = image ? lookFromImage(image, shape) : lookFromColor(color, shape);
 
@@ -53,13 +65,65 @@ export default function SetupLibrary() {
     setEditing(null);
   };
 
-  const add = () => {
+  const add = async () => {
     const name = label.trim();
     if (name.length < 2) return;
-    save({ id: editing ?? uid('lib-'), label: name, group, look });
+    const nextLook = image ? await lookFromCutout(image, shape) : look;
+    save({ id: editing ?? uid('lib-'), label: name, group, look: nextLook });
     toast(editing ? `Updated ${name}` : `Added ${name} to your library`, '📦');
     reset();
   };
+
+  const eraseAllStored = async () => {
+    if (cleanAllBusy) return;
+    setCleanAllBusy(true);
+    try {
+      const st = useStore.getState();
+      const { library, boards } = await cleanStoredPhotos({
+        customLibrary: st.customLibrary,
+        trainingEdits: st.trainingEdits ?? {},
+        trainingDrafts: st.trainingDrafts ?? {},
+        saveLibraryItem: st.saveLibraryItem,
+        saveTrainingDraft: st.saveTrainingDraft,
+        patchTrainingEdit: (spec) =>
+          useStore.setState((s) => ({ trainingEdits: { ...s.trainingEdits, [spec.id]: spec } })),
+      });
+      toast(
+        library || boards
+          ? `Erased backgrounds on ${library} library photo${library === 1 ? '' : 's'}${boards ? ` · ${boards} on boards` : ''}`
+          : 'No photos needed cleaning',
+        '✨',
+      );
+      return { library, boards };
+    } finally {
+      setCleanAllBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    const w = window as unknown as { __onlocalEraseLibrary?: () => Promise<{ library: number; boards: number }> };
+    w.__onlocalEraseLibrary = async () => {
+      const st = useStore.getState();
+      const result = await cleanStoredPhotos({
+        customLibrary: st.customLibrary,
+        trainingEdits: st.trainingEdits ?? {},
+        trainingDrafts: st.trainingDrafts ?? {},
+        saveLibraryItem: st.saveLibraryItem,
+        saveTrainingDraft: st.saveTrainingDraft,
+        patchTrainingEdit: (spec) => useStore.setState((s) => ({ trainingEdits: { ...s.trainingEdits, [spec.id]: spec } })),
+      });
+      st.toast(
+        result.library || result.boards
+          ? `Erased backgrounds on ${result.library} library photo${result.library === 1 ? '' : 's'}${result.boards ? ` · ${result.boards} on boards` : ''}`
+          : 'No photos needed cleaning',
+        '✨',
+      );
+      return result;
+    };
+    return () => {
+      delete w.__onlocalEraseLibrary;
+    };
+  }, []);
 
   const edit = (it: CustomLibraryItem) => {
     setEditing(it.id);
@@ -75,12 +139,47 @@ export default function SetupLibrary() {
     if (!file) return;
     setImageError('');
     try {
-      setImage(await resizePhoto(file));
+      setImage(await fitBoardPhoto(file));
     } catch (e) {
       setImageError((e as Error).message);
     } finally {
       if (fileRef.current) fileRef.current.value = '';
     }
+  };
+
+  const cleanBackground = async () => {
+    if (!image || cleanBusy) return;
+    setCleanBusy(true);
+    setImageError('');
+    try {
+      setImage(await cutoutBoardDataUrl(image));
+    } catch (e) {
+      setImageError((e as Error).message);
+    } finally {
+      setCleanBusy(false);
+    }
+  };
+
+  const bulkAdd = async (list: FileList | null) => {
+    if (!list?.length) return;
+    setBulkBusy(true);
+    setBulkError('');
+    let ok = 0;
+    let fail = 0;
+    for (const file of Array.from(list)) {
+      try {
+        const data = await fitBoardPhoto(file);
+        const name = labelFromFile(file.name);
+        save({ id: uid('lib-'), label: name.length >= 2 ? name : 'Untitled', group, look: await lookFromCutout(data, shape) });
+        ok += 1;
+      } catch {
+        fail += 1;
+      }
+    }
+    if (bulkRef.current) bulkRef.current.value = '';
+    setBulkBusy(false);
+    if (ok) toast(`Added ${ok} piece${ok === 1 ? '' : 's'} to your library`, '📦');
+    if (fail) setBulkError(`${fail} photo${fail === 1 ? '' : 's'} couldn’t be read. Try JPG or PNG.`);
   };
 
   const colors = [brand, ...PRESETS.filter((c) => c.toLowerCase() !== brand.toLowerCase())];
@@ -189,11 +288,17 @@ export default function SetupLibrary() {
                 {image ? 'Replace photo' : 'Upload photo'}
               </Button>
               {image && (
-                <button type="button" className="ml-2 cursor-pointer text-sm text-slate-500 hover:text-slate-800" onClick={() => setImage('')}>
-                  <X size={14} className="mr-0.5 inline" /> Use a shape instead
-                </button>
+                <>
+                  <Button type="button" variant="secondary" className="ml-2" disabled={cleanBusy} onClick={cleanBackground}>
+                    {cleanBusy ? <Loader2 size={14} className="animate-spin" /> : null}
+                    {cleanBusy ? 'Cleaning…' : 'Erase background'}
+                  </Button>
+                  <button type="button" className="ml-2 cursor-pointer text-sm text-slate-500 hover:text-slate-800" onClick={() => setImage('')}>
+                    <X size={14} className="mr-0.5 inline" /> Use a shape instead
+                  </button>
+                </>
               )}
-              <p className="mt-1.5 text-xs text-slate-500">PNG or JPG. Cropped square so it sits on the board.</p>
+              <p className="mt-1.5 text-xs text-slate-500">Any photo works — we fit it and clear empty white backdrop so you just see the item.</p>
               {imageError && <p className="mt-1 text-xs text-rose-600">{imageError}</p>}
             </div>
           </div>
@@ -214,8 +319,45 @@ export default function SetupLibrary() {
         </div>
       </section>
 
+      {!editing && (
+        <section className="mt-6 rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+          <h2 className="font-semibold text-slate-900">Bulk add photos</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Drop in a whole batch from a photo day. We fit each one and name it from the file — rename anytime below. Uses the shelf and shape selected above.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button type="button" variant="secondary" disabled={bulkBusy} onClick={() => bulkRef.current?.click()}>
+              {bulkBusy ? <Loader2 size={16} className="animate-spin" /> : <Images size={16} />}
+              {bulkBusy ? 'Adding…' : 'Choose multiple photos'}
+            </Button>
+            <span className="text-xs text-slate-500">
+              Shelf: <span className="font-medium capitalize text-slate-700">{group}</span>
+              {' · '}
+              Shape: <span className="font-medium text-slate-700">{SHAPES.find((s) => s.id === shape)?.label}</span>
+            </span>
+          </div>
+          {bulkError && <p className="mt-2 text-xs text-rose-600">{bulkError}</p>}
+          <input
+            ref={bulkRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/heic"
+            multiple
+            className="hidden"
+            onChange={(e) => bulkAdd(e.target.files)}
+          />
+        </section>
+      )}
+
       <section className="mt-6">
-        <h2 className="font-semibold text-slate-900">Yours ({mine.length})</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold text-slate-900">Yours ({mine.length})</h2>
+          {mine.some((it) => it.look.image) && (
+            <Button type="button" variant="secondary" size="sm" disabled={cleanAllBusy} onClick={eraseAllStored}>
+              {cleanAllBusy ? <Loader2 size={14} className="animate-spin" /> : <Eraser size={14} />}
+              {cleanAllBusy ? 'Erasing…' : 'Erase all backgrounds'}
+            </Button>
+          )}
+        </div>
         {mine.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">Nothing custom yet. The starter kit (chicken, glasses, urns) is already on every card.</p>
         ) : (

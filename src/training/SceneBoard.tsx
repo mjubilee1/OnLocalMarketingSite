@@ -1,4 +1,4 @@
-import { useRef, useState, type RefObject } from 'react';
+import { useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { motion } from 'framer-motion';
 import { styleOf } from './items';
 import type { Pose, Scene, SceneItem } from './types';
@@ -16,6 +16,7 @@ export function SceneBoard({
   slotIds,
   hotId,
   onDrop,
+  onResize,
   onSelect,
   boardRef: boardRefProp,
   className,
@@ -32,6 +33,8 @@ export function SceneBoard({
   /** Slot the trainee is currently hovering with the right piece. */
   hotId?: string;
   onDrop?: (id: string, pose: Pose) => void;
+  /** Drag the corner of a selected piece. Scale is 1 at the piece’s normal size. */
+  onResize?: (id: string, scale: number) => void;
   onSelect?: (id: string) => void;
   boardRef?: RefObject<HTMLDivElement | null>;
   className?: string;
@@ -102,6 +105,7 @@ export function SceneBoard({
               draggable={drag.has(item.id)}
               boardRef={boardRef}
               onDrop={onDrop}
+              onResize={onResize}
               onSelect={onSelect}
             />
           );
@@ -118,6 +122,7 @@ function Glyph({
   draggable,
   boardRef,
   onDrop,
+  onResize,
   onSelect,
 }: {
   item: SceneItem;
@@ -127,6 +132,7 @@ function Glyph({
   draggable?: boolean;
   boardRef: RefObject<HTMLDivElement | null>;
   onDrop?: (id: string, pose: Pose) => void;
+  onResize?: (id: string, scale: number) => void;
   onSelect?: (id: string) => void;
 }) {
   const st = styleOf(item.kind, item.look);
@@ -135,6 +141,31 @@ function Glyph({
   const top = `${item.y}%`;
   const [dragGen, setDragGen] = useState(0);
   const [pin, setPin] = useState(false);
+  const [resizing, setResizing] = useState(false);
+
+  const startResize = (e: ReactPointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const board = boardRef.current;
+    if (!board || !onResize) return;
+    const rect = board.getBoundingClientRect();
+    const ox = rect.left + (item.x / 100) * rect.width;
+    const oy = rect.top + (item.y / 100) * rect.height;
+    const startDist = Math.max(12, Math.hypot(e.clientX - ox, e.clientY - oy));
+    const startScale = item.scale ?? 1;
+    setResizing(true);
+    const move = (ev: PointerEvent) => {
+      const next = Math.min(2.6, Math.max(0.45, (startScale * Math.hypot(ev.clientX - ox, ev.clientY - oy)) / startDist));
+      onResize(item.id, Math.round(next * 20) / 20);
+    };
+    const up = () => {
+      setResizing(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
 
   return (
     <motion.div
@@ -150,7 +181,7 @@ function Glyph({
         scale: highlight ? scale * 1.08 : scale,
         opacity: dim ? 0.28 : 1,
       }}
-      transition={pin ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 26 }}
+      transition={pin || resizing ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 26 }}
     >
       <motion.div
         key={dragGen}
@@ -180,26 +211,43 @@ function Glyph({
         aria-label={item.label}
         className={cn('flex touch-none flex-col items-center', draggable && 'cursor-grab active:cursor-grabbing')}
       >
-        {st.image ? (
-          <img
-            src={st.image}
-            alt=""
-            className={cn('h-auto w-full object-cover drop-shadow-sm', highlight && 'ring-2 ring-indigo-600')}
-            style={{ borderRadius: st.shape === 'rect' ? 6 : '50%', aspectRatio: st.shape === 'ellipse' ? '3 / 2' : '1' }}
-          />
-        ) : (
-        <svg viewBox={`0 0 ${st.w} ${st.h}`} className={cn('h-auto w-full drop-shadow-sm', highlight && 'text-indigo-600')} overflow="visible">
-          {st.shape === 'circle' && (
-            <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
+        <span className="relative block w-full">
+          {st.image ? (
+            <img
+              src={st.image}
+              alt=""
+              draggable={false}
+              className={cn(
+                'pointer-events-none h-auto w-full object-contain drop-shadow-md select-none',
+                highlight && 'ring-2 ring-indigo-600 ring-offset-1',
+              )}
+              style={{ aspectRatio: `${st.w} / ${st.h}`, background: 'transparent' }}
+            />
+          ) : (
+            <svg viewBox={`0 0 ${st.w} ${st.h}`} className={cn('h-auto w-full drop-shadow-sm', highlight && 'text-indigo-600')} overflow="visible">
+              {st.shape === 'circle' && (
+                <circle cx={st.w / 2} cy={st.h / 2} r={Math.min(st.w, st.h) / 2 - 0.6} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.4 : 0.7} />
+              )}
+              {st.shape === 'ellipse' && (
+                <ellipse cx={st.w / 2} cy={st.h / 2} rx={st.w / 2 - 0.5} ry={st.h / 2 - 0.5} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+              )}
+              {st.shape === 'rect' && (
+                <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+              )}
+            </svg>
           )}
-          {st.shape === 'ellipse' && (
-            <ellipse cx={st.w / 2} cy={st.h / 2} rx={st.w / 2 - 0.5} ry={st.h / 2 - 0.5} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
+          {highlight && onResize && (
+            <span
+              role="slider"
+              aria-label={`Resize ${item.label}`}
+              aria-valuemin={45}
+              aria-valuemax={260}
+              aria-valuenow={Math.round(scale * 100)}
+              onPointerDownCapture={startResize}
+              className="absolute -bottom-1 -right-1 z-30 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-indigo-600 bg-white shadow-sm"
+            />
           )}
-          {st.shape === 'rect' && (
-            <rect x="0.4" y="0.4" width={st.w - 0.8} height={st.h - 0.8} rx={st.rx ?? 1} fill={st.fill} stroke={highlight ? 'currentColor' : st.stroke} strokeWidth={highlight ? 1.2 : 0.6} />
-          )}
-        </svg>
-        )}
+        </span>
         <span className="mt-0.5 max-w-[4.5rem] truncate text-[9px] font-semibold text-slate-600">{item.label}</span>
       </motion.div>
     </motion.div>

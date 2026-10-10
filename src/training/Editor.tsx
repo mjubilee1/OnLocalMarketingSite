@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { Button, Field, Input } from '../components/ui';
 import { boardWhen, cn, uid } from '../lib/utils';
 import { useStore } from '../store';
@@ -164,6 +164,29 @@ export function Editor({
     setLines((c) => [...c, `${label} goes here.`]);
   };
 
+  const nudgeScale = (id: string, delta: number) => {
+    touch();
+    setPoses((p) => {
+      const cur = p[id]?.scale ?? live.scene.items.find((it) => it.id === id)?.scale ?? 1;
+      const scale = Math.min(2.6, Math.max(0.45, Math.round((cur + delta) * 20) / 20));
+      return { ...p, [id]: { ...p[id], scale } };
+    });
+  };
+
+  /** Stack order — chicken on the plate, fork under napkin, etc. */
+  const nudgeLayer = (id: string, dir: 'front' | 'back') => {
+    touch();
+    const zs = live.scene.items.map((it) => it.z ?? 0);
+    const z = dir === 'front' ? Math.max(...zs, 0) + 1 : Math.min(...zs, 2) - 1;
+    setDraft({
+      ...live,
+      scene: {
+        ...live.scene,
+        items: live.scene.items.map((it) => (it.id === id ? { ...it, z } : it)),
+      },
+    });
+  };
+
   const removeItem = (id: string) => {
     touch();
     const it = live.scene.items.find((x) => x.id === id);
@@ -222,7 +245,7 @@ export function Editor({
               />
             </Field>
           </div>
-          <p className="mt-4 text-sm text-slate-500">Tap an item to add it. Tap something on the picture to remove it. Drag to place it.</p>
+          <p className="mt-4 text-sm text-slate-500">Tap an item to add it. Drag to move, corner dot or −/+ to resize, arrows to stack in front or behind.</p>
           <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
             <div className="relative">
               <SceneBoard
@@ -235,15 +258,62 @@ export function Editor({
                   touch();
                   setPoses((p) => ({ ...p, [id]: pose }));
                 }}
+                onResize={(id, scale) => {
+                  touch();
+                  setPoses((p) => ({ ...p, [id]: { ...p[id], scale } }));
+                }}
               />
               {selected && (
-                <button
-                  type="button"
-                  onClick={() => removeItem(selected.id)}
-                  className="absolute right-3 top-3 z-30 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-rose-600 shadow-sm ring-1 ring-rose-200"
-                >
-                  <Trash2 size={12} /> Remove {selected.label}
-                </button>
+                <div className="absolute right-3 top-3 z-30 flex flex-wrap items-center justify-end gap-2">
+                  <div className="inline-flex items-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+                    <button
+                      type="button"
+                      aria-label={`Make ${selected.label} smaller`}
+                      onClick={() => nudgeScale(selected.id, -0.15)}
+                      className="px-2.5 py-1 text-sm font-medium text-slate-700 hover:text-indigo-700"
+                    >
+                      −
+                    </button>
+                    <span className="min-w-10 text-center text-[11px] font-medium tabular-nums text-slate-600">
+                      {Math.round((poses[selected.id]?.scale ?? selected.scale ?? 1) * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={`Make ${selected.label} bigger`}
+                      onClick={() => nudgeScale(selected.id, 0.15)}
+                      className="px-2.5 py-1 text-sm font-medium text-slate-700 hover:text-indigo-700"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="inline-flex items-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+                    <button
+                      type="button"
+                      aria-label={`Send ${selected.label} behind`}
+                      title="Send behind"
+                      onClick={() => nudgeLayer(selected.id, 'back')}
+                      className="px-2 py-1 text-slate-700 hover:text-indigo-700"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Bring ${selected.label} in front`}
+                      title="Bring in front"
+                      onClick={() => nudgeLayer(selected.id, 'front')}
+                      className="px-2 py-1 text-slate-700 hover:text-indigo-700"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(selected.id)}
+                    className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-rose-600 shadow-sm ring-1 ring-rose-200"
+                  >
+                    <Trash2 size={12} /> Remove {selected.label}
+                  </button>
+                </div>
               )}
             </div>
             <aside className="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
@@ -283,8 +353,10 @@ export function Editor({
                   <ul className="mt-2 space-y-1">
                     {onScene.map((it) => (
                       <li key={it.id} className="flex items-center gap-2 text-xs text-slate-700">
-                        <ItemSwatch kind={it.kind} look={it.look} className="h-4 w-4" />
-                        <span className="flex-1 truncate">{it.label}</span>
+                        <button type="button" onClick={() => setSelectedId(it.id)} className={cn('flex min-w-0 flex-1 items-center gap-2 rounded px-1 py-0.5 text-left', selectedId === it.id && 'bg-indigo-50 text-indigo-800')}>
+                          <ItemSwatch kind={it.kind} look={it.look} className="h-4 w-4" />
+                          <span className="truncate">{it.label}</span>
+                        </button>
                         <button type="button" onClick={() => removeItem(it.id)} className="rounded p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600" aria-label={`Remove ${it.label}`}>
                           <Trash2 size={12} />
                         </button>
@@ -428,7 +500,7 @@ function WizardFrame({ step, children }: { step: number; children: React.ReactNo
 function posesFrom(spec?: TrainingSpec | null): Record<string, Pose> {
   const p: Record<string, Pose> = {};
   spec?.scene.items.forEach((it) => {
-    p[it.id] = { x: it.x, y: it.y, rotation: it.rotation };
+    p[it.id] = { x: it.x, y: it.y, rotation: it.rotation, scale: it.scale };
   });
   return p;
 }

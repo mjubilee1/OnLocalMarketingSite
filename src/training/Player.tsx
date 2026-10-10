@@ -335,7 +335,7 @@ function PlaceCheck({
     const t = targets[id];
     if (!t) return;
     if (dist(pose, t) <= SNAP) {
-      setPoses((prev) => ({ ...prev, [id]: { x: t.x, y: t.y, rotation: t.rotation } }));
+      setPoses((prev) => ({ ...prev, [id]: { x: t.x, y: t.y, rotation: t.rotation, scale: t.scale } }));
       setLocked((prev) => new Set(prev).add(id));
     } else {
       onFirstMiss(id);

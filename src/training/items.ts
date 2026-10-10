@@ -92,12 +92,23 @@ export const lookFromColor = (fill: string, shape: ItemStyle['shape']): ItemStyl
   return { fill, stroke, w: 11, h: 11, shape: 'circle' };
 };
 
-/** A photo piece. Shape decides how the picture is cropped on the board. */
-export const lookFromImage = (image: string, shape: ItemStyle['shape']): ItemStyle => {
-  if (shape === 'ellipse') return { fill: '#ffffff', w: 18, h: 12, shape, image };
-  if (shape === 'rect') return { fill: '#ffffff', w: 16, h: 16, shape, rx: 2, image };
-  return { fill: '#ffffff', w: 16, h: 16, shape: 'circle', image };
+/** A photo piece. Optional aspect (w/h) keeps tall cups / flat forks from sitting in a white box. */
+export const lookFromImage = (image: string, shape: ItemStyle['shape'], aspect = 1): ItemStyle => {
+  const base = 14;
+  const w = aspect >= 1 ? base : Math.max(6, base * aspect);
+  const h = aspect >= 1 ? Math.max(6, base / aspect) : base;
+  return { fill: 'transparent', w, h, shape: shape === 'ellipse' ? 'ellipse' : 'rect', rx: 1, image };
 };
+
+/** Measure a cutout PNG and build a look that hugs the item. */
+export function lookFromCutout(image: string, shape: ItemStyle['shape'] = 'rect'): Promise<ItemStyle> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(lookFromImage(image, shape, img.naturalWidth / Math.max(1, img.naturalHeight)));
+    img.onerror = () => reject(new Error("That photo couldn't be measured."));
+    img.src = image;
+  });
+}
 
 export const TEMPLATE_STARTERS: Record<string, { kind: string; label: string }[]> = {
   plate: [

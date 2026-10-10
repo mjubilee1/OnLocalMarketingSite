@@ -3,13 +3,13 @@ import { styleOf, type ItemStyle } from './items';
 export function ItemSwatch({ kind, look, className }: { kind: string; look?: ItemStyle; className?: string }) {
   const st = styleOf(kind, look);
   if (st.image) {
-    const round = st.shape === 'circle' || st.shape === 'ellipse';
     return (
       <img
         src={st.image}
         alt=""
+        draggable={false}
         className={className ?? 'h-8 w-8'}
-        style={{ objectFit: 'cover', borderRadius: round ? '50%' : 6, aspectRatio: st.shape === 'ellipse' ? '3 / 2' : '1' }}
+        style={{ objectFit: 'contain', aspectRatio: `${st.w} / ${st.h}`, background: 'transparent' }}
       />
     );
   }
