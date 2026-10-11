@@ -1,3 +1,6 @@
+/** Swap to a Calendly (or other) URL when you have one — used by the public homepage CTA. */
+export const DEMO_BOOKING_HREF = 'mailto:mjubil96@gmail.com?subject=Demo%20request';
+
 /** The crew manager's company, as it appears on documents and contracts. */
 export interface CompanyProfile {
   name: string;
