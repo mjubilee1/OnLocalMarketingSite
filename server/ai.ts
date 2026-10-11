@@ -579,8 +579,125 @@ export function toRole(raw: any, r: RoleRequest): RoleSuggestion {
 
 // ---------- Entry point ----------
 
+export interface CoachRequest {
+  question: string;
+  history?: { role: 'staff' | 'coach'; text: string }[];
+  lookingAt?: { phase?: string; caption?: string; highlights?: string[] };
+  spec?: {
+    title?: string;
+    department?: string;
+    version?: number;
+    changeNotes?: { summary?: string }[];
+    items?: { label?: string; x?: number; y?: number }[];
+    steps?: { caption?: string }[];
+    checks?: { prompt?: string }[];
+  };
+}
+
+function coachPrompt(r: CoachRequest) {
+  const spec = r.spec ?? {};
+  const look = r.lookingAt ?? {};
+  const items = (spec.items ?? [])
+    .map((it) => `${str(it.label, 40)} at ${Math.round(Number(it.x) || 0)}% x ${Math.round(Number(it.y) || 0)}%`)
+    .join('; ');
+  const notes = (spec.changeNotes ?? []).map((n) => str(n.summary, 200)).filter(Boolean).join(' | ');
+  const steps = (spec.steps ?? []).map((s) => str(s.caption, 180)).filter(Boolean).join(' → ');
+  const hist = (r.history ?? [])
+    .slice(-6)
+    .map((m) => `${m.role === 'staff' ? 'Staff' : 'You'}: ${str(m.text, 400)}`)
+    .join('\n');
+  const system = `You are Alex, a banquet captain coaching a server on the floor. You can SEE the training scene they are looking at. Answer only from that standard. Spoken voice: 1–3 short sentences, second person, no markdown, no lists, no JSON. If they ask where something goes, use guest-left / guest-right. If you don't know from the spec, say so and point them back to the plate.`;
+  const user = [
+    `Module: ${str(spec.title, 120) || 'setup'} (${str(spec.department, 40)}, v${spec.version ?? 1})`,
+    notes ? `What changed: ${notes}` : '',
+    items ? `Items on the scene: ${items}` : '',
+    steps ? `Walkthrough: ${steps}` : '',
+    (spec.checks ?? []).length ? `Check: ${str(spec.checks![0]?.prompt, 200)}` : '',
+    `They are looking at: phase ${str(look.phase, 20) || 'walk'}. Caption: ${str(look.caption, 300) || '(none)'}. Highlighted: ${(look.highlights ?? []).map((h) => str(h, 40)).join(', ') || 'none'}.`,
+    hist ? `Recent chat:\n${hist}` : '',
+    `Staff just said: ${str(r.question, 500)}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+  return { system, user, maxTokens: 220 };
+}
+
+async function callPlainWithFallback(o: {
+  key: string;
+  models: ModelSpec[];
+  system: string;
+  user: string;
+  maxTokens: number;
+  perModelMs: number;
+  totalMs: number;
+  signal?: AbortSignal;
+  emit: (e: AIEvent) => void;
+}) {
+  const t0 = Date.now();
+  for (const [i, m] of o.models.entries()) {
+    if (o.signal?.aborted) throw new Error('cancelled');
+    if (Date.now() - t0 > o.totalMs) break;
+    o.emit({ type: 'attempt', label: m.label, n: i + 1, of: o.models.length });
+    const started = Date.now();
+    try {
+      const timeout = AbortSignal.timeout(o.perModelMs);
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${o.key}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://onlocalai.com',
+          'X-Title': 'onlocalAI',
+        },
+        body: JSON.stringify({
+          model: m.id,
+          messages: [
+            { role: 'system', content: o.system },
+            { role: 'user', content: o.user },
+          ],
+          temperature: 0.5,
+          max_tokens: o.maxTokens,
+          ...(m.lowReasoning ? { reasoning: { effort: 'low' } } : {}),
+        }),
+        signal: o.signal ? AbortSignal.any([o.signal, timeout]) : timeout,
+      });
+      const j: any = await res.json().catch(() => ({}));
+      if (!res.ok || j.error) {
+        const reason = reasonFrom(res.status, j);
+        o.emit({ type: 'failed', label: m.label, reason });
+        if (res.status === 401) throw new Error('OpenRouter rejected the API key. Check OPENROUTER_API_KEY in .env.local.');
+        continue;
+      }
+      const choice = j.choices?.[0];
+      let text: string = String(choice?.message?.content ?? '').trim();
+      text = text.replace(/^["'`]+|["'`]+$/g, '').replace(/^```[\s\S]*?```$/g, '').trim();
+      if (text.startsWith('{')) {
+        try {
+          const parsed = parseModelJSON(text);
+          text = String(parsed.reply ?? parsed.text ?? parsed.answer ?? '').trim() || text;
+        } catch {
+          /* keep raw */
+        }
+      }
+      text = text.replace(/\s+/g, ' ').slice(0, 420);
+      if (text.length < 2) {
+        o.emit({ type: 'failed', label: m.label, reason: 'empty reply' });
+        continue;
+      }
+      o.emit({ type: 'done', label: m.label, seconds: Math.round((Date.now() - started) / 1000), data: { reply: text } });
+      return;
+    } catch (e) {
+      const err = e as Error;
+      if (err.message.startsWith('OpenRouter rejected')) throw err;
+      if (o.signal?.aborted) throw new Error('cancelled');
+      o.emit({ type: 'failed', label: m.label, reason: err.name === 'TimeoutError' ? `timed out after ${Math.round(o.perModelMs / 1000)}s` : err.message.slice(0, 100) });
+    }
+  }
+  throw new Error('All free models are busy right now. Wait a minute and try again.');
+}
+
 export async function handleAI(
-  route: 'course' | 'lesson' | 'role',
+  route: 'course' | 'lesson' | 'role' | 'coach',
   body: any,
   env: { key: string; models?: string },
   emit: (e: AIEvent) => void,
@@ -589,6 +706,12 @@ export async function handleAI(
   if (!env.key) return emit({ type: 'error', message: 'AI is not configured. Add OPENROUTER_API_KEY to .env.local and restart the dev server.' });
   const models = resolveModels(env.models);
   try {
+    if (route === 'coach') {
+      if (str(body?.question, 500).length < 2) return emit({ type: 'error', message: 'Ask a question about the scene.' });
+      const p = coachPrompt(body as CoachRequest);
+      await callPlainWithFallback({ ...p, key: env.key, models, perModelMs: 22_000, totalMs: 55_000, signal, emit });
+      return;
+    }
     if (route === 'course') {
       if (str(body?.request, 2000).length < 3) return emit({ type: 'error', message: 'Describe what the course should teach.' });
       const p = coursePrompt(body as CourseRequest);

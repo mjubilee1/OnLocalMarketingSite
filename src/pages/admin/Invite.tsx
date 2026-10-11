@@ -4,8 +4,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Check, CircleCheck, CircleX, Clock, Copy, ExternalLink, Loader2, Mail, Phone, Printer, RefreshCw, Send, TriangleAlert, UserPlus, UserRound, Users } from 'lucide-react';
 import { Avatar, Button, Card, IconInput, Input, Pill, Select } from '../../components/ui';
 import { fetchEmailStatus, inviteLink, inviteText, mailtoInvite, useCrewEmail, type EmailResult, type EmailStatus } from '../../lib/email';
+import { brandPalette } from '../../lib/brand';
+import { displayName } from '../../lib/company';
 import { relTime } from '../../lib/utils';
-import { useCatalog, useStore } from '../../store';
+import { useCatalog, useCompany, useStore } from '../../store';
 import type { Staff } from '../../types';
 
 const EMAIL_RE = /^[^\s@<>()[\]\\,;:"]+@[^\s@<>()[\]\\,;:"]+\.[A-Za-z]{2,}$/;
@@ -191,7 +193,9 @@ function PendingRow({ s, busy, onSend }: { s: Staff; busy: boolean; onSend: () =
 
 export default function Invite() {
   const code = useStore((s) => s.inviteCode);
-  const orgName = useStore((s) => s.orgName);
+  const company = useCompany();
+  const team = displayName(company);
+  const brand = useMemo(() => brandPalette(company.primaryColor, company.accentColor), [company.primaryColor, company.accentColor]);
   const staff = useStore((s) => s.staff);
   const createStaff = useStore((s) => s.createStaff);
   const toast = useStore((s) => s.toast);
@@ -319,11 +323,11 @@ export default function Invite() {
         </div>
 
         <Card className="overflow-hidden lg:sticky lg:top-6 lg:col-span-2">
-          <div className="bg-gradient-to-br from-[#01175E] via-indigo-900 to-indigo-700 px-6 py-7 text-center text-white print:bg-none print:text-black">
-            <div className="text-xs font-medium uppercase tracking-widest text-indigo-200">Join the crew at</div>
-            <div className="mt-1 text-xl font-bold">{orgName}</div>
+          <div className="px-6 py-7 text-center text-white print:bg-none print:text-black" style={{ background: `linear-gradient(135deg, ${brand.ink}, ${brand.primary})` }}>
+            <div className="text-xs font-medium uppercase tracking-widest text-white/70">Join the crew at</div>
+            <div className="mt-1 text-xl font-bold">{team}</div>
             <div className="mx-auto mt-5 w-fit rounded-2xl bg-white p-3.5 shadow-lg">
-              <QRCodeSVG value={link} size={156} fgColor="#01175E" />
+              <QRCodeSVG value={link} size={156} fgColor={brand.ink} />
             </div>
             <div className="mt-4 text-sm text-indigo-100">Scan to apply · takes 1 minute</div>
           </div>

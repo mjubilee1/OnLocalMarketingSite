@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, ClipboardCheck, Mail, RefreshCw, Users } from 'lucide-react';
+import { ArrowRight, ClipboardCheck, Play, RefreshCw, Users } from 'lucide-react';
 import { Logo } from '../layouts/AdminLayout';
 import { DEMO_BOOKING_HREF } from '../lib/company';
 
@@ -51,12 +51,12 @@ export default function Landing() {
           >
             Book a demo <ArrowRight size={16} />
           </a>
-          <a
-            href={DEMO_BOOKING_HREF}
+          <Link
+            to="/demo"
             className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-base font-semibold text-slate-800 ring-1 ring-slate-200 transition hover:bg-slate-50"
           >
-            <Mail size={16} className="text-indigo-600" /> Email us
-          </a>
+            <Play size={16} className="text-indigo-600" /> Try a practice drill
+          </Link>
         </div>
       </section>
 
@@ -75,9 +75,9 @@ export default function Landing() {
         </ol>
         <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-slate-600">
           Watch your standard → practice on the picture → know who’s ready for the shift.{' '}
-          <a href={DEMO_BOOKING_HREF} className="font-medium text-indigo-700 hover:underline">
-            Book a 15-minute walkthrough
-          </a>
+          <Link to="/demo" className="font-medium text-indigo-700 hover:underline">
+            Try a 2-minute drill
+          </Link>
           .
         </p>
       </section>

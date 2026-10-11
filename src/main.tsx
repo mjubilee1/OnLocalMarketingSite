@@ -2,11 +2,17 @@ import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import './index.css';
+import { BrandTheme } from './components/brand';
 import { Toaster } from './components/ui';
 import AdminLayout from './layouts/AdminLayout';
 import WorkerLayout from './layouts/WorkerLayout';
 import Landing from './pages/Landing';
+import Demo from './pages/Demo';
 import Join from './pages/Join';
+import SetupTraining from './pages/admin/SetupTraining';
+import SetupEditor from './pages/admin/SetupEditor';
+import SetupLibrary from './pages/admin/SetupLibrary';
+import SetupPlayer from './pages/worker/SetupPlayer';
 import Dashboard from './pages/admin/Dashboard';
 import Events from './pages/admin/Events';
 import EventForm from './pages/admin/EventForm';
@@ -45,9 +51,12 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ScrollToTop />
+      <BrandTheme />
       <Toaster />
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/demo" element={<Demo />} />
+        <Route path="/demo/:moduleId" element={<Demo />} />
         <Route path="/join/:code" element={<Join />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
@@ -59,6 +68,10 @@ createRoot(document.getElementById('root')!).render(
           <Route path="events/:id/edit" element={<EventForm />} />
           <Route path="crew" element={<Crew />} />
           <Route path="crew/:id" element={<Person />} />
+          <Route path="setup" element={<SetupTraining />} />
+          <Route path="setup/new" element={<SetupEditor />} />
+          <Route path="setup/library" element={<SetupLibrary />} />
+          <Route path="setup/:id" element={<SetupEditor />} />
           <Route path="training" element={<Training />} />
           <Route path="training/library" element={<TemplateLibrary />} />
           <Route path="training/:id" element={<CourseBuilder />} />
@@ -73,6 +86,7 @@ createRoot(document.getElementById('root')!).render(
           <Route index element={<Home />} />
           <Route path="learn" element={<Learn />} />
           <Route path="learn/:id" element={<CoursePlayer />} />
+          <Route path="setup/:id" element={<SetupPlayer />} />
           <Route path="docs/:id" element={<DocSign />} />
           <Route path="contracts/:id" element={<ContractSign />} />
           <Route path="events" element={<MyShifts />} />

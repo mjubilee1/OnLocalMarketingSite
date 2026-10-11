@@ -78,7 +78,7 @@ export function Progress({ value, className, barClass }: { value: number; classN
 export function Ring({ value, size = 120, stroke = 10, children }: { value: number; size?: number; stroke?: number; children?: ReactNode }) {
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
-  const col = value === 100 ? '#10b981' : value >= 50 ? '#6366f1' : '#f59e0b';
+  const col = value === 100 ? '#10b981' : value >= 50 ? 'var(--brand, #6366f1)' : '#f59e0b';
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">

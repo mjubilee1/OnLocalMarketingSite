@@ -1,4 +1,48 @@
-import type { SVGProps } from 'react';
+import { useEffect, type SVGProps } from 'react';
+import { Link } from 'react-router-dom';
+import { applyBrand, brandPalette, DEFAULT_ACCENT, DEFAULT_PRIMARY } from '../lib/brand';
+import { displayName, initialsOf } from '../lib/company';
+import { cn } from '../lib/utils';
+import { useCompany, useStore } from '../store';
+
+/** Paints the open document with the saved brand, or the unsaved preview from settings. */
+export function BrandTheme() {
+  const company = useCompany();
+  const preview = useStore((s) => s.brandPreview);
+  const name = preview?.teamName?.trim() || displayName(company);
+  const primary = preview?.primary || company.primaryColor || DEFAULT_PRIMARY;
+  const accent = preview?.accent || company.accentColor || DEFAULT_ACCENT;
+  useEffect(() => {
+    const palette = brandPalette(primary, accent);
+    applyBrand(palette);
+    document.title = `${name} — Crew`;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', palette.ink);
+  }, [primary, accent, name]);
+  return null;
+}
+
+/** Company logo, or initials plus the team name, in the manager and crew chrome. */
+export function Wordmark({ light, to = '/' }: { light?: boolean; to?: string }) {
+  const company = useCompany();
+  const preview = useStore((s) => s.brandPreview);
+  const name = preview?.teamName?.trim() || displayName(company);
+  const logo = preview?.logo ?? company.logo;
+  return (
+    <Link to={to} className="flex min-w-0 items-center gap-2.5" aria-label={`${name} home`}>
+      {logo ? (
+        <img src={logo} alt="" className={cn('h-8 w-auto max-w-[9.5rem] object-contain', light && 'rounded-md bg-white px-1.5 py-0.5')} />
+      ) : (
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold text-white"
+          style={{ background: light ? 'rgba(255,255,255,0.18)' : 'var(--brand, #4f46e5)' }}
+        >
+          {initialsOf(name)}
+        </span>
+      )}
+      <span className={cn('truncate text-sm font-semibold tracking-tight', light ? 'text-white' : 'text-slate-900')}>{name}</span>
+    </Link>
+  );
+}
 
 /** The onlocalAI mark in the current text color, so it works on light and brand-colored buttons. */
 export function OnlocalMark({ size = 16, ...props }: SVGProps<SVGSVGElement> & { size?: number }) {
