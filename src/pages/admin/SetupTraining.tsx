@@ -16,7 +16,7 @@ export default function SetupTraining() {
     <div>
       <PageHeader
         title="Setup cards"
-        sub="A picture the crew rebuilds. Alex talks. No SOP for them to click through."
+        sub="Watch the standard, then do it. Alex talks. No SOP to click through."
         actions={
           <div className="flex gap-2">
             <Link to="/admin/setup/library" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200">
@@ -42,7 +42,10 @@ export default function SetupTraining() {
             }),
           );
           const topMiss = [...miss.entries()].sort((a, b) => b[1] - a[1])[0];
-          const itemLabel = (id: string) => m.scene.items.find((it) => it.id === id)?.label ?? id;
+          const itemLabel = (id: string) =>
+            m.scene.items.find((it) => it.id === id)?.label ??
+            m.checks.flatMap((c) => c.choices ?? []).find((c) => c.id === id)?.label ??
+            id;
 
           return (
             <section key={m.id} className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
@@ -54,6 +57,7 @@ export default function SetupTraining() {
                     {[m.venue, m.status === 'draft' ? 'Draft' : `v${m.version}`, boardWhen(m.updatedAt)].filter(Boolean).join(' · ')}
                     {m.changeNotes.length ? ` · ${m.changeNotes[m.changeNotes.length - 1]!.summary}` : ''}
                   </p>
+                  {m.source && <p className="mt-1 max-w-xl text-sm text-slate-600">{m.source.job}</p>}
                 </div>
                 <div className="flex gap-2">
                   <Link to={`/demo/${m.id}`} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white">

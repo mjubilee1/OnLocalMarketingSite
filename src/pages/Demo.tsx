@@ -84,6 +84,7 @@ function DemoHub() {
                   v{m.version} · {boardWhen(m.updatedAt)}
                   {m.changeNotes.length ? ` · ${m.changeNotes[m.changeNotes.length - 1]!.summary}` : ''}
                 </p>
+                {m.source && <p className="mt-2 text-sm text-slate-600">{m.source.job}</p>}
                 <p className="mt-2 text-xs text-slate-500">{n} completed</p>
                 <div className="mt-4 flex gap-2">
                   <Link to={`/demo/${m.id}`} className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">

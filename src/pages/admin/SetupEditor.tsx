@@ -56,7 +56,11 @@ export default function SetupEditor() {
     <div>
       <PageHeader
         title={working.venue ? `${working.title} · ${working.venue}` : working.title}
-        sub="Add or remove pieces, drag the standard, and the draft saves as you go. Publish when crew should train on it."
+        sub={
+          working.source
+            ? 'Built from the workstation film. Crew watch each beat, then make the move.'
+            : 'Add or remove pieces, drag the standard, and the draft saves as you go. Publish when crew should train on it.'
+        }
       />
       <Editor spec={working} revising={!!published} onSave={publish} onDraft={keepDraft} />
     </div>

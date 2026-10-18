@@ -1,8 +1,8 @@
-export type SceneKind = 'plate' | 'round-table' | 'station';
+export type SceneKind = 'plate' | 'round-table' | 'station' | 'service';
 
 export type AnimType = 'appear' | 'move' | 'swap' | 'highlight';
 
-export type CheckKind = 'place' | 'spot';
+export type CheckKind = 'place' | 'spot' | 'move';
 
 export interface Pose {
   x: number;
@@ -46,6 +46,18 @@ export interface Step {
   anim: AnimType;
   itemIds: string[];
   to?: Record<string, Pose>;
+  /** Seconds into the source film where this beat is shown. */
+  at?: number;
+  /** Pause the film here so the check stays unseen. */
+  until?: number;
+}
+
+export interface MoveChoice {
+  id: string;
+  label: string;
+  correct?: boolean;
+  /** Spoken after a wrong pick. Names the move; does not say “incorrect.” */
+  miss?: string;
 }
 
 export interface Check {
@@ -57,6 +69,17 @@ export interface Check {
   correctId?: string;
   /** Scrambled starting poses for place checks. */
   start?: Record<string, Pose>;
+  /** For a service move: the trainee picks the action. Exactly one is correct. */
+  choices?: MoveChoice[];
+}
+
+/** A card built from one worker’s film. Plate cards leave this unset. */
+export interface VideoSource {
+  video: string;
+  workstationId: string;
+  role: string;
+  /** The one job this card trains. */
+  job: string;
 }
 
 export interface ChangeNote {
@@ -83,6 +106,8 @@ export interface TrainingSpec {
   checks: Check[];
   changeNotes: ChangeNote[];
   previousScene?: Scene;
+  /** Set when `practiceFromVideo` built this card. Spatial cards omit it. */
+  source?: VideoSource;
 }
 
 export interface TrainingAttempt {

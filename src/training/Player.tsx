@@ -105,7 +105,12 @@ export function Player({
                 <Check size={28} />
               </div>
               <h2 className="mt-4 text-xl font-bold text-slate-900">First-try accuracy {acc}%</h2>
-              <p className="mt-1 px-4 text-sm text-slate-500">Finished in {secs}s. Wrong drops snap back — you can’t skip the standard.</p>
+              <p className="mt-1 px-4 text-sm text-slate-500">
+                Finished in {secs}s.{' '}
+                {spec.template === 'service'
+                  ? 'A wrong move flashes and you retry. You can’t skip the standard.'
+                  : 'Wrong drops snap back — you can’t skip the standard.'}
+              </p>
             </div>
           </SceneRow>
           <Button className="mt-6 w-full" onClick={() => onExit?.()}>
@@ -149,12 +154,46 @@ function Walkthrough({
   }
 
   const hi = step?.itemIds ?? [];
+  const looking = {
+    phase: 'walk' as const,
+    caption: step?.caption ?? '',
+    highlights: hi.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id),
+  };
+
+  if (spec.source?.video && step?.at != null) {
+    return (
+      <div>
+        <SceneRow lookingAt={looking}>
+          <BeatFilm key={`${step.id}-${index}`} src={spec.source.video} start={step.at} end={step.until ?? step.at + 8} label={looking.highlights[0] ?? spec.title} />
+        </SceneRow>
+        <WalkNav index={index} total={spec.steps.length} setIndex={setIndex} onDone={onDone} />
+      </div>
+    );
+  }
 
   return (
     <div>
-      <SceneRow lookingAt={{ phase: 'walk', caption: step?.caption ?? '', highlights: hi.map((id) => spec.scene.items.find((it) => it.id === id)?.label ?? id) }}>
+      <SceneRow lookingAt={looking}>
         <SceneBoard scene={spec.scene} visibleIds={visible} highlightIds={step?.itemIds} dimOthers={step?.anim === 'highlight'} poses={poses} />
       </SceneRow>
+      <WalkNav index={index} total={spec.steps.length} setIndex={setIndex} onDone={onDone} />
+    </div>
+  );
+}
+
+function WalkNav({
+  index,
+  total,
+  setIndex,
+  onDone,
+}: {
+  index: number;
+  total: number;
+  setIndex: (n: number | ((n: number) => number)) => void;
+  onDone: () => void;
+}) {
+  return (
+    <>
       <div className="mt-3 flex items-center justify-between gap-2">
         <button
           type="button"
@@ -169,9 +208,9 @@ function Walkthrough({
           <ChevronLeft size={20} />
         </button>
         <span className="text-xs text-slate-500">
-          {index + 1} / {spec.steps.length}
+          {index + 1} / {total}
         </span>
-        {index + 1 >= spec.steps.length ? (
+        {index + 1 >= total ? (
           <Button onClick={onDone}>Start check</Button>
         ) : (
           <Button
@@ -194,6 +233,68 @@ function Walkthrough({
       >
         <RotateCcw size={12} /> Replay
       </button>
+    </>
+  );
+}
+
+/** A few seconds of the workstation film. Muted so Alex owns the spoken line, and cut off before the check. */
+function BeatFilm({ src, start, end, label }: { src: string; start: number; end: number; label: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    let cancel = false;
+    const arm = () => {
+      if (cancel) return;
+      const go = () => {
+        if (!cancel) v.play().catch(() => {});
+      };
+      v.addEventListener('seeked', go, { once: true });
+      try {
+        v.currentTime = start;
+      } catch {
+        /* Metadata can arrive before the browser will seek. The next loadeddata retries. */
+      }
+    };
+    const onTime = () => {
+      if (v.currentTime < end) return;
+      v.pause();
+      if (v.currentTime > end + 0.08) v.currentTime = end;
+    };
+    const onError = () => {
+      // 1 = the browser aborted a load (strict mode, or a seek). The file is still there.
+      if (!v.error || v.error.code === 1) return;
+      setFailed(true);
+    };
+    v.addEventListener('timeupdate', onTime);
+    v.addEventListener('error', onError);
+    if (v.readyState >= 1) arm();
+    else v.addEventListener('loadedmetadata', arm, { once: true });
+    return () => {
+      cancel = true;
+      v.removeEventListener('timeupdate', onTime);
+      v.removeEventListener('error', onError);
+      v.pause();
+    };
+  }, [src, start, end]);
+
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-slate-200">
+      <video
+        ref={ref}
+        src={src}
+        muted
+        playsInline
+        preload="auto"
+        className="h-full w-full object-cover"
+      />
+      {failed && (
+        <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm font-medium text-white">
+          {label}
+        </div>
+      )}
     </div>
   );
 }
@@ -238,7 +339,75 @@ function CheckPlay({
   if (check.kind === 'spot') {
     return <SpotCheck spec={spec} check={check} onPass={onPass} onFirstMiss={onFirstMiss} />;
   }
+  if (check.kind === 'move') {
+    return <MoveCheck check={check} onPass={onPass} onFirstMiss={onFirstMiss} />;
+  }
   return <PlaceCheck spec={spec} check={check} onPass={onPass} onFirstMiss={onFirstMiss} />;
+}
+
+function MoveCheck({
+  check,
+  onPass,
+  onFirstMiss,
+}: {
+  check: CheckSpec;
+  onPass: () => void;
+  onFirstMiss: (itemId?: string) => void;
+}) {
+  const [wrongId, setWrongId] = useState<string | null>(null);
+  const [ok, setOk] = useState(false);
+  const choices = check.choices ?? [];
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-slate-900">{check.prompt}</p>
+      <SceneRow lookingAt={{ phase: 'check', caption: check.prompt, highlights: [] }}>
+        <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Your move</p>
+          <ul className="mt-3 space-y-2">
+            {choices.map((choice) => {
+              const missed = wrongId === choice.id;
+              const picked = ok && choice.correct;
+              return (
+                <li key={choice.id}>
+                  <button
+                    type="button"
+                    disabled={ok}
+                    className={cn(
+                      'w-full rounded-xl px-3 py-3 text-left text-sm font-medium ring-1',
+                      picked && 'bg-emerald-50 text-emerald-900 ring-emerald-200',
+                      missed && 'anim-shake bg-rose-50 text-rose-900 ring-rose-200',
+                      !picked && !missed && 'bg-white text-slate-800 ring-slate-200 hover:ring-indigo-300',
+                    )}
+                    onClick={() => {
+                      if (ok) return;
+                      if (choice.correct) {
+                        setWrongId(null);
+                        setOk(true);
+                        return;
+                      }
+                      onFirstMiss(choice.id);
+                      setWrongId(choice.id);
+                    }}
+                  >
+                    {choice.label}
+                    {missed && choice.miss && <span className="mt-1 block text-xs font-normal">{choice.miss}</span>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </SceneRow>
+      {ok ? (
+        <Button className="mt-4 w-full" onClick={onPass}>
+          That’s the move
+        </Button>
+      ) : (
+        <p className="mt-3 text-center text-xs text-slate-500">Pick the move. A wrong one flashes and you retry.</p>
+      )}
+    </div>
+  );
 }
 
 function SpotCheck({

@@ -105,6 +105,26 @@ export function Editor({
     if (!nameEdited) setTitle(labelOf(id));
   };
 
+  if (spec?.template === 'service' && spec.source) {
+    return (
+      <section className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{spec.source.role}</p>
+        <h2 className="mt-1 text-2xl font-bold text-slate-900">{spec.title}</h2>
+        <p className="mt-2 max-w-xl text-sm text-slate-600">{spec.source.job}</p>
+        <p className="mt-4 text-sm text-slate-500">Built from the workstation film. Crew watch each beat, then make the move. Preview it the way they will train.</p>
+        <ol className="mt-4 space-y-2">
+          {spec.steps.map((s, i) => (
+            <li key={s.id} className="text-sm text-slate-800">
+              <span className="mr-2 text-slate-400">{i + 1}</span>
+              {s.caption}
+            </li>
+          ))}
+        </ol>
+        {spec.checks[0] && <p className="mt-4 text-sm font-medium text-slate-900">{spec.checks[0].prompt}</p>}
+      </section>
+    );
+  }
+
   if (!live && step === 0) {
     return (
       <WizardFrame step={0}>

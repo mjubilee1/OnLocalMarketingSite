@@ -70,14 +70,14 @@ export default function Learn() {
       {setups.length > 0 && (
         <section className="mt-6">
           <h2 className="text-base font-semibold text-slate-900">Tonight’s setup</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Watch the standard, then rebuild it. You can’t skip the check.</p>
+          <p className="mt-0.5 text-xs text-slate-500">Watch the standard, then do it. You can’t skip the check.</p>
           <div className="mt-3 space-y-2">
             {setups.map((m) => (
               <Link key={m.id} to={`/app/setup/${m.id}`} className="flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200">
                 <div>
                   <div className="text-sm font-semibold text-slate-900">{m.title}</div>
                   <div className="text-xs text-slate-500">
-                    {m.department} · v{m.version}
+                    {m.source ? `${m.source.role} · watch, then the move` : `${m.department} · v${m.version}`}
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 text-sm font-medium text-indigo-700">

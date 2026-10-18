@@ -46,6 +46,9 @@ function packSpec(spec: TrainingSpec) {
 
 function localReply(q: string, spec: TrainingSpec, look: LookingAt): string {
   const n = q.toLowerCase();
+  if (spec.template === 'service') {
+    return look.caption || spec.steps[spec.steps.length - 1]?.caption || 'Watch the guest, then make the move.';
+  }
   const item = (id: string) => spec.scene.items.find((it) => it.id === id);
   const side = (x: number) => (x < 48 ? 'left' : x > 52 ? 'right' : 'center');
   const note = spec.changeNotes[spec.changeNotes.length - 1];
@@ -72,7 +75,9 @@ function localReply(q: string, spec: TrainingSpec, look: LookingAt): string {
 
 export function CoachProvider({ spec, children }: { spec: TrainingSpec; children: ReactNode }) {
   const [mood, setMood] = useState<CoachMood>('idle');
-  const [line, setLine] = useState('Hold the mic and ask me anything about this setup.');
+  const [line, setLine] = useState(
+    spec.template === 'service' ? 'Hold the mic and ask me about this station.' : 'Hold the mic and ask me anything about this setup.',
+  );
   const [muted, setMuted] = useState(false);
   const [listening, setListening] = useState(false);
   const looking = useRef<LookingAt>({ phase: 'walk', caption: '', highlights: [] });
@@ -153,7 +158,7 @@ export function CoachProvider({ spec, children }: { spec: TrainingSpec; children
     hush();
     setListening(true);
     setMood('listen');
-    setLine('Listening… ask about the plate.');
+    setLine(specRef.current.template === 'service' ? 'Listening… ask about this station.' : 'Listening… ask about the plate.');
     listenCtl.current = listen({
       onPartial: (t) => t && setLine(t),
       onFinal: (t) => {
