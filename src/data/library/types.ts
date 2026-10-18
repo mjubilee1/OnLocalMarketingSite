@@ -1,7 +1,7 @@
 import type { Course, DocTemplate } from '../../types';
 
 /** The library currently targets US event companies only. */
-export type Region = 'US';
+export type Region = 'US' | 'UK' | 'Global';
 export type TemplateKind = 'legal' | 'safety' | 'welfare' | 'service' | 'operations';
 
 /** Seed role ids a template is recommended for, or 'all' crew. */
