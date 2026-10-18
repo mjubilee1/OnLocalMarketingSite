@@ -8,7 +8,7 @@ import type { Course, CoverImage } from '../types';
 /** Cover gradients per category, so a library of courses reads like a catalog rather than a list. */
 const THEMES: Record<string, string> = {
   'Health & Safety': 'from-rose-500 via-orange-500 to-amber-400',
-  Compliance: 'from-[#01175E] via-indigo-700 to-indigo-500',
+  Compliance: 'from-indigo-950 via-indigo-700 to-indigo-500',
   'Customer Service': 'from-sky-600 via-sky-500 to-cyan-400',
   Operations: 'from-emerald-600 via-emerald-500 to-teal-400',
   Welfare: 'from-violet-600 via-purple-500 to-fuchsia-400',
@@ -19,7 +19,7 @@ const FALLBACK = ['from-indigo-600 via-indigo-500 to-sky-400', 'from-teal-600 vi
 /** Text color matching each category's cover, for section headings. */
 const ACCENTS: Record<string, string> = {
   'Health & Safety': 'text-rose-600',
-  Compliance: 'text-[#01175E]',
+  Compliance: 'text-indigo-950',
   'Customer Service': 'text-sky-700',
   Operations: 'text-emerald-700',
   Welfare: 'text-violet-700',

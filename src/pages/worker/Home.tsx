@@ -4,7 +4,8 @@ import { Card, Pill, Progress, Ring } from '../../components/ui';
 import { eventReadiness, readiness, type ReqItem, type ReqKind } from '../../lib/readiness';
 import { badge, level } from '../../lib/badges';
 import { cn, color, countdown, daysUntil, fmtDay } from '../../lib/utils';
-import { useCatalog, useCurrentStaff, useStore } from '../../store';
+import { displayName } from '../../lib/company';
+import { useCatalog, useCompany, useCurrentStaff, useStore } from '../../store';
 
 const ICON: Record<ReqKind, typeof FileSignature> = { profile: Camera, doc: FileSignature, course: GraduationCap, cert: ShieldCheck };
 const LABEL: Record<ReqKind, string> = { profile: 'Profile', doc: 'Sign', course: 'Learn', cert: 'Upload' };
@@ -35,7 +36,7 @@ export function TodoRow({ item }: { item: ReqItem }) {
 export default function Home() {
   const me = useCurrentStaff();
   const events = useStore((s) => s.events);
-  const orgName = useStore((s) => s.orgName);
+  const team = displayName(useCompany());
   const setStatus = useStore((s) => s.setAssignmentStatus);
   const toast = useStore((s) => s.toast);
   const cat = useCatalog();
@@ -58,7 +59,7 @@ export default function Home() {
   return (
     <div>
       <div className="bg-gradient-to-br from-indigo-600 to-violet-600 px-5 pb-20 pt-6 text-white">
-        <div className="text-xs opacity-80">{orgName}</div>
+        <div className="text-xs opacity-80">{team}</div>
         <h1 className="mt-1 text-2xl font-bold">Hi {me.name.split(' ')[0]} 👋</h1>
         <div className="mt-3 flex items-center gap-3">
           <Pill className="bg-white/20 text-white">

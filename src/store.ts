@@ -21,6 +21,8 @@ import { readiness, requirements } from './lib/readiness';
 import { badge } from './lib/badges';
 import { uid } from './lib/utils';
 import type { CompanyProfile } from './lib/company';
+import type { CustomLibraryItem, TrainingAttempt, TrainingSpec } from './training/types';
+import { TRAINING_SPECS } from './data/training';
 
 type Data = ReturnType<typeof buildSeed>;
 
@@ -84,6 +86,9 @@ interface Actions {
   // company
   /** Saves the company profile and refreshes every contract nobody has signed yet. Returns how many changed. */
   updateCompany: (p: CompanyProfile) => number;
+  /** Unsaved brand preview while the brand settings page is open. Not persisted. */
+  brandPreview: { primary: string; accent: string; teamName: string; logo: string } | null;
+  setBrandPreview: (p: { primary: string; accent: string; teamName: string; logo: string } | null) => void;
 
   // contracts
   saveContract: (c: Contract, note?: string) => void;
@@ -91,6 +96,16 @@ interface Actions {
   signContract: (id: ID, party: 'employer' | 'staff', signature: string, typed: boolean, termsHash: string, signatory?: string) => void;
   voidContract: (id: ID) => void;
   deleteContract: (id: ID) => void;
+
+  saveTrainingSpec: (draft: TrainingSpec, changeSummary: string) => void;
+  /** Persist a working copy without publishing. Crew keep training on the last published version. */
+  saveTrainingDraft: (draft: TrainingSpec) => void;
+  /** Removes a setup card from the manager list and from crew training. */
+  deleteTrainingBoard: (id: string) => void;
+  recordTrainingAttempt: (a: Omit<TrainingAttempt, 'id'>) => void;
+  saveLibraryItem: (item: CustomLibraryItem) => void;
+  removeLibraryItem: (id: string) => void;
+  setLibraryBrand: (hex: string) => void;
 }
 
 export type State = Data & Actions;
@@ -168,7 +183,67 @@ export const useStore = create<State>()(
           setTimeout(() => get().dismissToast(t.id), 3500);
         },
         dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
-        resetDemo: () => set({ ...buildSeed(), currentStaffId: 's-1', toasts: [] }),
+        brandPreview: null,
+        setBrandPreview: (p) => set({ brandPreview: p }),
+        resetDemo: () => set({ ...buildSeed(), currentStaffId: 's-1', toasts: [], brandPreview: null }),
+
+        saveTrainingDraft: (draft) => {
+          const saved: TrainingSpec = {
+            ...draft,
+            status: 'draft',
+            updatedAt: new Date().toISOString(),
+          };
+          set((st) => ({ trainingDrafts: { ...(st.trainingDrafts ?? {}), [saved.id]: saved } }));
+        },
+        deleteTrainingBoard: (id) =>
+          set((st) => {
+            const trainingEdits = { ...st.trainingEdits };
+            delete trainingEdits[id];
+            const trainingDrafts = { ...(st.trainingDrafts ?? {}) };
+            delete trainingDrafts[id];
+            const deletedTrainingIds = (st.deletedTrainingIds ?? []).includes(id) ? st.deletedTrainingIds : [...(st.deletedTrainingIds ?? []), id];
+            return { trainingEdits, trainingDrafts, deletedTrainingIds };
+          }),
+        saveTrainingSpec: (draft, changeSummary) => {
+          const current = get().trainingEdits[draft.id] ?? TRAINING_SPECS.find((s) => s.id === draft.id);
+          const version = current ? current.version + 1 : draft.version || 1;
+          const updatedAt = new Date().toISOString();
+          const moved = current
+            ? current.scene.items
+                .filter((it) => {
+                  const n = draft.scene.items.find((x) => x.id === it.id);
+                  return n && (Math.abs(n.x - it.x) > 1 || Math.abs(n.y - it.y) > 1);
+                })
+                .map((it) => it.id)
+            : [];
+          const saved: TrainingSpec = {
+            ...draft,
+            status: 'published',
+            version,
+            updatedAt,
+            previousScene: current?.scene,
+            changeNotes: [
+              ...(current?.changeNotes ?? []),
+              { version, date: updatedAt.slice(0, 10), summary: changeSummary, itemIds: moved },
+            ],
+          };
+          set((st) => {
+            const trainingDrafts = { ...(st.trainingDrafts ?? {}) };
+            delete trainingDrafts[saved.id];
+            return { trainingEdits: { ...st.trainingEdits, [saved.id]: saved }, trainingDrafts };
+          });
+        },
+        recordTrainingAttempt: (a) =>
+          set((st) => ({
+            trainingAttempts: [{ ...a, id: uid('ta-') }, ...st.trainingAttempts].slice(0, 200),
+          })),
+        saveLibraryItem: (item) =>
+          set((st) => {
+            const rest = st.customLibrary.filter((x) => x.id !== item.id);
+            return { customLibrary: [...rest, item] };
+          }),
+        removeLibraryItem: (id) => set((st) => ({ customLibrary: st.customLibrary.filter((x) => x.id !== id) })),
+        setLibraryBrand: (hex) => set({ libraryBrand: hex }),
 
         completeLesson: (staffId, courseId, lessonId, quizScore) => {
           const course = get().courses.find((c) => c.id === courseId);
@@ -376,6 +451,11 @@ export const useStore = create<State>()(
               orgPhone: p.phone,
               managerName: p.managerName,
               managerTitle: p.managerTitle,
+              teamName: p.teamName,
+              primaryColor: p.primaryColor,
+              accentColor: p.accentColor,
+              logo: p.logo,
+              libraryBrand: p.primaryColor,
               orgConfigured: true,
               contracts,
             };
@@ -432,7 +512,7 @@ export const useStore = create<State>()(
     },
     {
       name: 'onlocalai-v1',
-      version: 3,
+      version: 8,
       migrate: (persisted: any, version) => {
         // v1 stored document text with the demo company name baked in; switch it to the placeholder.
         if (version < 2 && persisted?.docs) {
@@ -449,9 +529,25 @@ export const useStore = create<State>()(
             return { ...s, phone: phoneOk(s.phone) ? s.phone : demoPhone(n), photo: s.photo ?? (s.status !== 'invited' ? demoPhoto(s.name) : undefined) };
           });
         }
+        if (version < 4) {
+          persisted.trainingEdits = persisted.trainingEdits ?? {};
+          persisted.trainingAttempts = persisted.trainingAttempts ?? [];
+        }
+        if (version < 5) {
+          persisted.customLibrary = persisted.customLibrary ?? [];
+          persisted.libraryBrand = persisted.libraryBrand ?? '#4f46e5';
+        }
+        if (version < 6) persisted.trainingDrafts = persisted.trainingDrafts ?? {};
+        if (version < 8) persisted.deletedTrainingIds = persisted.deletedTrainingIds ?? [];
+        if (version < 7) {
+          persisted.teamName = persisted.teamName || persisted.orgName || 'onlocalAI Events';
+          persisted.primaryColor = persisted.primaryColor || '#4f46e5';
+          persisted.accentColor = persisted.accentColor || '#7c3aed';
+          persisted.logo = persisted.logo || '';
+        }
         return persisted;
       },
-      partialize: ({ toasts, ...rest }) => rest,
+      partialize: ({ toasts, brandPreview, setBrandPreview, ...rest }) => rest,
     },
   ),
 );
@@ -471,7 +567,11 @@ export const useCompany = (): CompanyProfile => {
   const phone = useStore((s) => s.orgPhone);
   const managerName = useStore((s) => s.managerName);
   const managerTitle = useStore((s) => s.managerTitle);
-  return { name, address, email, phone, managerName, managerTitle };
+  const teamName = useStore((s) => s.teamName) || name;
+  const primaryColor = useStore((s) => s.primaryColor) || '#4f46e5';
+  const accentColor = useStore((s) => s.accentColor) || '#7c3aed';
+  const logo = useStore((s) => s.logo) || '';
+  return { name, address, email, phone, managerName, managerTitle, teamName, primaryColor, accentColor, logo };
 };
 
 export const useCurrentStaff = () => {
@@ -479,3 +579,25 @@ export const useCurrentStaff = () => {
   const staff = useStore((s) => s.staff);
   return staff.find((s) => s.id === id) ?? staff[0]!;
 };
+
+export const useTrainingModules = (): TrainingSpec[] => {
+  const edits = useStore((s) => s.trainingEdits);
+  const deleted = useStore((s) => s.deletedTrainingIds ?? []);
+  const extra = Object.values(edits).filter((e) => !TRAINING_SPECS.some((s) => s.id === e.id));
+  return [...TRAINING_SPECS.map((s) => edits[s.id] ?? s), ...extra].filter((s) => !deleted.includes(s.id));
+};
+
+export const useTrainingModule = (id: string | undefined) => useTrainingModules().find((s) => s.id === id);
+
+/** Manager list: unpublished boards, plus a draft laid over any published card you’re still editing. */
+export const useTrainingBoards = (): TrainingSpec[] => {
+  const published = useTrainingModules();
+  const drafts = useStore((s) => s.trainingDrafts ?? {});
+  const deleted = useStore((s) => s.deletedTrainingIds ?? []);
+  const ids = new Set(published.map((m) => m.id));
+  const fresh = Object.values(drafts).filter((d) => !ids.has(d.id) && !deleted.includes(d.id));
+  const rows = published.map((m) => (drafts[m.id] ? { ...drafts[m.id], status: 'draft' as const } : m));
+  return [...fresh, ...rows];
+};
+
+export const useTrainingBoard = (id: string | undefined) => useTrainingBoards().find((s) => s.id === id);

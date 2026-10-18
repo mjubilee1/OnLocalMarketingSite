@@ -12,6 +12,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Filled in from the company brand. Defaults match the starting indigo theme. */
+:root {
+  --brand: #4f46e5;
+  --brand-accent: #7c3aed;
+  --brand-ink: #1e1b4b;
+}
+
 @keyframes pop {
   from { opacity: 0; transform: translateY(6px) scale(0.98); }
   to { opacity: 1; transform: none; }
@@ -45,3 +52,67 @@ body {
   75% { transform: translateX(6px); }
 }
 .anim-shake { animation: shake 0.3s ease-in-out; }
+
+@keyframes demo-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.demo-fade { animation: demo-fade 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes demo-type {
+  from { width: 0; }
+  to { width: 100%; }
+}
+.demo-type {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: demo-type 1.1s steps(18, end) both;
+}
+
+@keyframes demo-check {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.18); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.demo-check { animation: demo-check 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes demo-bar {
+  from { width: 12%; }
+  to { width: 100%; }
+}
+.demo-bar { animation: demo-bar 1.6s ease-out both; }
+
+@keyframes demo-sig {
+  from { stroke-dashoffset: 280; }
+  to { stroke-dashoffset: 0; }
+}
+.demo-sig {
+  stroke-dasharray: 280;
+  animation: demo-sig 1.2s ease-in-out 0.35s both;
+}
+
+@keyframes demo-tap {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(0.96); }
+}
+.demo-tap { animation: demo-tap 0.45s ease-in-out 1.4s both; }
+
+@keyframes demo-ring {
+  from { stroke-dashoffset: 251; }
+  to { stroke-dashoffset: 0; }
+}
+.demo-ring {
+  stroke-dasharray: 251;
+  animation: demo-ring 1.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-fade, .demo-type, .demo-check, .demo-bar, .demo-sig, .demo-tap, .demo-ring {
+    animation: none !important;
+  }
+  .demo-type { width: 100%; }
+  .demo-bar { width: 100%; }
+  .demo-sig { stroke-dashoffset: 0; }
+  .demo-ring { stroke-dashoffset: 0; }
+}

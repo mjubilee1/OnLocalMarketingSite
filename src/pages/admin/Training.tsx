@@ -8,13 +8,14 @@ import { CreateCourseModal } from '../../components/ai';
 import { requirements } from '../../lib/readiness';
 import { cn, pct, uid } from '../../lib/utils';
 import { autoCover, autoLessonImages, needsImage } from '../../lib/images';
-import { useCatalog, useStore } from '../../store';
+import { displayName } from '../../lib/company';
+import { useCatalog, useCompany, useStore } from '../../store';
 import type { Course } from '../../types';
 
 export default function Training() {
   const staff = useStore((s) => s.staff);
   const upsert = useStore((s) => s.upsertCourse);
-  const orgName = useStore((s) => s.orgName);
+  const team = displayName(useCompany());
   const cat = useCatalog();
   const nav = useNavigate();
   const [ai, setAi] = useState(false);
@@ -126,7 +127,7 @@ export default function Training() {
                   <CourseCard
                     key={c.id}
                     c={c}
-                    provider={c.templateId ? 'onlocalAI Library' : orgName}
+                    provider={c.templateId ? 'onlocalAI Library' : team}
                     onClick={() => nav(`/admin/training/${c.id}`)}
                     badges={!c.published && <CoverBadge tone="dark">Draft</CoverBadge>}
                     corner={<CoverBadge>+{c.points} pts</CoverBadge>}
